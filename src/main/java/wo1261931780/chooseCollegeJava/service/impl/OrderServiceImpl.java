@@ -2,7 +2,7 @@ package wo1261931780.chooseCollegeJava.service.impl;
 
 import org.springframework.stereotype.Service;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
-import wo1261931780.chooseCollegeJava.service.orderService;
+import wo1261931780.chooseCollegeJava.service.OrderService;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @Description
  */
 @Service
-public class orderServiceImpl implements orderService {
+public class OrderServiceImpl implements OrderService {
 	@Override
 	public List<UniversityRankingsQs> orderByRank(List<UniversityRankingsQs> universityRankingsQsList) {
 		return List.of();

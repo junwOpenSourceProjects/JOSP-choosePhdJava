@@ -86,7 +86,7 @@ public class UniversityRankingsUsnews implements Serializable {
     @TableField(value = "ranking_year")
     @ApiModelProperty(value="排名年份")
     @Schema(description="排名年份")
-    private Object rankingYear;
+    private String rankingYear;
 
     /**
      * 当前排名（整数）

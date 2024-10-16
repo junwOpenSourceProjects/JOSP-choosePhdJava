@@ -13,7 +13,7 @@ import java.util.List;
  * @Date 2024-10-18-07  星期三
  * @Description
  */
-public interface orderService {
+public interface OrderService {
 	List<UniversityRankingsQs> orderByRank(List<UniversityRankingsQs> universityRankingsQsList);
 
 }
