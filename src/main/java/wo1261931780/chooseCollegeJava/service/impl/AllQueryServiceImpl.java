@@ -7,14 +7,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQsCs;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnews;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
-import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsUsnewsMapper;
 import wo1261931780.chooseCollegeJava.service.*;
 
 import java.util.ArrayList;

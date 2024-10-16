@@ -1,11 +1,10 @@
-package wo1261931780.chooseCollegeJava.service;
+package wo1261931780.chooseCollegeJava.service.impl;
 
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsUsnewsCsMapper;
-import java.util.List;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs;
 /**
 *Created by Intellij IDEA.
