@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wo1261931780.chooseCollegeJava.mapper.UniversityRankingsUsnewsCsMapper">
+  <resultMap id="BaseResultMap" type="wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs">
+    <!--@mbg.generated-->
+    <!--@Table computer_rank.university_rankings_usnews_cs-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="university_name_chinese" jdbcType="VARCHAR" property="universityNameChinese" />
+    <result column="university_name_english" jdbcType="VARCHAR" property="universityNameEnglish" />
+    <result column="university_tags" jdbcType="VARCHAR" property="universityTags" />
+    <result column="university_tags_state" jdbcType="VARCHAR" property="universityTagsState" />
+    <result column="ranking_category" jdbcType="VARCHAR" property="rankingCategory" />
+    <result column="ranking_year" jdbcType="OTHER" property="rankingYear" />
+    <result column="current_rank_integer" jdbcType="INTEGER" property="currentRankInteger" />
+    <result column="current_rank_raw" jdbcType="VARCHAR" property="currentRankRaw" />
+    <result column="rank_variant" jdbcType="VARCHAR" property="rankVariant" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, university_name_chinese, university_name_english, university_tags, university_tags_state, 
+    ranking_category, ranking_year, current_rank_integer, current_rank_raw, rank_variant
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.university_rankings_usnews_cs
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name_chinese = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameChinese,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="university_name_english = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameEnglish,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="university_tags = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityTags,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="university_tags_state = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityTagsState,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_category = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankingCategory,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_year = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankingYear,jdbcType=OTHER}
+        </foreach>
+      </trim>
+      <trim prefix="current_rank_integer = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.currentRankInteger,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="current_rank_raw = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.currentRankRaw,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="rank_variant = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankVariant,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.university_rankings_usnews_cs
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name_chinese = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityNameChinese != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameChinese,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="university_name_english = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityNameEnglish != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameEnglish,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="university_tags = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityTags != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityTags,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="university_tags_state = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityTagsState != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityTagsState,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_category = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingCategory != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankingCategory,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_year = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingYear != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankingYear,jdbcType=OTHER}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="current_rank_integer = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.currentRankInteger != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.currentRankInteger,jdbcType=INTEGER}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="current_rank_raw = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.currentRankRaw != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.currentRankRaw,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="rank_variant = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankVariant != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankVariant,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_usnews_cs
+    (university_name_chinese, university_name_english, university_tags, university_tags_state, 
+      ranking_category, ranking_year, current_rank_integer, current_rank_raw, rank_variant
+      )
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.universityNameChinese,jdbcType=VARCHAR}, #{item.universityNameEnglish,jdbcType=VARCHAR}, 
+        #{item.universityTags,jdbcType=VARCHAR}, #{item.universityTagsState,jdbcType=VARCHAR}, 
+        #{item.rankingCategory,jdbcType=VARCHAR}, #{item.rankingYear,jdbcType=OTHER}, #{item.currentRankInteger,jdbcType=INTEGER}, 
+        #{item.currentRankRaw,jdbcType=VARCHAR}, #{item.rankVariant,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from computer_rank.university_rankings_usnews_cs where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=INTEGER}
+    </foreach>
+  </delete>
+  <update id="updateBatchUseMultiQuery" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    <foreach collection="list" item="item" separator=";">
+      update computer_rank.university_rankings_usnews_cs
+      <set>
+        <if test="item.universityNameChinese != null">
+          university_name_chinese = #{item.universityNameChinese,jdbcType=VARCHAR},
+        </if>
+        <if test="item.universityNameEnglish != null">
+          university_name_english = #{item.universityNameEnglish,jdbcType=VARCHAR},
+        </if>
+        <if test="item.universityTags != null">
+          university_tags = #{item.universityTags,jdbcType=VARCHAR},
+        </if>
+        <if test="item.universityTagsState != null">
+          university_tags_state = #{item.universityTagsState,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingCategory != null">
+          ranking_category = #{item.rankingCategory,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingYear != null">
+          ranking_year = #{item.rankingYear,jdbcType=OTHER},
+        </if>
+        <if test="item.currentRankInteger != null">
+          current_rank_integer = #{item.currentRankInteger,jdbcType=INTEGER},
+        </if>
+        <if test="item.currentRankRaw != null">
+          current_rank_raw = #{item.currentRankRaw,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankVariant != null">
+          rank_variant = #{item.rankVariant,jdbcType=VARCHAR},
+        </if>
+      </set>
+      where id = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <insert id="batchInsertSelectiveUseDefaultForNull" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_usnews_cs
+    (university_name_chinese, university_name_english, university_tags, university_tags_state, 
+      ranking_category, ranking_year, current_rank_integer, current_rank_raw, rank_variant
+      )
+    values
+    <foreach collection="list" item="item" separator=",">
+      (
+      <choose>
+        <when test="item.universityNameChinese != null">
+          #{item.universityNameChinese,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.universityNameEnglish != null">
+          #{item.universityNameEnglish,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.universityTags != null">
+          #{item.universityTags,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.universityTagsState != null">
+          #{item.universityTagsState,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingCategory != null">
+          #{item.rankingCategory,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingYear != null">
+          #{item.rankingYear,jdbcType=OTHER},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.currentRankInteger != null">
+          #{item.currentRankInteger,jdbcType=INTEGER},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.currentRankRaw != null">
+          #{item.currentRankRaw,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankVariant != null">
+          #{item.rankVariant,jdbcType=VARCHAR}
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT
+        </otherwise>
+      </choose>
+      )
+    </foreach>
+  </insert>
+  <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_usnews_cs
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      university_name_chinese,
+      university_name_english,
+      university_tags,
+      university_tags_state,
+      ranking_category,
+      ranking_year,
+      current_rank_integer,
+      current_rank_raw,
+      rank_variant,
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      #{universityNameChinese,jdbcType=VARCHAR},
+      #{universityNameEnglish,jdbcType=VARCHAR},
+      #{universityTags,jdbcType=VARCHAR},
+      #{universityTagsState,jdbcType=VARCHAR},
+      #{rankingCategory,jdbcType=VARCHAR},
+      #{rankingYear,jdbcType=OTHER},
+      #{currentRankInteger,jdbcType=INTEGER},
+      #{currentRankRaw,jdbcType=VARCHAR},
+      #{rankVariant,jdbcType=VARCHAR},
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      university_name_chinese = #{universityNameChinese,jdbcType=VARCHAR},
+      university_name_english = #{universityNameEnglish,jdbcType=VARCHAR},
+      university_tags = #{universityTags,jdbcType=VARCHAR},
+      university_tags_state = #{universityTagsState,jdbcType=VARCHAR},
+      ranking_category = #{rankingCategory,jdbcType=VARCHAR},
+      ranking_year = #{rankingYear,jdbcType=OTHER},
+      current_rank_integer = #{currentRankInteger,jdbcType=INTEGER},
+      current_rank_raw = #{currentRankRaw,jdbcType=VARCHAR},
+      rank_variant = #{rankVariant,jdbcType=VARCHAR},
+    </trim>
+  </insert>
+  <insert id="insertOrUpdateSelective" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_usnews_cs
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="universityNameChinese != null">
+        university_name_chinese,
+      </if>
+      <if test="universityNameEnglish != null">
+        university_name_english,
+      </if>
+      <if test="universityTags != null">
+        university_tags,
+      </if>
+      <if test="universityTagsState != null">
+        university_tags_state,
+      </if>
+      <if test="rankingCategory != null">
+        ranking_category,
+      </if>
+      <if test="rankingYear != null">
+        ranking_year,
+      </if>
+      <if test="currentRankInteger != null">
+        current_rank_integer,
+      </if>
+      <if test="currentRankRaw != null">
+        current_rank_raw,
+      </if>
+      <if test="rankVariant != null">
+        rank_variant,
+      </if>
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="universityNameChinese != null">
+        #{universityNameChinese,jdbcType=VARCHAR},
+      </if>
+      <if test="universityNameEnglish != null">
+        #{universityNameEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTags != null">
+        #{universityTags,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTagsState != null">
+        #{universityTagsState,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingCategory != null">
+        #{rankingCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingYear != null">
+        #{rankingYear,jdbcType=OTHER},
+      </if>
+      <if test="currentRankInteger != null">
+        #{currentRankInteger,jdbcType=INTEGER},
+      </if>
+      <if test="currentRankRaw != null">
+        #{currentRankRaw,jdbcType=VARCHAR},
+      </if>
+      <if test="rankVariant != null">
+        #{rankVariant,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      <if test="universityNameChinese != null">
+        university_name_chinese = #{universityNameChinese,jdbcType=VARCHAR},
+      </if>
+      <if test="universityNameEnglish != null">
+        university_name_english = #{universityNameEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTags != null">
+        university_tags = #{universityTags,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTagsState != null">
+        university_tags_state = #{universityTagsState,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingCategory != null">
+        ranking_category = #{rankingCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingYear != null">
+        ranking_year = #{rankingYear,jdbcType=OTHER},
+      </if>
+      <if test="currentRankInteger != null">
+        current_rank_integer = #{currentRankInteger,jdbcType=INTEGER},
+      </if>
+      <if test="currentRankRaw != null">
+        current_rank_raw = #{currentRankRaw,jdbcType=VARCHAR},
+      </if>
+      <if test="rankVariant != null">
+        rank_variant = #{rankVariant,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

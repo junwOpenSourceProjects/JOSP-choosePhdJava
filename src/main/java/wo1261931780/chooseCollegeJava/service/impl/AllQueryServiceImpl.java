@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
+import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQsCs;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnews;
+import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsUsnewsMapper;
-import wo1261931780.chooseCollegeJava.service.AllQueryService;
-import wo1261931780.chooseCollegeJava.service.UniversityRankingsQsService;
-import wo1261931780.chooseCollegeJava.service.UniversityRankingsUsnewsService;
+import wo1261931780.chooseCollegeJava.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,11 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	@Autowired
 	private UniversityRankingsQsService qsService;
 	@Autowired
+	private UniversityRankingsQsCsService qsCsService;
+	@Autowired
 	private UniversityRankingsUsnewsService UsnewsService;
+	@Autowired
+	private UniversityRankingsUsnewsCsService UsnewsCsService;
 
 
 	@Override
@@ -77,20 +81,23 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			queryWrapper.le("current_rank_integer", currentRank);
 		}
 
-		// 查询 QS 表
 		Page<UniversityRankingsQs> qsPage = qsMapper.selectPage(new Page<>(page, limit),
 				(QueryWrapper<UniversityRankingsQs>) queryWrapper);
 		qsPage.getRecords().forEach(qs -> {
 			UniversityAllDTO dto = new UniversityAllDTO();
 			BeanUtils.copyProperties(qs, dto);
-			dto.setRankingYear(qs.getRankingYear().toString().substring(0, 4));
+			// UniversityRankingsUsnews usnews = new UniversityRankingsUsnews();
+			// BeanUtils.copyProperties(qs, usnews);
+			// 丢进去批量处理
+			UniversityAllDTO universityAllDTO = queryDiffObject(dto.getUniversityNameChinese(),dto.getRankingYear());
+
+			// 设置qs全球排名
 			dto.setCurrentQsAllRank(qs.getCurrentRankInteger());
-			UniversityRankingsUsnews usnews = new UniversityRankingsUsnews();
-			BeanUtils.copyProperties(qs, usnews);
-			usnews.setRankingYear(qs.getRankingYear().toString().substring(0, 4));
-			UniversityAllDTO universityAllDTO = queryDiffObject(qs, usnews);
+			// 设置qs计算机排名
 			dto.setCurrentQsComputerRank(universityAllDTO.getCurrentQsComputerRank());
+			// 设置usnews全球排名
 			dto.setCurrentUsnewsAllRank(universityAllDTO.getCurrentUsnewsAllRank());
+			// 设置usnews计算机排名
 			dto.setCurrentUsnewsComputerRank(universityAllDTO.getCurrentUsnewsComputerRank());
 			// 根据业务需求设置其他字段
 			dtoList.add(dto);
@@ -109,35 +116,27 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	 * @param usnews usnews对象
 	 * @return dto结果
 	 */
-	UniversityAllDTO queryDiffObject(UniversityRankingsQs qs, UniversityRankingsUsnews usnews) {
-		LambdaQueryWrapper<UniversityRankingsQs> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(UniversityRankingsQs::getUniversityNameChinese, qs.getUniversityNameChinese());
-		queryWrapper.eq(UniversityRankingsQs::getRankingYear, qs.getRankingYear());
-		queryWrapper.eq(UniversityRankingsQs::getRankingCategory, "计算机科学");
-		queryWrapper.eq(UniversityRankingsQs::getRankVariant, "QS");
-		List<UniversityRankingsQs> list = qsService.list(queryWrapper);
-		UniversityRankingsQs qsResult = list.size() > 1 ? list.get(0) : qsService.getOne(queryWrapper);
+	UniversityAllDTO queryDiffObject(String universityNameChinese, String rankingYear) {
+		LambdaQueryWrapper<UniversityRankingsQsCs> queryWrapperqscs = new LambdaQueryWrapper<>();
+		queryWrapperqscs.eq(UniversityRankingsQsCs::getUniversityNameChinese, universityNameChinese);
+		queryWrapperqscs.eq(UniversityRankingsQsCs::getRankingYear, rankingYear);
+		List<UniversityRankingsQsCs> list1 = qsCsService.list(queryWrapperqscs);
+		UniversityRankingsQsCs qsCsResult = list1.size() > 1 ? list1.get(0) : qsCsService.getOne(queryWrapperqscs);
 
-		LambdaQueryWrapper<UniversityRankingsUsnews> usnewsQueryWrapper = new LambdaQueryWrapper<>();
-		usnewsQueryWrapper.eq(UniversityRankingsUsnews::getUniversityNameChinese, usnews.getUniversityNameChinese());
-		usnewsQueryWrapper.eq(UniversityRankingsUsnews::getRankingYear, usnews.getRankingYear());
-		usnewsQueryWrapper.eq(UniversityRankingsUsnews::getRankingCategory, "计算机科学");
-		usnewsQueryWrapper.eq(UniversityRankingsUsnews::getRankVariant, "USNews");
-		List<UniversityRankingsUsnews> list1 = UsnewsService.list(usnewsQueryWrapper);
-		log.warn("list1 size > 1" + list1);
-		UniversityRankingsUsnews usnewsResult = list1.size() > 1 ? list1.get(0) : UsnewsService.getOne(usnewsQueryWrapper);
+		LambdaQueryWrapper<UniversityRankingsUsnews> queryWrapperusnews = new LambdaQueryWrapper<>();
+		queryWrapperusnews.eq(UniversityRankingsUsnews::getUniversityNameChinese, universityNameChinese);
+		queryWrapperusnews.eq(UniversityRankingsUsnews::getRankingYear, rankingYear);
+		List<UniversityRankingsUsnews> list2 = UsnewsService.list(queryWrapperusnews);
+		UniversityRankingsUsnews usnewsResult = list2.size() > 1 ? list2.get(0) : UsnewsService.getOne(queryWrapperusnews);
 
-		LambdaQueryWrapper<UniversityRankingsUsnews> usnewsQueryWrapper2 = new LambdaQueryWrapper<>();
-		usnewsQueryWrapper2.eq(UniversityRankingsUsnews::getUniversityNameChinese, usnews.getUniversityNameChinese());
-		usnewsQueryWrapper2.eq(UniversityRankingsUsnews::getRankingYear, usnews.getRankingYear());
-		usnewsQueryWrapper2.eq(UniversityRankingsUsnews::getRankingCategory, "USNEWS世界大学排名");
-		usnewsQueryWrapper2.eq(UniversityRankingsUsnews::getRankVariant, "USNews");
-		List<UniversityRankingsUsnews> list2 = UsnewsService.list(usnewsQueryWrapper2);
-		log.warn("list2 size > 1" + list2);
-		UniversityRankingsUsnews usnewsResult2 = list2.size() > 1 ? list2.get(1) : UsnewsService.getOne(usnewsQueryWrapper);
+		LambdaQueryWrapper<UniversityRankingsUsnewsCs> queryWrapperusnewscs = new LambdaQueryWrapper<>();
+		queryWrapperusnewscs.eq(UniversityRankingsUsnewsCs::getUniversityNameChinese, universityNameChinese);
+		queryWrapperusnewscs.eq(UniversityRankingsUsnewsCs::getRankingYear, rankingYear);
+		List<UniversityRankingsUsnewsCs> list3 = UsnewsCsService.list(queryWrapperusnewscs);
+		UniversityRankingsUsnewsCs usnewsResult2 = list3.size() > 1 ? list3.get(0) : UsnewsCsService.getOne(queryWrapperusnewscs);
 
 		UniversityAllDTO universityAllDTO = new UniversityAllDTO();
-		universityAllDTO.setCurrentQsComputerRank(qsResult == null ? 0 : qsResult.getCurrentRankInteger());
+		universityAllDTO.setCurrentQsComputerRank(qsCsResult == null ? 0 : qsCsResult.getCurrentRankInteger());
 		universityAllDTO.setCurrentUsnewsAllRank(usnewsResult == null ? 0 : usnewsResult.getCurrentRankInteger());
 		universityAllDTO.setCurrentUsnewsComputerRank(usnewsResult2 == null ? 0 : usnewsResult2.getCurrentRankInteger());
 		return universityAllDTO;
