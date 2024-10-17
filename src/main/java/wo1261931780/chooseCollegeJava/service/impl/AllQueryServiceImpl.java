@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import wo1261931780.chooseCollegeJava.dto.EchartsDTO;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.*;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsAllMapper;
@@ -230,9 +231,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			series.setType("line");
 			series.setSmooth(Boolean.TRUE);
 			series.setEmphasis(new Emphasis("series"));
-			List<Double> doubles1 = objectMapper.readValue(serviceOne.getRankingUsnews(), new TypeReference<>() {
-			});
-			series.setData(doubles1);
+			List<Double> doubles;
+			doubles = getDoubles(rankVariant, serviceOne);
+			series.setData(doubles);
 			seriesArrayList.add(series);
 			chartData.setSeries(seriesArrayList);
 			return chartData;
@@ -251,40 +252,55 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			series.setType("line");
 			series.setSmooth(Boolean.TRUE);
 			series.setEmphasis(new Emphasis("series"));
-			try {
-				switch (rankVariant.toLowerCase()) {
-					case "usnews":
-						List<Double> doubles1 = objectMapper.readValue(all.getRankingUsnews(), new TypeReference<>() {
-						});
-						series.setData(doubles1);
-						break;
-					case "qs_cs":
-						// series.setDataString(all.getRankingQsCs());
-						List<Double> doubles2 = objectMapper.readValue(all.getRankingQsCs(), new TypeReference<>() {
-						});
-						series.setData(doubles2);
-						break;
-					case "usnews_cs":
-						// series.setDataString(all.getRankingUsnewsCs());
-						List<Double> doubles3 = objectMapper.readValue(all.getRankingUsnewsCs(), new TypeReference<>() {
-						});
-						series.setData(doubles3);
-						break;
-					default:
-						// series.setDataString(all.getRankingQs());
-						List<Double> doubles = objectMapper.readValue(all.getRankingQs(), new TypeReference<>() {
-								}
-						);
-						series.setData(doubles);
-						break;
-				}
-			} catch (JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
+			List<Double> doubles;
+			doubles = getDoubles(rankVariant, all);
+			series.setData(doubles);
 			seriesArrayList.add(series);
 		});
 		chartData.setSeries(seriesArrayList);
 		return chartData;
+	}
+
+	@Override
+	public EchartsDTO queryPartEcharts2(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException {
+		EchartsDTO echartsDTO = new EchartsDTO();
+		ChartData chartData = queryPartEcharts(universityNameChinese, universityTagsState, universityTags, rankVariant);
+		echartsDTO.setChatData(chartData);
+		ArrayList<String> strings = new ArrayList<>();
+		chartData.getSeries().forEach(series -> strings.add(series.getName()));
+		echartsDTO.setLegendData(strings);
+		return echartsDTO;
+	}
+
+	private List<Double> getDoubles(String rankVariant, UniversityRankingsEcharts all) {
+		List<Double> doubles;
+		try {
+			switch (rankVariant.toLowerCase()) {
+				case "usnews":
+					doubles = objectMapper.readValue(all.getRankingUsnews(), new TypeReference<>() {
+					});
+					break;
+				case "qs_cs":
+					// series.setDataString(all.getRankingQsCs());
+					doubles = objectMapper.readValue(all.getRankingQsCs(), new TypeReference<>() {
+					});
+					break;
+				case "usnews_cs":
+					// series.setDataString(all.getRankingUsnewsCs());
+					doubles = objectMapper.readValue(all.getRankingUsnewsCs(), new TypeReference<>() {
+					});
+					break;
+				default:
+					// series.setDataString(all.getRankingQs());
+					doubles = objectMapper.readValue(all.getRankingQs(), new TypeReference<>() {
+							}
+					);
+					break;
+			}
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		return doubles;
 	}
 
 	ChartData getOneChartData() {

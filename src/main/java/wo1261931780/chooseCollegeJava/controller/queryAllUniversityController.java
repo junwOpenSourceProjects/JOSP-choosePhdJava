@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import wo1261931780.chooseCollegeJava.config.ShowResult;
+import wo1261931780.chooseCollegeJava.dto.EchartsDTO;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.ChartData;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsAll;
@@ -101,13 +102,13 @@ public class queryAllUniversityController {
 	}
 	@GetMapping("/queryPartEcharts")
 	@ApiOperation("条件查询echarts大学汇总排名")
-	public ChartData queryPartEcharts(
+	public EchartsDTO queryPartEcharts(
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
 			@RequestParam(defaultValue = "qs") String rankVariant
 	) throws JsonProcessingException {
-		return allQueryServiceImpl.queryPartEcharts(
+		return allQueryServiceImpl.queryPartEcharts2(
 				universityNameChinese, universityTagsState, universityTags,  rankVariant);
 	}
 
