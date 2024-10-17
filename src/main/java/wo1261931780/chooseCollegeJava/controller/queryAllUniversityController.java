@@ -85,10 +85,18 @@ public class queryAllUniversityController {
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
-			@RequestParam(required = false, defaultValue = "10") Integer currentRank
+			@RequestParam(required = false, defaultValue = "10") Integer currentRank,
+			@RequestParam(required = false) String rankVariant
 	) {
 		return allQueryServiceImpl.queryAllEchartsData(
-				universityNameChinese, universityTagsState, universityTags, currentRank);
+				universityNameChinese, universityTagsState, universityTags, currentRank, rankVariant);
+	}
+
+	@GetMapping("/updateEchartsData")
+	@ApiOperation("更新echarts对象表")
+	public ChartData queryAllUniversityRank2(
+	) {
+		return allQueryServiceImpl.updateEchartsData();
 	}
 
 }

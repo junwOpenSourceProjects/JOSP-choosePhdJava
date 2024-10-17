@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import springfox.documentation.spring.web.json.Json;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.*;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsAllMapper;
@@ -58,6 +59,8 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 
 	@Autowired
 	private UniversityRankingsAllMapper allMapper;
+	@Autowired
+	private UniversityRankingsEchartsService echartsService;
 
 
 	@Override
@@ -106,8 +109,6 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		});
 		dtoPage.setRecords(dtoList);
 		dtoPage.setTotal(qsPage.getTotal());
-
-
 		return dtoPage;
 	}
 
@@ -142,7 +143,7 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 
 	@Override
 	public ChartData queryAllEchartsData(
-			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank) {
+			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank, String rankVariant) {
 		ChartData chartData = getOneChartData();
 		List<Series> seriesList = chartData.getSeries();
 		seriesList.forEach(series -> {
@@ -153,8 +154,50 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			// 按照排名年份asc排序
 			lambdaQueryWrapper.orderByAsc(UniversityRankingsAll::getRankingYear);
 			List<UniversityRankingsAll> oneList = allService.list(lambdaQueryWrapper);// 获取该学校的所有年份数据
-			oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQs())));// 把qs排名添加进去
-			// series.setData(seriesData);
+			switch (rankVariant.toLowerCase()) {
+				// case "qs":
+				// 	break;
+				case "usnews":
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnews())));// 把usnews排名添加进去
+					break;
+				case "qs_cs":
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQsCs())));// 把qs+cs排名添加进去
+					break;
+				case "usnews_cs":
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnewsCs())));// 把usnews+cs排名添加进去
+					break;
+				default:
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQs())));// 把qs排名添加进去
+			}
+		});
+		return chartData;
+	}
+
+	@Override
+	public ChartData updateEchartsData() {
+		// ChartData chartData = queryAllEchartsData(null, null, null, null, "qs");
+		// ChartData chartData = queryAllEchartsData(null, null, null, null, "qs_cs");
+		// ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews");
+		ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews_cs");
+		chartData.getSeries().forEach(series -> {
+			LambdaQueryWrapper<UniversityRankingsEcharts> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, series.getName());
+			UniversityRankingsEcharts serviceOne = echartsService.getOne(lambdaQueryWrapper);
+			if (serviceOne == null) {
+				UniversityRankingsEcharts rankingsEcharts = new UniversityRankingsEcharts();
+				rankingsEcharts.setUniversityNameChinese(series.getName());
+				// rankingsEcharts.setRankingQs(series.getData().toString());
+				// rankingsEcharts.setRankingQsCs(series.getData().toString());
+				// rankingsEcharts.setRankingUsnews(series.getData().toString());
+				rankingsEcharts.setRankingUsnewsCs(series.getData().toString());
+				echartsService.save(rankingsEcharts);
+			} else {
+				// serviceOne.setRankingQs(series.getData().toString());
+				// serviceOne.setRankingQsCs(series.getData().toString());
+				// serviceOne.setRankingUsnews(series.getData().toString());
+				serviceOne.setRankingUsnewsCs(series.getData().toString());
+				echartsService.insertOrUpdate(serviceOne);
+			}
 		});
 		return chartData;
 	}

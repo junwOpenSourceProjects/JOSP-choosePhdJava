@@ -47,5 +47,8 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 			Integer page, Integer limit,
 			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank);
 
-	ChartData queryAllEchartsData(String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank);
+	ChartData queryAllEchartsData(String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank,String rankVariant);
+
+	ChartData updateEchartsData();
+
 }

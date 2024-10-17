@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wo1261931780.chooseCollegeJava.mapper.UniversityRankingsEchartsMapper">
+  <resultMap id="BaseResultMap" type="wo1261931780.chooseCollegeJava.entity.UniversityRankingsEcharts">
+    <!--@mbg.generated-->
+    <!--@Table computer_rank.university_rankings_echarts-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="university_name_chinese" jdbcType="VARCHAR" property="universityNameChinese" />
+    <result column="university_tags" jdbcType="VARCHAR" property="universityTags" />
+    <result column="university_tags_state" jdbcType="VARCHAR" property="universityTagsState" />
+    <result column="ranking_qs" jdbcType="VARCHAR" property="rankingQs" />
+    <result column="ranking_qs_cs" jdbcType="VARCHAR" property="rankingQsCs" />
+    <result column="ranking_usnews" jdbcType="VARCHAR" property="rankingUsnews" />
+    <result column="ranking_usnews_cs" jdbcType="VARCHAR" property="rankingUsnewsCs" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, university_name_chinese, university_tags, university_tags_state, ranking_qs, 
+    ranking_qs_cs, ranking_usnews, ranking_usnews_cs
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.university_rankings_echarts
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name_chinese = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameChinese,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="university_tags = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityTags,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="university_tags_state = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityTagsState,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_qs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankingQs,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_qs_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankingQsCs,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_usnews = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankingUsnews,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_usnews_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.rankingUsnewsCs,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.university_rankings_echarts
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name_chinese = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityNameChinese != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameChinese,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="university_tags = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityTags != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityTags,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="university_tags_state = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityTagsState != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityTagsState,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_qs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingQs != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankingQs,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_qs_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingQsCs != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankingQsCs,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_usnews = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingUsnews != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankingUsnews,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_usnews_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingUsnewsCs != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.rankingUsnewsCs,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_echarts
+    (university_name_chinese, university_tags, university_tags_state, ranking_qs, ranking_qs_cs, 
+      ranking_usnews, ranking_usnews_cs)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.universityNameChinese,jdbcType=VARCHAR}, #{item.universityTags,jdbcType=VARCHAR}, 
+        #{item.universityTagsState,jdbcType=VARCHAR}, #{item.rankingQs,jdbcType=VARCHAR}, 
+        #{item.rankingQsCs,jdbcType=VARCHAR}, #{item.rankingUsnews,jdbcType=VARCHAR}, #{item.rankingUsnewsCs,jdbcType=VARCHAR}
+        )
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from computer_rank.university_rankings_echarts where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=INTEGER}
+    </foreach>
+  </delete>
+  <update id="updateBatchUseMultiQuery" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    <foreach collection="list" item="item" separator=";">
+      update computer_rank.university_rankings_echarts
+      <set>
+        <if test="item.universityNameChinese != null">
+          university_name_chinese = #{item.universityNameChinese,jdbcType=VARCHAR},
+        </if>
+        <if test="item.universityTags != null">
+          university_tags = #{item.universityTags,jdbcType=VARCHAR},
+        </if>
+        <if test="item.universityTagsState != null">
+          university_tags_state = #{item.universityTagsState,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingQs != null">
+          ranking_qs = #{item.rankingQs,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingQsCs != null">
+          ranking_qs_cs = #{item.rankingQsCs,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingUsnews != null">
+          ranking_usnews = #{item.rankingUsnews,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingUsnewsCs != null">
+          ranking_usnews_cs = #{item.rankingUsnewsCs,jdbcType=VARCHAR},
+        </if>
+      </set>
+      where id = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <insert id="batchInsertSelectiveUseDefaultForNull" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_echarts
+    (university_name_chinese, university_tags, university_tags_state, ranking_qs, ranking_qs_cs, 
+      ranking_usnews, ranking_usnews_cs)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (
+      <choose>
+        <when test="item.universityNameChinese != null">
+          #{item.universityNameChinese,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.universityTags != null">
+          #{item.universityTags,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.universityTagsState != null">
+          #{item.universityTagsState,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingQs != null">
+          #{item.rankingQs,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingQsCs != null">
+          #{item.rankingQsCs,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingUsnews != null">
+          #{item.rankingUsnews,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingUsnewsCs != null">
+          #{item.rankingUsnewsCs,jdbcType=VARCHAR}
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT
+        </otherwise>
+      </choose>
+      )
+    </foreach>
+  </insert>
+  <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.UniversityRankingsEcharts" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_echarts
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      university_name_chinese,
+      university_tags,
+      university_tags_state,
+      ranking_qs,
+      ranking_qs_cs,
+      ranking_usnews,
+      ranking_usnews_cs,
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      #{universityNameChinese,jdbcType=VARCHAR},
+      #{universityTags,jdbcType=VARCHAR},
+      #{universityTagsState,jdbcType=VARCHAR},
+      #{rankingQs,jdbcType=VARCHAR},
+      #{rankingQsCs,jdbcType=VARCHAR},
+      #{rankingUsnews,jdbcType=VARCHAR},
+      #{rankingUsnewsCs,jdbcType=VARCHAR},
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      university_name_chinese = #{universityNameChinese,jdbcType=VARCHAR},
+      university_tags = #{universityTags,jdbcType=VARCHAR},
+      university_tags_state = #{universityTagsState,jdbcType=VARCHAR},
+      ranking_qs = #{rankingQs,jdbcType=VARCHAR},
+      ranking_qs_cs = #{rankingQsCs,jdbcType=VARCHAR},
+      ranking_usnews = #{rankingUsnews,jdbcType=VARCHAR},
+      ranking_usnews_cs = #{rankingUsnewsCs,jdbcType=VARCHAR},
+    </trim>
+  </insert>
+  <insert id="insertOrUpdateSelective" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.UniversityRankingsEcharts" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_rankings_echarts
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="universityNameChinese != null">
+        university_name_chinese,
+      </if>
+      <if test="universityTags != null">
+        university_tags,
+      </if>
+      <if test="universityTagsState != null">
+        university_tags_state,
+      </if>
+      <if test="rankingQs != null">
+        ranking_qs,
+      </if>
+      <if test="rankingQsCs != null">
+        ranking_qs_cs,
+      </if>
+      <if test="rankingUsnews != null">
+        ranking_usnews,
+      </if>
+      <if test="rankingUsnewsCs != null">
+        ranking_usnews_cs,
+      </if>
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="universityNameChinese != null">
+        #{universityNameChinese,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTags != null">
+        #{universityTags,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTagsState != null">
+        #{universityTagsState,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingQs != null">
+        #{rankingQs,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingQsCs != null">
+        #{rankingQsCs,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingUsnews != null">
+        #{rankingUsnews,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingUsnewsCs != null">
+        #{rankingUsnewsCs,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      <if test="universityNameChinese != null">
+        university_name_chinese = #{universityNameChinese,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTags != null">
+        university_tags = #{universityTags,jdbcType=VARCHAR},
+      </if>
+      <if test="universityTagsState != null">
+        university_tags_state = #{universityTagsState,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingQs != null">
+        ranking_qs = #{rankingQs,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingQsCs != null">
+        ranking_qs_cs = #{rankingQsCs,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingUsnews != null">
+        ranking_usnews = #{rankingUsnews,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingUsnewsCs != null">
+        ranking_usnews_cs = #{rankingUsnewsCs,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>
