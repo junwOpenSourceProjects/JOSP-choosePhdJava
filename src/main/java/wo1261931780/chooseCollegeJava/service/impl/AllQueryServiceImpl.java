@@ -1,5 +1,9 @@
 package wo1261931780.chooseCollegeJava.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +15,7 @@ import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
 import wo1261931780.chooseCollegeJava.service.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Intellij IDEA.
