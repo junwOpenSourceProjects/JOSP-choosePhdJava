@@ -1,22 +1,16 @@
 package wo1261931780.chooseCollegeJava.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import springfox.documentation.spring.web.json.Json;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.*;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsAllMapper;
+import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsEchartsMapper;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
 import wo1261931780.chooseCollegeJava.service.*;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Intellij IDEA.
@@ -61,6 +55,8 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	private UniversityRankingsAllMapper allMapper;
 	@Autowired
 	private UniversityRankingsEchartsService echartsService;
+	@Autowired
+	private UniversityRankingsEchartsMapper echartsMapper;
 
 
 	@Override
@@ -175,10 +171,10 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 
 	@Override
 	public ChartData updateEchartsData() {
-		// ChartData chartData = queryAllEchartsData(null, null, null, null, "qs");
+		ChartData chartData = queryAllEchartsData(null, null, null, null, "qs");
 		// ChartData chartData = queryAllEchartsData(null, null, null, null, "qs_cs");
 		// ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews");
-		ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews_cs");
+		// ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews_cs");
 		chartData.getSeries().forEach(series -> {
 			LambdaQueryWrapper<UniversityRankingsEcharts> lambdaQueryWrapper = new LambdaQueryWrapper<>();
 			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, series.getName());
@@ -186,19 +182,84 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			if (serviceOne == null) {
 				UniversityRankingsEcharts rankingsEcharts = new UniversityRankingsEcharts();
 				rankingsEcharts.setUniversityNameChinese(series.getName());
-				// rankingsEcharts.setRankingQs(series.getData().toString());
+				rankingsEcharts.setRankingQs(series.getData().toString());
 				// rankingsEcharts.setRankingQsCs(series.getData().toString());
 				// rankingsEcharts.setRankingUsnews(series.getData().toString());
-				rankingsEcharts.setRankingUsnewsCs(series.getData().toString());
+				// rankingsEcharts.setRankingUsnewsCs(series.getData().toString());
 				echartsService.save(rankingsEcharts);
 			} else {
-				// serviceOne.setRankingQs(series.getData().toString());
+				serviceOne.setRankingQs(series.getData().toString());
 				// serviceOne.setRankingQsCs(series.getData().toString());
 				// serviceOne.setRankingUsnews(series.getData().toString());
-				serviceOne.setRankingUsnewsCs(series.getData().toString());
+				// serviceOne.setRankingUsnewsCs(series.getData().toString());
 				echartsService.insertOrUpdate(serviceOne);
 			}
 		});
+		return chartData;
+	}
+
+	@Override
+	public ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) {
+		if (rankVariant == null) {
+			log.error("rankVariant is null");
+			return null;
+		}
+		ChartData chartData = new ChartData();
+		ArrayList<Series> seriesArrayList = new ArrayList<>();
+		LambdaQueryWrapper<UniversityRankingsEcharts> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+		if (universityNameChinese != null && !universityNameChinese.isEmpty()) {
+			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, universityNameChinese);
+			UniversityRankingsEcharts serviceOne = echartsService.getOne(lambdaQueryWrapper);
+			Series series = new Series();
+			series.setName(universityNameChinese);
+			series.setType("line");
+			series.setSmooth(Boolean.TRUE);
+			series.setEmphasis(new Emphasis("series"));
+			// series.setData(serviceOne.getRankingQs());
+			seriesArrayList.add(series);
+			chartData.setSeries(seriesArrayList);
+			return chartData;
+		}
+		if (universityTagsState != null && !universityTagsState.isEmpty()) {
+			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityTagsState, universityTagsState);
+		}
+		if (universityTags != null && !universityTags.isEmpty()) {
+			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityTags, universityTags);
+		}
+
+		List<UniversityRankingsEcharts> serviceList = echartsService.list(lambdaQueryWrapper);
+		serviceList.forEach(all -> {
+			Series series = new Series();
+			series.setName(all.getUniversityNameChinese());
+			series.setType("line");
+			series.setSmooth(Boolean.TRUE);
+			series.setEmphasis(new Emphasis("series"));
+			switch (rankVariant.toLowerCase()) {
+				case "usnews":
+					series.setData(List.of(Double.valueOf(all.getRankingUsnews())));
+					break;
+				case "qs_cs":
+					// series.setDataString(all.getRankingQsCs());
+					series.setData(List.of(Double.valueOf(all.getRankingQsCs())));
+					break;
+				case "usnews_cs":
+					// series.setDataString(all.getRankingUsnewsCs());
+					series.setData(List.of(Double.valueOf(all.getRankingUsnewsCs())));
+					break;
+				default:
+					// series.setDataString(all.getRankingQs());
+					echartsMapper.readValue(
+							all.getRankingQs(),
+							new TypeReference<List<Double>>() {}
+					);
+					series.setData(List.of(Double.valueOf(all.getRankingQs())));
+					break;
+
+			}
+			seriesArrayList.add(series);
+		});
+		chartData.setSeries(seriesArrayList);
 		return chartData;
 	}
 

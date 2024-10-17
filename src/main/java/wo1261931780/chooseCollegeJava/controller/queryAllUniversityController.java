@@ -98,5 +98,16 @@ public class queryAllUniversityController {
 	) {
 		return allQueryServiceImpl.updateEchartsData();
 	}
+	@GetMapping("/queryPartEcharts")
+	@ApiOperation("条件查询echarts大学汇总排名")
+	public ChartData queryPartEcharts(
+			@RequestParam(required = false) String universityNameChinese,
+			@RequestParam(required = false) String universityTagsState,
+			@RequestParam(required = false) String universityTags,
+			@RequestParam(defaultValue = "qs") String rankVariant
+	) {
+		return allQueryServiceImpl.queryPartEcharts(
+				universityNameChinese, universityTagsState, universityTags,  rankVariant);
+	}
 
 }

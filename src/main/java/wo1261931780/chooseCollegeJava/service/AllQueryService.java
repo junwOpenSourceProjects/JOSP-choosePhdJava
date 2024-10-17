@@ -51,4 +51,6 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 
 	ChartData updateEchartsData();
 
+
+	ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant);
 }
