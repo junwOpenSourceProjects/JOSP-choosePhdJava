@@ -2,8 +2,9 @@ package wo1261931780.chooseCollegeJava.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.web.bind.annotation.RequestParam;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
+import wo1261931780.chooseCollegeJava.entity.ChartData;
+import wo1261931780.chooseCollegeJava.entity.UniversityRankingsAll;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnews;
 
@@ -41,4 +42,10 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 			String universityTags,
 			Integer currentRank
 	);
+
+	Page<UniversityRankingsAll> queryAllData(
+			Integer page, Integer limit,
+			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank);
+
+	ChartData queryAllEchartsData(String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank);
 }

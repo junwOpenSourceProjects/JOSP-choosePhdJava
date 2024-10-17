@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import wo1261931780.chooseCollegeJava.config.ShowResult;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
+import wo1261931780.chooseCollegeJava.entity.ChartData;
+import wo1261931780.chooseCollegeJava.entity.UniversityRankingsAll;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.service.impl.AllQueryServiceImpl;
+
+import java.util.List;
 
 /**
  * Created by Intellij IDEA.
@@ -24,7 +28,7 @@ import wo1261931780.chooseCollegeJava.service.impl.AllQueryServiceImpl;
  * @Description
  */
 @Slf4j
-@RequestMapping("/queryAll")
+@RequestMapping("/query")
 @RestController
 public class queryAllUniversityController {
 	@Autowired
@@ -47,7 +51,7 @@ public class queryAllUniversityController {
 		return ShowResult.sendSuccess(rankingsQsPage);
 	}
 
-	@GetMapping("/query")
+	@GetMapping("/queryQs")
 	@ApiOperation("查询大学排名数据")
 	public Page<UniversityAllDTO> queryUniversityRank(
 			@RequestParam Integer page,
@@ -59,6 +63,32 @@ public class queryAllUniversityController {
 	) {
 		return allQueryServiceImpl.queryUniversityRank(page, limit, rankVariant,
 				universityTagsState, universityTags, currentRank);
+	}
+
+	@GetMapping("/queryAll")
+	@ApiOperation("查询大学汇总排名")
+	public Page<UniversityRankingsAll> queryAllUniversityRank(
+			@RequestParam Integer page,
+			@RequestParam Integer limit,
+			@RequestParam(required = false) String universityNameChinese,
+			@RequestParam(required = false) String universityTagsState,
+			@RequestParam(required = false) String universityTags,
+			@RequestParam(required = false, defaultValue = "100") Integer currentRank
+	) {
+		return allQueryServiceImpl.queryAllData(page, limit,
+				universityNameChinese, universityTagsState, universityTags, currentRank);
+	}
+
+	@GetMapping("/queryAllEcharts")
+	@ApiOperation("查询echarts大学汇总排名")
+	public ChartData queryAllUniversityRank(
+			@RequestParam(required = false) String universityNameChinese,
+			@RequestParam(required = false) String universityTagsState,
+			@RequestParam(required = false) String universityTags,
+			@RequestParam(required = false, defaultValue = "10") Integer currentRank
+	) {
+		return allQueryServiceImpl.queryAllEchartsData(
+				universityNameChinese, universityTagsState, universityTags, currentRank);
 	}
 
 }

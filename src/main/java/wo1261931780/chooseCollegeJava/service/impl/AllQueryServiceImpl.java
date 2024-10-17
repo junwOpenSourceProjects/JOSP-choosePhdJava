@@ -8,15 +8,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
-import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
-import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQsCs;
-import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnews;
-import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnewsCs;
+import wo1261931780.chooseCollegeJava.entity.*;
+import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsAllMapper;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
 import wo1261931780.chooseCollegeJava.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Intellij IDEA.
@@ -54,6 +53,11 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	private UniversityRankingsUsnewsService UsnewsService;
 	@Autowired
 	private UniversityRankingsUsnewsCsService UsnewsCsService;
+	@Autowired
+	private UniversityRankingsAllService allService;
+
+	@Autowired
+	private UniversityRankingsAllMapper allMapper;
 
 
 	@Override
@@ -87,7 +91,7 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			// UniversityRankingsUsnews usnews = new UniversityRankingsUsnews();
 			// BeanUtils.copyProperties(qs, usnews);
 			// 丢进去批量处理
-			UniversityAllDTO universityAllDTO = queryDiffObject(dto.getUniversityNameChinese(),dto.getRankingYear());
+			UniversityAllDTO universityAllDTO = queryDiffObject(dto.getUniversityNameChinese(), dto.getRankingYear());
 
 			// 设置qs全球排名
 			dto.setCurrentQsAllRank(qs.getCurrentRankInteger());
@@ -107,11 +111,92 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		return dtoPage;
 	}
 
+	@Override
+	public Page<UniversityRankingsAll> queryAllData(
+			Integer page, Integer limit,
+			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank) {
+		Page<UniversityRankingsAll> dtoPage = new Page<>(page, limit);
+		// 首先判断是否为空，
+		LambdaQueryWrapper<UniversityRankingsAll> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+		if (universityNameChinese != null && !universityNameChinese.isEmpty()) {
+			lambdaQueryWrapper.eq(UniversityRankingsAll::getUniversityNameChinese, universityNameChinese);
+		}
+		if (universityTagsState != null && !universityTagsState.isEmpty()) {
+			lambdaQueryWrapper.eq(UniversityRankingsAll::getUniversityTagsState, universityTagsState);
+		}
+		if (universityTags != null && !universityTags.isEmpty()) {
+			lambdaQueryWrapper.eq(UniversityRankingsAll::getUniversityTags, universityTags);
+		}
+		// 默认查询前100名的，默认使用qs排名
+		if (currentRank != null) {
+			lambdaQueryWrapper.le(UniversityRankingsAll::getCurrentRankIntegerQs, currentRank);
+		}
+		lambdaQueryWrapper.orderByAsc(UniversityRankingsAll::getUniversityNameChinese)
+				.orderByAsc(UniversityRankingsAll::getRankingYear);
+		// 执行查询
+		List<UniversityRankingsAll> rankingsAllList = allService.list(lambdaQueryWrapper);
+		dtoPage.setRecords(rankingsAllList);
+		dtoPage.setTotal(rankingsAllList.size());
+		return dtoPage;
+	}
+
+	@Override
+	public ChartData queryAllEchartsData(
+			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank) {
+		ChartData chartData = getOneChartData();
+		List<Series> seriesList = chartData.getSeries();
+		seriesList.forEach(series -> {
+			LambdaQueryWrapper<UniversityRankingsAll> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+			List<Double> seriesData = series.getData();
+			// 遍历所有系列，根据名称去查询qs排名，把数据一个一个对照set进去
+			lambdaQueryWrapper.eq(UniversityRankingsAll::getUniversityNameChinese, series.getName());
+			// 按照排名年份asc排序
+			lambdaQueryWrapper.orderByAsc(UniversityRankingsAll::getRankingYear);
+			List<UniversityRankingsAll> oneList = allService.list(lambdaQueryWrapper);// 获取该学校的所有年份数据
+			oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQs())));// 把qs排名添加进去
+			// series.setData(seriesData);
+		});
+		return chartData;
+	}
+
+	ChartData getOneChartData() {
+		// 设置一个新的方法用来组合数据为echarts格式
+		ChartData chartData = new ChartData();
+		ArrayList<Series> seriesArrayList = new ArrayList<>();
+		// 首先要去重获取所有的UniversityNameChinese，把名称全部set进去，
+		// 创建 LambdaQueryWrapper 实例并配置查询条件
+		LambdaQueryWrapper<UniversityRankingsAll> wrapper = new LambdaQueryWrapper<>();
+		wrapper.select(UniversityRankingsAll::getUniversityNameChinese)
+				.groupBy(UniversityRankingsAll::getUniversityNameChinese);
+
+		// 执行查询，获取去重后的 UniversityRankingsAll 对象列表
+		List<UniversityRankingsAll> universityRecords = allMapper.selectList(wrapper);
+
+		// 将 UniversityRankingsAll 对象列表转换为仅包含 UniversityNameChinese 的 List<String>
+		List<String> universityNameList = universityRecords.stream()
+				.map(UniversityRankingsAll::getUniversityNameChinese)
+				.toList();
+		log.debug(String.valueOf(universityNameList.size()));
+		// 然后遍历，根据名称去查询qs排名，把数据一个一个对照set进去
+		universityNameList.forEach(all -> {
+			Series series = new Series();
+			series.setName(all);
+			series.setType("line");
+			series.setSmooth(Boolean.TRUE);
+			series.setEmphasis(new Emphasis("series"));
+			ArrayList<Double> doubles = new ArrayList<>();
+			series.setData(doubles);
+			seriesArrayList.add(series);
+		});
+		chartData.setSeries(seriesArrayList);
+		return chartData;
+	}
+
 	/**
 	 * 执行三次查询，笨方法
 	 *
-	 * @param qs     qs对象
-	 * @param usnews usnews对象
+	 * @param universityNameChinese 中文名
+	 * @param rankingYear           年份
 	 * @return dto结果
 	 */
 	UniversityAllDTO queryDiffObject(String universityNameChinese, String rankingYear) {
