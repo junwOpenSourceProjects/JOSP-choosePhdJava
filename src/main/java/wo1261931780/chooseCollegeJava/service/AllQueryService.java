@@ -2,6 +2,7 @@ package wo1261931780.chooseCollegeJava.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
 import wo1261931780.chooseCollegeJava.entity.ChartData;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsAll;
@@ -52,5 +53,5 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 	ChartData updateEchartsData();
 
 
-	ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant);
+	ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException;
 }

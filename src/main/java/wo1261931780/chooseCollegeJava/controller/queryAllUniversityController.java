@@ -2,6 +2,7 @@ package wo1261931780.chooseCollegeJava.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +106,7 @@ public class queryAllUniversityController {
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
 			@RequestParam(defaultValue = "qs") String rankVariant
-	) {
+	) throws JsonProcessingException {
 		return allQueryServiceImpl.queryPartEcharts(
 				universityNameChinese, universityTagsState, universityTags,  rankVariant);
 	}

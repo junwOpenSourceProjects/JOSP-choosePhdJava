@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsAllMapper;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsEchartsMapper;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
 import wo1261931780.chooseCollegeJava.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +33,10 @@ import java.util.List;
 @Service
 public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper, UniversityRankingsQs> implements AllQueryService {
 
+	@Autowired
+	public AllQueryServiceImpl(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	/**
 	 * 默认的查询模块，主要是对数据进行组装操作
@@ -62,6 +70,7 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	private UniversityRankingsEchartsService echartsService;
 	@Autowired
 	private UniversityRankingsEchartsMapper echartsMapper;
+	private final ObjectMapper objectMapper;
 
 
 	@Override
@@ -204,7 +213,7 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	}
 
 	@Override
-	public ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) {
+	public ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException {
 		if (rankVariant == null) {
 			log.error("rankVariant is null");
 			return null;
@@ -221,7 +230,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			series.setType("line");
 			series.setSmooth(Boolean.TRUE);
 			series.setEmphasis(new Emphasis("series"));
-			// series.setData(serviceOne.getRankingQs());
+			List<Double> doubles1 = objectMapper.readValue(serviceOne.getRankingUsnews(), new TypeReference<>() {
+			});
+			series.setData(doubles1);
 			seriesArrayList.add(series);
 			chartData.setSeries(seriesArrayList);
 			return chartData;
@@ -240,27 +251,35 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			series.setType("line");
 			series.setSmooth(Boolean.TRUE);
 			series.setEmphasis(new Emphasis("series"));
-			switch (rankVariant.toLowerCase()) {
-				case "usnews":
-					series.setData(List.of(Double.valueOf(all.getRankingUsnews())));
-					break;
-				case "qs_cs":
-					// series.setDataString(all.getRankingQsCs());
-					series.setData(List.of(Double.valueOf(all.getRankingQsCs())));
-					break;
-				case "usnews_cs":
-					// series.setDataString(all.getRankingUsnewsCs());
-					series.setData(List.of(Double.valueOf(all.getRankingUsnewsCs())));
-					break;
-				default:
-					// series.setDataString(all.getRankingQs());
-					echartsMapper.readValue(
-							all.getRankingQs(),
-							new TypeReference<List<Double>>() {}
-					);
-					series.setData(List.of(Double.valueOf(all.getRankingQs())));
-					break;
-
+			try {
+				switch (rankVariant.toLowerCase()) {
+					case "usnews":
+						List<Double> doubles1 = objectMapper.readValue(all.getRankingUsnews(), new TypeReference<>() {
+						});
+						series.setData(doubles1);
+						break;
+					case "qs_cs":
+						// series.setDataString(all.getRankingQsCs());
+						List<Double> doubles2 = objectMapper.readValue(all.getRankingQsCs(), new TypeReference<>() {
+						});
+						series.setData(doubles2);
+						break;
+					case "usnews_cs":
+						// series.setDataString(all.getRankingUsnewsCs());
+						List<Double> doubles3 = objectMapper.readValue(all.getRankingUsnewsCs(), new TypeReference<>() {
+						});
+						series.setData(doubles3);
+						break;
+					default:
+						// series.setDataString(all.getRankingQs());
+						List<Double> doubles = objectMapper.readValue(all.getRankingQs(), new TypeReference<>() {
+								}
+						);
+						series.setData(doubles);
+						break;
+				}
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
 			}
 			seriesArrayList.add(series);
 		});
