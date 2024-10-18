@@ -77,6 +77,7 @@ public class queryAllUniversityController {
 			@RequestParam(required = false) String universityTags,
 			@RequestParam(required = false, defaultValue = "100") Integer currentRank
 	) {
+		log.info("universityNameChinese:{}, universityTagsState:{}, universityTags:{}, currentRank:{}", universityNameChinese, universityTagsState, universityTags, currentRank);
 		return allQueryServiceImpl.queryAllData(page, limit,
 				universityNameChinese, universityTagsState, universityTags, currentRank);
 	}

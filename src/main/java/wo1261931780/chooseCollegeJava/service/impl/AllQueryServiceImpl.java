@@ -146,10 +146,10 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		lambdaQueryWrapper.orderByAsc(UniversityRankingsAll::getUniversityNameChinese)
 				.orderByAsc(UniversityRankingsAll::getRankingYear);
 		// 执行查询
-		List<UniversityRankingsAll> rankingsAllList = allService.list(lambdaQueryWrapper);
-		dtoPage.setRecords(rankingsAllList);
-		dtoPage.setTotal(rankingsAllList.size());
-		return dtoPage;
+		// List<UniversityRankingsAll> rankingsAllList = allService.list(lambdaQueryWrapper);
+		// dtoPage.setRecords(rankingsAllList);
+		// dtoPage.setTotal(rankingsAllList.size());
+		return allService.page(dtoPage, lambdaQueryWrapper);
 	}
 
 	@Override
