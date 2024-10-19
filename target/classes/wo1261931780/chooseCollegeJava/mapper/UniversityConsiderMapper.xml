@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wo1261931780.chooseCollegeJava.mapper.UniversityConsiderMapper">
+  <resultMap id="BaseResultMap" type="wo1261931780.chooseCollegeJava.entity.UniversityConsider">
+    <!--@mbg.generated-->
+    <!--@Table computer_rank.university_consider-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="university_name_chinese" jdbcType="VARCHAR" property="universityNameChinese" />
+    <result column="status_qs" jdbcType="TINYINT" property="statusQs" />
+    <result column="status_qs_cs" jdbcType="TINYINT" property="statusQsCs" />
+    <result column="status_usnews" jdbcType="TINYINT" property="statusUsnews" />
+    <result column="status_usnews_cs" jdbcType="TINYINT" property="statusUsnewsCs" />
+    <result column="status_total" jdbcType="TINYINT" property="statusTotal" />
+    <result column="consider" jdbcType="TINYINT" property="consider" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, university_name_chinese, status_qs, status_qs_cs, status_usnews, status_usnews_cs, 
+    status_total, consider
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.university_consider
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name_chinese = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameChinese,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="status_qs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.statusQs,jdbcType=TINYINT}
+        </foreach>
+      </trim>
+      <trim prefix="status_qs_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.statusQsCs,jdbcType=TINYINT}
+        </foreach>
+      </trim>
+      <trim prefix="status_usnews = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.statusUsnews,jdbcType=TINYINT}
+        </foreach>
+      </trim>
+      <trim prefix="status_usnews_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.statusUsnewsCs,jdbcType=TINYINT}
+        </foreach>
+      </trim>
+      <trim prefix="status_total = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.statusTotal,jdbcType=TINYINT}
+        </foreach>
+      </trim>
+      <trim prefix="consider = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=INTEGER} then #{item.consider,jdbcType=TINYINT}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.university_consider
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name_chinese = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityNameChinese != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.universityNameChinese,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="status_qs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.statusQs != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.statusQs,jdbcType=TINYINT}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="status_qs_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.statusQsCs != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.statusQsCs,jdbcType=TINYINT}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="status_usnews = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.statusUsnews != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.statusUsnews,jdbcType=TINYINT}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="status_usnews_cs = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.statusUsnewsCs != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.statusUsnewsCs,jdbcType=TINYINT}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="status_total = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.statusTotal != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.statusTotal,jdbcType=TINYINT}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="consider = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.consider != null">
+            when id = #{item.id,jdbcType=INTEGER} then #{item.consider,jdbcType=TINYINT}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_consider
+    (university_name_chinese, status_qs, status_qs_cs, status_usnews, status_usnews_cs, 
+      status_total, consider)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.universityNameChinese,jdbcType=VARCHAR}, #{item.statusQs,jdbcType=TINYINT}, 
+        #{item.statusQsCs,jdbcType=TINYINT}, #{item.statusUsnews,jdbcType=TINYINT}, #{item.statusUsnewsCs,jdbcType=TINYINT}, 
+        #{item.statusTotal,jdbcType=TINYINT}, #{item.consider,jdbcType=TINYINT})
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from computer_rank.university_consider where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=INTEGER}
+    </foreach>
+  </delete>
+  <update id="updateBatchUseMultiQuery" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    <foreach collection="list" item="item" separator=";">
+      update computer_rank.university_consider
+      <set>
+        <if test="item.universityNameChinese != null">
+          university_name_chinese = #{item.universityNameChinese,jdbcType=VARCHAR},
+        </if>
+        <if test="item.statusQs != null">
+          status_qs = #{item.statusQs,jdbcType=TINYINT},
+        </if>
+        <if test="item.statusQsCs != null">
+          status_qs_cs = #{item.statusQsCs,jdbcType=TINYINT},
+        </if>
+        <if test="item.statusUsnews != null">
+          status_usnews = #{item.statusUsnews,jdbcType=TINYINT},
+        </if>
+        <if test="item.statusUsnewsCs != null">
+          status_usnews_cs = #{item.statusUsnewsCs,jdbcType=TINYINT},
+        </if>
+        <if test="item.statusTotal != null">
+          status_total = #{item.statusTotal,jdbcType=TINYINT},
+        </if>
+        <if test="item.consider != null">
+          consider = #{item.consider,jdbcType=TINYINT},
+        </if>
+      </set>
+      where id = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+  <insert id="batchInsertSelectiveUseDefaultForNull" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_consider
+    (university_name_chinese, status_qs, status_qs_cs, status_usnews, status_usnews_cs, 
+      status_total, consider)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (
+      <choose>
+        <when test="item.universityNameChinese != null">
+          #{item.universityNameChinese,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.statusQs != null">
+          #{item.statusQs,jdbcType=TINYINT},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.statusQsCs != null">
+          #{item.statusQsCs,jdbcType=TINYINT},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.statusUsnews != null">
+          #{item.statusUsnews,jdbcType=TINYINT},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.statusUsnewsCs != null">
+          #{item.statusUsnewsCs,jdbcType=TINYINT},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.statusTotal != null">
+          #{item.statusTotal,jdbcType=TINYINT},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.consider != null">
+          #{item.consider,jdbcType=TINYINT}
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT
+        </otherwise>
+      </choose>
+      )
+    </foreach>
+  </insert>
+  <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.UniversityConsider" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_consider
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      university_name_chinese,
+      status_qs,
+      status_qs_cs,
+      status_usnews,
+      status_usnews_cs,
+      status_total,
+      consider,
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      #{universityNameChinese,jdbcType=VARCHAR},
+      #{statusQs,jdbcType=TINYINT},
+      #{statusQsCs,jdbcType=TINYINT},
+      #{statusUsnews,jdbcType=TINYINT},
+      #{statusUsnewsCs,jdbcType=TINYINT},
+      #{statusTotal,jdbcType=TINYINT},
+      #{consider,jdbcType=TINYINT},
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      university_name_chinese = #{universityNameChinese,jdbcType=VARCHAR},
+      status_qs = #{statusQs,jdbcType=TINYINT},
+      status_qs_cs = #{statusQsCs,jdbcType=TINYINT},
+      status_usnews = #{statusUsnews,jdbcType=TINYINT},
+      status_usnews_cs = #{statusUsnewsCs,jdbcType=TINYINT},
+      status_total = #{statusTotal,jdbcType=TINYINT},
+      consider = #{consider,jdbcType=TINYINT},
+    </trim>
+  </insert>
+  <insert id="insertOrUpdateSelective" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.UniversityConsider" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.university_consider
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="universityNameChinese != null">
+        university_name_chinese,
+      </if>
+      <if test="statusQs != null">
+        status_qs,
+      </if>
+      <if test="statusQsCs != null">
+        status_qs_cs,
+      </if>
+      <if test="statusUsnews != null">
+        status_usnews,
+      </if>
+      <if test="statusUsnewsCs != null">
+        status_usnews_cs,
+      </if>
+      <if test="statusTotal != null">
+        status_total,
+      </if>
+      <if test="consider != null">
+        consider,
+      </if>
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="universityNameChinese != null">
+        #{universityNameChinese,jdbcType=VARCHAR},
+      </if>
+      <if test="statusQs != null">
+        #{statusQs,jdbcType=TINYINT},
+      </if>
+      <if test="statusQsCs != null">
+        #{statusQsCs,jdbcType=TINYINT},
+      </if>
+      <if test="statusUsnews != null">
+        #{statusUsnews,jdbcType=TINYINT},
+      </if>
+      <if test="statusUsnewsCs != null">
+        #{statusUsnewsCs,jdbcType=TINYINT},
+      </if>
+      <if test="statusTotal != null">
+        #{statusTotal,jdbcType=TINYINT},
+      </if>
+      <if test="consider != null">
+        #{consider,jdbcType=TINYINT},
+      </if>
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      <if test="universityNameChinese != null">
+        university_name_chinese = #{universityNameChinese,jdbcType=VARCHAR},
+      </if>
+      <if test="statusQs != null">
+        status_qs = #{statusQs,jdbcType=TINYINT},
+      </if>
+      <if test="statusQsCs != null">
+        status_qs_cs = #{statusQsCs,jdbcType=TINYINT},
+      </if>
+      <if test="statusUsnews != null">
+        status_usnews = #{statusUsnews,jdbcType=TINYINT},
+      </if>
+      <if test="statusUsnewsCs != null">
+        status_usnews_cs = #{statusUsnewsCs,jdbcType=TINYINT},
+      </if>
+      <if test="statusTotal != null">
+        status_total = #{statusTotal,jdbcType=TINYINT},
+      </if>
+      <if test="consider != null">
+        consider = #{consider,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+</mapper>

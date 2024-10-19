@@ -18,8 +18,6 @@ import wo1261931780.chooseCollegeJava.entity.UniversityRankingsAll;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.service.impl.AllQueryServiceImpl;
 
-import java.util.List;
-
 /**
  * Created by Intellij IDEA.
  * Project:chooseCollegeJava
@@ -32,7 +30,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/query")
 @RestController
-public class queryAllUniversityController {
+public class QueryAllUniversityController {
 	@Autowired
 	private AllQueryServiceImpl allQueryService;
 
