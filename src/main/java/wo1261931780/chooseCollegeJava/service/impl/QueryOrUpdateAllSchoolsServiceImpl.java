@@ -1,5 +1,7 @@
 package wo1261931780.chooseCollegeJava.service.impl;
 
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +73,8 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		// log.info("新增{}条记录", universityConsiderList.size());
 		// return String.valueOf("新增成功{}, 共{}条记录".toCharArray(), universityConsiderList.size(), universityConsiderList.size());
 		// }
+		// 用雪花算法生成id
+		// universityConsiderList.setId(IdUtil.getSnowflake(1, 1).nextId());
 		return considerService.insertOrUpdate(universityConsiderList);
 	}
 }
