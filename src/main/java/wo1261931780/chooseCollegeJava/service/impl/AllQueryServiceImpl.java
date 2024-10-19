@@ -264,6 +264,10 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	@Override
 	public EchartsDTO queryPartEcharts2(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException {
 		EchartsDTO echartsDTO = new EchartsDTO();
+		if (universityTags == null || universityTags.isEmpty()) {
+			log.error("universityTagsState is null");
+			universityTags = "德国";
+		}
 		ChartData chartData = queryPartEcharts(universityNameChinese, universityTagsState, universityTags, rankVariant);
 		echartsDTO.setChatData(chartData);
 		ArrayList<String> strings = new ArrayList<>();
