@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import wo1261931780.chooseCollegeJava.config.ShowResult;
 import wo1261931780.chooseCollegeJava.dto.RankingStatusDTO;
 import wo1261931780.chooseCollegeJava.entity.UniversityConsider;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsEcharts;
@@ -62,14 +63,14 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 	}
 
 	@Override
-	public String insertOrUpdate(List<UniversityConsider> universityConsiderList) {
-		int updated = considerService.updateBatch(universityConsiderList);
-		if (updated > 0) {
-			log.info("更新{}条记录", updated);
-			return String.valueOf("更新成功{}, 共{}条记录".toCharArray(), updated, universityConsiderList.size());
-		} else {
-			log.info("新增{}条记录", universityConsiderList.size());
-			return String.valueOf("新增成功{}, 共{}条记录".toCharArray(), universityConsiderList.size(), universityConsiderList.size());
-		}
+	public Boolean insertOrUpdate(UniversityConsider universityConsiderList) {
+		// if (updated > 0) {
+		// 	log.info("更新{}条记录", updated);
+		// return String.valueOf("更新成功{}, 共{}条记录".toCharArray(), updated, universityConsiderList.size());
+		// } else {
+		// log.info("新增{}条记录", universityConsiderList.size());
+		// return String.valueOf("新增成功{}, 共{}条记录".toCharArray(), universityConsiderList.size(), universityConsiderList.size());
+		// }
+		return considerService.insertOrUpdate(universityConsiderList);
 	}
 }

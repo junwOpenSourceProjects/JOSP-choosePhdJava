@@ -17,5 +17,5 @@ import java.util.List;
 public interface QueryOrUpdateAllSchoolsService {
 	List<RankingStatusDTO> queryRankingStatus();
 
-	String insertOrUpdate(List<UniversityConsider> universityConsiderList);
+	Boolean insertOrUpdate(UniversityConsider universityConsiderList);
 }

@@ -29,11 +29,12 @@ public class RankingStatusController {
 
 
 	@GetMapping("/queryRankingStatus")
-	public List<RankingStatusDTO> queryOrUpdateAllSchools(	) {
+	public List<RankingStatusDTO> queryOrUpdateAllSchools() {
 		return schoolsService.queryRankingStatus();
 	}
-	@PutMapping("/insertOrUpdate")
-	public ShowResult<String> updateRankingStatus(@RequestBody List<UniversityConsider> universityConsiderList) {
-		return ShowResult.sendSuccess(schoolsService.insertOrUpdate(universityConsiderList));
+
+	@PostMapping("/insertOrUpdate")
+	public ShowResult<String> updateRankingStatus(@RequestBody UniversityConsider universityConsiderList) {
+		return schoolsService.insertOrUpdate(universityConsiderList) ? ShowResult.sendSuccess("成功") : ShowResult.sendError("失败");
 	}
 }
