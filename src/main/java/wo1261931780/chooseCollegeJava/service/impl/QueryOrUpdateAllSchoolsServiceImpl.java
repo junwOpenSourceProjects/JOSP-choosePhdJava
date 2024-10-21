@@ -43,7 +43,7 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		// 因为这里是查询出所有的意向院校，然后根据情况进行意愿的更新或者新增，所以查询所有的以后，直接组装即可。
 		// 接下来我需要去consider中查所有存在的记录
 		List<UniversityConsider> considerList = considerService.list();
-		if (considerList != null && !considerList.isEmpty()) {
+		if (considerList == null && considerList.isEmpty()) {
 			log.info("暂无意向院校：{}", considerList);
 			return rankingStatusDTOS;
 		}
@@ -55,6 +55,8 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 			LambdaQueryWrapper<UniversityRankingsEcharts> queryWrapper = new LambdaQueryWrapper<>();
 			queryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, consider.getUniversityNameChinese()).last("limit 1");
 			UniversityRankingsEcharts serviceOne = echartsService.getOne(queryWrapper);
+			rankingStatusDTO.setUniversityTags(serviceOne.getUniversityTags());
+			rankingStatusDTO.setUniversityTagsState(serviceOne.getUniversityTagsState());
 			rankingStatusDTO.setRankingQs(serviceOne.getRankingQs());
 			rankingStatusDTO.setRankingQsCs(serviceOne.getRankingQsCs());
 			rankingStatusDTO.setRankingUsnews(serviceOne.getRankingUsnews());
@@ -76,5 +78,25 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		// 用雪花算法生成id
 		// universityConsiderList.setId(IdUtil.getSnowflake(1, 1).nextId());
 		return considerService.insertOrUpdate(universityConsiderList);
+	}
+
+	@Override
+	public boolean insertBatch(List<String> nameList) {
+		if (nameList == null || nameList.isEmpty()) {
+			log.info("nameList is null or empty");
+			return false;
+		}
+		List<UniversityConsider> considerList = new ArrayList<>();
+		nameList.forEach(name -> {
+			UniversityConsider universityConsider = new UniversityConsider();
+			universityConsider.setUniversityNameChinese(name);
+			universityConsider.setConsider((byte) 1);
+			universityConsider.setStatusQs((byte) 1);
+			universityConsider.setStatusQsCs((byte) 1);
+			universityConsider.setStatusUsnews((byte) 1);
+			universityConsider.setStatusUsnewsCs((byte) 1);
+			considerList.add(universityConsider);
+		});
+		return considerService.saveBatch(considerList);
 	}
 }

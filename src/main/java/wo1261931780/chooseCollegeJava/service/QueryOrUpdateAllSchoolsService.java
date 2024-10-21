@@ -18,4 +18,6 @@ public interface QueryOrUpdateAllSchoolsService {
 	List<RankingStatusDTO> queryRankingStatus();
 
 	Boolean insertOrUpdate(UniversityConsider universityConsiderList);
+
+	boolean insertBatch(List<String> nameList);
 }

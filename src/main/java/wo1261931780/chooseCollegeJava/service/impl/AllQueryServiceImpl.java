@@ -256,8 +256,43 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			series.setData(doubles);
 			seriesArrayList.add(series);
 		});
-		chartData.setSeries(seriesArrayList);
+		// 不管查什么数据，默认新增asu进去作为对比。
+		List<Series> addAsuList = addAsuData(seriesArrayList, rankVariant);
+		chartData.setSeries(addAsuList);
 		return chartData;
+	}
+
+	private List<Series> addAsuData(List<Series> seriesArrayList, String rankVariant) throws JsonProcessingException {
+		Series asuService = new Series();
+		asuService.setName("亚利桑那州立大学");
+		asuService.setType("line");
+		asuService.setSmooth(Boolean.TRUE);
+		// asuService.setXAxisIndex();
+		asuService.setEmphasis(new Emphasis("series"));
+		switch (rankVariant.toLowerCase()) {
+			case "usnews":
+				asuService.setData(objectMapper.readValue(
+						"[0.0, 0.0, 143.0, 148.0, 121.0, 134.0, 145.0, 146.0, 146.0, 165.0, 156.0, 0.0, 179.0]",
+						new TypeReference<>() {}));
+				break;
+			case "qs_cs":
+				asuService.setData(objectMapper.readValue(
+						"[0.0, 0.0, 201.0, 201.0, 151.0, 151.0, 151.0, 201.0, 151.0, 148.0, 151.0, 155.0, 0.0]",
+						new TypeReference<>() {}));
+				break;
+			case "usnews_cs":
+				asuService.setData(objectMapper.readValue(
+						"[0.0, 0.0, 65.0, 72.0, 75.0, 89.0, 65.0, 78.0, 65.0, 89.0, 87.0, 0.0, 0.0]",
+						new TypeReference<>() {}));
+				break;
+			default:
+				asuService.setData(objectMapper.readValue(
+						"[330.0, 293.0, 294.0, 249.0, 222.0, 209.0, 212.0, 215.0, 220.0, 216.0, 219.0, 179.0, 200.0]",
+						new TypeReference<>() {}));
+				break;
+		}
+		seriesArrayList.add(asuService);
+		return seriesArrayList;
 	}
 
 	@Override

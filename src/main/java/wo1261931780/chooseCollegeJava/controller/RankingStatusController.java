@@ -8,6 +8,7 @@ import wo1261931780.chooseCollegeJava.dto.RankingStatusDTO;
 import wo1261931780.chooseCollegeJava.entity.UniversityConsider;
 import wo1261931780.chooseCollegeJava.service.impl.QueryOrUpdateAllSchoolsServiceImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,5 +37,16 @@ public class RankingStatusController {
 	@PostMapping("/insertOrUpdate")
 	public ShowResult<String> updateRankingStatus(@RequestBody UniversityConsider universityConsiderList) {
 		return schoolsService.insertOrUpdate(universityConsiderList) ? ShowResult.sendSuccess("成功") : ShowResult.sendError("失败");
+	}
+	@PostMapping("/insertBatch")
+	public ShowResult<String> insertBatch(@RequestBody List<String> nameList) {
+		return schoolsService.insertBatch(nameList) ? ShowResult.sendSuccess("鎴愬姛") : ShowResult.sendError("澶辫触");
+	}
+	@GetMapping("/tasks")
+	public List<String> getTasks() {
+		ArrayList<String> arrayList = new ArrayList<>();
+		arrayList.add("task1");
+		arrayList.add("task2");
+		return arrayList;
 	}
 }
