@@ -1,10 +1,13 @@
 package wo1261931780.chooseCollegeJava.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import wo1261931780.chooseCollegeJava.config.ShowResult;
+import wo1261931780.chooseCollegeJava.dto.EchartsDTO;
 import wo1261931780.chooseCollegeJava.dto.RankingStatusDTO;
+import wo1261931780.chooseCollegeJava.entity.ChartData;
 import wo1261931780.chooseCollegeJava.entity.UniversityConsider;
 import wo1261931780.chooseCollegeJava.service.impl.QueryOrUpdateAllSchoolsServiceImpl;
 
@@ -42,11 +45,8 @@ public class RankingStatusController {
 	public ShowResult<String> insertBatch(@RequestBody List<String> nameList) {
 		return schoolsService.insertBatch(nameList) ? ShowResult.sendSuccess("鎴愬姛") : ShowResult.sendError("澶辫触");
 	}
-	@GetMapping("/tasks")
-	public List<String> getTasks() {
-		ArrayList<String> arrayList = new ArrayList<>();
-		arrayList.add("task1");
-		arrayList.add("task2");
-		return arrayList;
+	@PostMapping("/drawerData")
+	public EchartsDTO drawerData(@RequestBody String name) throws JsonProcessingException {
+		return schoolsService.drawerData(name);
 	}
 }

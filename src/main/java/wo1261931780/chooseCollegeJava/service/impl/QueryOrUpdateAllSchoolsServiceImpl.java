@@ -4,15 +4,19 @@ import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import wo1261931780.chooseCollegeJava.config.ShowResult;
+import wo1261931780.chooseCollegeJava.dto.EchartsDTO;
 import wo1261931780.chooseCollegeJava.dto.RankingStatusDTO;
-import wo1261931780.chooseCollegeJava.entity.UniversityConsider;
-import wo1261931780.chooseCollegeJava.entity.UniversityRankingsEcharts;
+import wo1261931780.chooseCollegeJava.entity.*;
 import wo1261931780.chooseCollegeJava.service.QueryOrUpdateAllSchoolsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,11 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 	@Autowired
 	private UniversityConsiderService considerService;
 
+	private final ObjectMapper objectMapper;
+
+	public QueryOrUpdateAllSchoolsServiceImpl(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	@Override
 	public List<RankingStatusDTO> queryRankingStatus() {
@@ -98,5 +107,70 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 			considerList.add(universityConsider);
 		});
 		return considerService.saveBatch(considerList);
+	}
+
+	@Override
+	public EchartsDTO drawerData(String name1) throws JsonProcessingException {
+
+		List<Series> series = new ArrayList<>();
+		List<String> strings = new ArrayList<>();
+
+		while (series.size() < 8) {
+			Series series1 = new Series();
+			series1.setName(name1);
+			series1.setType("line");
+			series1.setSmooth(Boolean.TRUE);
+			series1.setEmphasis(new Emphasis("series"));
+			series.add(series1);
+			strings.add(name1);
+		}
+		log.info("series size:{}", series.size());
+		LambdaQueryWrapper<UniversityRankingsEcharts> queryWrapper = new LambdaQueryWrapper<>();
+		queryWrapper.like(UniversityRankingsEcharts::getUniversityNameChinese, name1);
+		UniversityRankingsEcharts serviceOne = echartsService.getOne(queryWrapper);
+		UniversityRankingsEcharts serviceTwo = echartsService.getOne(new LambdaQueryWrapper<UniversityRankingsEcharts>().eq(UniversityRankingsEcharts::getUniversityNameChinese, "亚利桑那州立大学"));
+		for (int i = 0; i < series.size(); i++) {
+			if (i == 0) {
+				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingQs(), new TypeReference<>() {
+				}));
+				strings.set(i, name1 + "qs");
+			} else if (i == 1) {
+				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingQsCs(), new TypeReference<>() {
+				}));
+				strings.set(i, name1 + "QsCs");
+			} else if (i == 2) {
+				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingUsnews(), new TypeReference<>() {
+				}));
+				strings.set(i, name1 + "Usnews");
+			} else if (i == 3) {
+				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingUsnewsCs(), new TypeReference<>() {
+				}));
+				strings.set(i, name1 + "UsnewsCs");
+			} else if (i == 4) {
+				series.get(i).setName("亚利桑那州立大学");
+				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingQs(), new TypeReference<>() {
+				}));
+				strings.set(i, "亚利桑那州立大学qs");
+			} else if (i == 5) {
+				series.get(i).setName("亚利桑那州立大学");
+				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingQsCs(), new TypeReference<>() {
+				}));
+				strings.set(i, "亚利桑那州立大学QsCs");
+			} else if (i == 6) {
+				series.get(i).setName("亚利桑那州立大学");
+				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingUsnews(), new TypeReference<>() {
+				}));
+				strings.set(i, "亚利桑那州立大学Usnews");
+			} else if (i == 7) {
+				series.get(i).setName("亚利桑那州立大学");
+				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingUsnewsCs(), new TypeReference<>() {
+				}));
+				strings.set(i, "亚利桑那州立大学UsnewsCs");
+			}
+		}
+		EchartsDTO echartsDTO = new EchartsDTO();
+		echartsDTO.setChatData(new ChartData(series));
+		echartsDTO.setLegendData(strings);
+		return echartsDTO;
 	}
 }
