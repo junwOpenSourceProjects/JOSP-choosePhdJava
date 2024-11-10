@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wo1261931780.chooseCollegeJava.mapper.ChoosePhdMapper">
+  <resultMap id="BaseResultMap" type="wo1261931780.chooseCollegeJava.entity.ChoosePhd">
+    <!--@mbg.generated-->
+    <!--@Table computer_rank.choose_phd-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="university_name" jdbcType="VARCHAR" property="universityName" />
+    <result column="ranking_data" jdbcType="VARCHAR" property="rankingData" />
+    <result column="official_website" jdbcType="VARCHAR" property="officialWebsite" />
+    <result column="recruitment_website" jdbcType="VARCHAR" property="recruitmentWebsite" />
+    <result column="priority" jdbcType="INTEGER" property="priority" />
+    <result column="country_region" jdbcType="VARCHAR" property="countryRegion" />
+    <result column="scholarship" jdbcType="VARCHAR" property="scholarship" />
+    <result column="salary_amount" jdbcType="DECIMAL" property="salaryAmount" />
+    <result column="salary_currency" jdbcType="VARCHAR" property="salaryCurrency" />
+    <result column="living_expenses_amount" jdbcType="DECIMAL" property="livingExpensesAmount" />
+    <result column="living_expenses_currency" jdbcType="VARCHAR" property="livingExpensesCurrency" />
+    <result column="research_field" jdbcType="VARCHAR" property="researchField" />
+    <result column="application_requirements" jdbcType="LONGVARCHAR" property="applicationRequirements" />
+    <result column="application_deadline" jdbcType="TIMESTAMP" property="applicationDeadline" />
+    <result column="drug_prohibition" jdbcType="BOOLEAN" property="drugProhibition" />
+    <result column="gun_control" jdbcType="BOOLEAN" property="gunControl" />
+    <result column="qs_rank" jdbcType="INTEGER" property="qsRank" />
+    <result column="usnews_rank" jdbcType="INTEGER" property="usnewsRank" />
+    <result column="education_duration" jdbcType="VARCHAR" property="educationDuration" />
+    <result column="application_difficulty" jdbcType="VARCHAR" property="applicationDifficulty" />
+    <result column="reference_material" jdbcType="VARCHAR" property="referenceMaterial" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, university_name, ranking_data, official_website, recruitment_website, priority, 
+    country_region, scholarship, salary_amount, salary_currency, living_expenses_amount, 
+    living_expenses_currency, research_field, application_requirements, application_deadline, 
+    drug_prohibition, gun_control, qs_rank, usnews_rank, education_duration, application_difficulty, 
+    reference_material
+  </sql>
+  <update id="updateBatch" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.choose_phd
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.universityName,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="ranking_data = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.rankingData,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="official_website = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.officialWebsite,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="recruitment_website = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.recruitmentWebsite,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="priority = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.priority,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="country_region = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.countryRegion,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="scholarship = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.scholarship,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="salary_amount = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.salaryAmount,jdbcType=DECIMAL}
+        </foreach>
+      </trim>
+      <trim prefix="salary_currency = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.salaryCurrency,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="living_expenses_amount = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.livingExpensesAmount,jdbcType=DECIMAL}
+        </foreach>
+      </trim>
+      <trim prefix="living_expenses_currency = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.livingExpensesCurrency,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="research_field = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.researchField,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="application_requirements = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.applicationRequirements,jdbcType=LONGVARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="application_deadline = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.applicationDeadline,jdbcType=TIMESTAMP}
+        </foreach>
+      </trim>
+      <trim prefix="drug_prohibition = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.drugProhibition,jdbcType=BOOLEAN}
+        </foreach>
+      </trim>
+      <trim prefix="gun_control = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.gunControl,jdbcType=BOOLEAN}
+        </foreach>
+      </trim>
+      <trim prefix="qs_rank = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.qsRank,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="usnews_rank = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.usnewsRank,jdbcType=INTEGER}
+        </foreach>
+      </trim>
+      <trim prefix="education_duration = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.educationDuration,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="application_difficulty = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.applicationDifficulty,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+      <trim prefix="reference_material = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          when id = #{item.id,jdbcType=BIGINT} then #{item.referenceMaterial,jdbcType=VARCHAR}
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=BIGINT}
+    </foreach>
+  </update>
+  <update id="updateBatchSelective" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    update computer_rank.choose_phd
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="university_name = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.universityName != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.universityName,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="ranking_data = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.rankingData != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.rankingData,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="official_website = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.officialWebsite != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.officialWebsite,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="recruitment_website = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.recruitmentWebsite != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.recruitmentWebsite,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="priority = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.priority != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.priority,jdbcType=INTEGER}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="country_region = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.countryRegion != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.countryRegion,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="scholarship = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.scholarship != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.scholarship,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="salary_amount = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.salaryAmount != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.salaryAmount,jdbcType=DECIMAL}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="salary_currency = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.salaryCurrency != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.salaryCurrency,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="living_expenses_amount = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.livingExpensesAmount != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.livingExpensesAmount,jdbcType=DECIMAL}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="living_expenses_currency = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.livingExpensesCurrency != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.livingExpensesCurrency,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="research_field = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.researchField != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.researchField,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="application_requirements = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.applicationRequirements != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.applicationRequirements,jdbcType=LONGVARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="application_deadline = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.applicationDeadline != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.applicationDeadline,jdbcType=TIMESTAMP}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="drug_prohibition = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.drugProhibition != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.drugProhibition,jdbcType=BOOLEAN}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="gun_control = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.gunControl != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.gunControl,jdbcType=BOOLEAN}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="qs_rank = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.qsRank != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.qsRank,jdbcType=INTEGER}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="usnews_rank = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.usnewsRank != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.usnewsRank,jdbcType=INTEGER}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="education_duration = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.educationDuration != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.educationDuration,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="application_difficulty = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.applicationDifficulty != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.applicationDifficulty,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="reference_material = case" suffix="end,">
+        <foreach collection="list" index="index" item="item">
+          <if test="item.referenceMaterial != null">
+            when id = #{item.id,jdbcType=BIGINT} then #{item.referenceMaterial,jdbcType=VARCHAR}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where id in
+    <foreach close=")" collection="list" item="item" open="(" separator=", ">
+      #{item.id,jdbcType=BIGINT}
+    </foreach>
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.choose_phd
+    (university_name, ranking_data, official_website, recruitment_website, priority, 
+      country_region, scholarship, salary_amount, salary_currency, living_expenses_amount, 
+      living_expenses_currency, research_field, application_requirements, application_deadline, 
+      drug_prohibition, gun_control, qs_rank, usnews_rank, education_duration, application_difficulty, 
+      reference_material)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.universityName,jdbcType=VARCHAR}, #{item.rankingData,jdbcType=VARCHAR}, #{item.officialWebsite,jdbcType=VARCHAR}, 
+        #{item.recruitmentWebsite,jdbcType=VARCHAR}, #{item.priority,jdbcType=INTEGER}, 
+        #{item.countryRegion,jdbcType=VARCHAR}, #{item.scholarship,jdbcType=VARCHAR}, #{item.salaryAmount,jdbcType=DECIMAL}, 
+        #{item.salaryCurrency,jdbcType=VARCHAR}, #{item.livingExpensesAmount,jdbcType=DECIMAL}, 
+        #{item.livingExpensesCurrency,jdbcType=VARCHAR}, #{item.researchField,jdbcType=VARCHAR}, 
+        #{item.applicationRequirements,jdbcType=LONGVARCHAR}, #{item.applicationDeadline,jdbcType=TIMESTAMP}, 
+        #{item.drugProhibition,jdbcType=BOOLEAN}, #{item.gunControl,jdbcType=BOOLEAN}, 
+        #{item.qsRank,jdbcType=INTEGER}, #{item.usnewsRank,jdbcType=INTEGER}, #{item.educationDuration,jdbcType=VARCHAR}, 
+        #{item.applicationDifficulty,jdbcType=VARCHAR}, #{item.referenceMaterial,jdbcType=VARCHAR}
+        )
+    </foreach>
+  </insert>
+  <delete id="deleteByPrimaryKeyIn">
+    <!--@mbg.generated-->
+    delete from computer_rank.choose_phd where id in 
+    <foreach close=")" collection="list" item="id" open="(" separator=", ">
+      #{id,jdbcType=BIGINT}
+    </foreach>
+  </delete>
+  <update id="updateBatchUseMultiQuery" parameterType="java.util.List">
+    <!--@mbg.generated-->
+    <foreach collection="list" item="item" separator=";">
+      update computer_rank.choose_phd
+      <set>
+        <if test="item.universityName != null">
+          university_name = #{item.universityName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.rankingData != null">
+          ranking_data = #{item.rankingData,jdbcType=VARCHAR},
+        </if>
+        <if test="item.officialWebsite != null">
+          official_website = #{item.officialWebsite,jdbcType=VARCHAR},
+        </if>
+        <if test="item.recruitmentWebsite != null">
+          recruitment_website = #{item.recruitmentWebsite,jdbcType=VARCHAR},
+        </if>
+        <if test="item.priority != null">
+          priority = #{item.priority,jdbcType=INTEGER},
+        </if>
+        <if test="item.countryRegion != null">
+          country_region = #{item.countryRegion,jdbcType=VARCHAR},
+        </if>
+        <if test="item.scholarship != null">
+          scholarship = #{item.scholarship,jdbcType=VARCHAR},
+        </if>
+        <if test="item.salaryAmount != null">
+          salary_amount = #{item.salaryAmount,jdbcType=DECIMAL},
+        </if>
+        <if test="item.salaryCurrency != null">
+          salary_currency = #{item.salaryCurrency,jdbcType=VARCHAR},
+        </if>
+        <if test="item.livingExpensesAmount != null">
+          living_expenses_amount = #{item.livingExpensesAmount,jdbcType=DECIMAL},
+        </if>
+        <if test="item.livingExpensesCurrency != null">
+          living_expenses_currency = #{item.livingExpensesCurrency,jdbcType=VARCHAR},
+        </if>
+        <if test="item.researchField != null">
+          research_field = #{item.researchField,jdbcType=VARCHAR},
+        </if>
+        <if test="item.applicationRequirements != null">
+          application_requirements = #{item.applicationRequirements,jdbcType=LONGVARCHAR},
+        </if>
+        <if test="item.applicationDeadline != null">
+          application_deadline = #{item.applicationDeadline,jdbcType=TIMESTAMP},
+        </if>
+        <if test="item.drugProhibition != null">
+          drug_prohibition = #{item.drugProhibition,jdbcType=BOOLEAN},
+        </if>
+        <if test="item.gunControl != null">
+          gun_control = #{item.gunControl,jdbcType=BOOLEAN},
+        </if>
+        <if test="item.qsRank != null">
+          qs_rank = #{item.qsRank,jdbcType=INTEGER},
+        </if>
+        <if test="item.usnewsRank != null">
+          usnews_rank = #{item.usnewsRank,jdbcType=INTEGER},
+        </if>
+        <if test="item.educationDuration != null">
+          education_duration = #{item.educationDuration,jdbcType=VARCHAR},
+        </if>
+        <if test="item.applicationDifficulty != null">
+          application_difficulty = #{item.applicationDifficulty,jdbcType=VARCHAR},
+        </if>
+        <if test="item.referenceMaterial != null">
+          reference_material = #{item.referenceMaterial,jdbcType=VARCHAR},
+        </if>
+      </set>
+      where id = #{item.id,jdbcType=BIGINT}
+    </foreach>
+  </update>
+  <insert id="batchInsertSelectiveUseDefaultForNull" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.choose_phd
+    (university_name, ranking_data, official_website, recruitment_website, priority, 
+      country_region, scholarship, salary_amount, salary_currency, living_expenses_amount, 
+      living_expenses_currency, research_field, application_requirements, application_deadline, 
+      drug_prohibition, gun_control, qs_rank, usnews_rank, education_duration, application_difficulty, 
+      reference_material)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (
+      <choose>
+        <when test="item.universityName != null">
+          #{item.universityName,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.rankingData != null">
+          #{item.rankingData,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.officialWebsite != null">
+          #{item.officialWebsite,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.recruitmentWebsite != null">
+          #{item.recruitmentWebsite,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.priority != null">
+          #{item.priority,jdbcType=INTEGER},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.countryRegion != null">
+          #{item.countryRegion,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.scholarship != null">
+          #{item.scholarship,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.salaryAmount != null">
+          #{item.salaryAmount,jdbcType=DECIMAL},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.salaryCurrency != null">
+          #{item.salaryCurrency,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.livingExpensesAmount != null">
+          #{item.livingExpensesAmount,jdbcType=DECIMAL},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.livingExpensesCurrency != null">
+          #{item.livingExpensesCurrency,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.researchField != null">
+          #{item.researchField,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.applicationRequirements != null">
+          #{item.applicationRequirements,jdbcType=LONGVARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.applicationDeadline != null">
+          #{item.applicationDeadline,jdbcType=TIMESTAMP},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.drugProhibition != null">
+          #{item.drugProhibition,jdbcType=BOOLEAN},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.gunControl != null">
+          #{item.gunControl,jdbcType=BOOLEAN},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.qsRank != null">
+          #{item.qsRank,jdbcType=INTEGER},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.usnewsRank != null">
+          #{item.usnewsRank,jdbcType=INTEGER},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.educationDuration != null">
+          #{item.educationDuration,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.applicationDifficulty != null">
+          #{item.applicationDifficulty,jdbcType=VARCHAR},
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT,
+        </otherwise>
+      </choose>
+      <choose>
+        <when test="item.referenceMaterial != null">
+          #{item.referenceMaterial,jdbcType=VARCHAR}
+        </when>
+        <!--@ignoreSql-->
+        <otherwise>
+          DEFAULT
+        </otherwise>
+      </choose>
+      )
+    </foreach>
+  </insert>
+  <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.ChoosePhd" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.choose_phd
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      university_name,
+      ranking_data,
+      official_website,
+      recruitment_website,
+      priority,
+      country_region,
+      scholarship,
+      salary_amount,
+      salary_currency,
+      living_expenses_amount,
+      living_expenses_currency,
+      research_field,
+      application_requirements,
+      application_deadline,
+      drug_prohibition,
+      gun_control,
+      qs_rank,
+      usnews_rank,
+      education_duration,
+      application_difficulty,
+      reference_material,
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      #{universityName,jdbcType=VARCHAR},
+      #{rankingData,jdbcType=VARCHAR},
+      #{officialWebsite,jdbcType=VARCHAR},
+      #{recruitmentWebsite,jdbcType=VARCHAR},
+      #{priority,jdbcType=INTEGER},
+      #{countryRegion,jdbcType=VARCHAR},
+      #{scholarship,jdbcType=VARCHAR},
+      #{salaryAmount,jdbcType=DECIMAL},
+      #{salaryCurrency,jdbcType=VARCHAR},
+      #{livingExpensesAmount,jdbcType=DECIMAL},
+      #{livingExpensesCurrency,jdbcType=VARCHAR},
+      #{researchField,jdbcType=VARCHAR},
+      #{applicationRequirements,jdbcType=LONGVARCHAR},
+      #{applicationDeadline,jdbcType=TIMESTAMP},
+      #{drugProhibition,jdbcType=BOOLEAN},
+      #{gunControl,jdbcType=BOOLEAN},
+      #{qsRank,jdbcType=INTEGER},
+      #{usnewsRank,jdbcType=INTEGER},
+      #{educationDuration,jdbcType=VARCHAR},
+      #{applicationDifficulty,jdbcType=VARCHAR},
+      #{referenceMaterial,jdbcType=VARCHAR},
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=BIGINT},
+      </if>
+      university_name = #{universityName,jdbcType=VARCHAR},
+      ranking_data = #{rankingData,jdbcType=VARCHAR},
+      official_website = #{officialWebsite,jdbcType=VARCHAR},
+      recruitment_website = #{recruitmentWebsite,jdbcType=VARCHAR},
+      priority = #{priority,jdbcType=INTEGER},
+      country_region = #{countryRegion,jdbcType=VARCHAR},
+      scholarship = #{scholarship,jdbcType=VARCHAR},
+      salary_amount = #{salaryAmount,jdbcType=DECIMAL},
+      salary_currency = #{salaryCurrency,jdbcType=VARCHAR},
+      living_expenses_amount = #{livingExpensesAmount,jdbcType=DECIMAL},
+      living_expenses_currency = #{livingExpensesCurrency,jdbcType=VARCHAR},
+      research_field = #{researchField,jdbcType=VARCHAR},
+      application_requirements = #{applicationRequirements,jdbcType=LONGVARCHAR},
+      application_deadline = #{applicationDeadline,jdbcType=TIMESTAMP},
+      drug_prohibition = #{drugProhibition,jdbcType=BOOLEAN},
+      gun_control = #{gunControl,jdbcType=BOOLEAN},
+      qs_rank = #{qsRank,jdbcType=INTEGER},
+      usnews_rank = #{usnewsRank,jdbcType=INTEGER},
+      education_duration = #{educationDuration,jdbcType=VARCHAR},
+      application_difficulty = #{applicationDifficulty,jdbcType=VARCHAR},
+      reference_material = #{referenceMaterial,jdbcType=VARCHAR},
+    </trim>
+  </insert>
+  <insert id="insertOrUpdateSelective" keyColumn="id" keyProperty="id" parameterType="wo1261931780.chooseCollegeJava.entity.ChoosePhd" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into computer_rank.choose_phd
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="universityName != null">
+        university_name,
+      </if>
+      <if test="rankingData != null">
+        ranking_data,
+      </if>
+      <if test="officialWebsite != null">
+        official_website,
+      </if>
+      <if test="recruitmentWebsite != null">
+        recruitment_website,
+      </if>
+      <if test="priority != null">
+        priority,
+      </if>
+      <if test="countryRegion != null">
+        country_region,
+      </if>
+      <if test="scholarship != null">
+        scholarship,
+      </if>
+      <if test="salaryAmount != null">
+        salary_amount,
+      </if>
+      <if test="salaryCurrency != null">
+        salary_currency,
+      </if>
+      <if test="livingExpensesAmount != null">
+        living_expenses_amount,
+      </if>
+      <if test="livingExpensesCurrency != null">
+        living_expenses_currency,
+      </if>
+      <if test="researchField != null">
+        research_field,
+      </if>
+      <if test="applicationRequirements != null">
+        application_requirements,
+      </if>
+      <if test="applicationDeadline != null">
+        application_deadline,
+      </if>
+      <if test="drugProhibition != null">
+        drug_prohibition,
+      </if>
+      <if test="gunControl != null">
+        gun_control,
+      </if>
+      <if test="qsRank != null">
+        qs_rank,
+      </if>
+      <if test="usnewsRank != null">
+        usnews_rank,
+      </if>
+      <if test="educationDuration != null">
+        education_duration,
+      </if>
+      <if test="applicationDifficulty != null">
+        application_difficulty,
+      </if>
+      <if test="referenceMaterial != null">
+        reference_material,
+      </if>
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="universityName != null">
+        #{universityName,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingData != null">
+        #{rankingData,jdbcType=VARCHAR},
+      </if>
+      <if test="officialWebsite != null">
+        #{officialWebsite,jdbcType=VARCHAR},
+      </if>
+      <if test="recruitmentWebsite != null">
+        #{recruitmentWebsite,jdbcType=VARCHAR},
+      </if>
+      <if test="priority != null">
+        #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="countryRegion != null">
+        #{countryRegion,jdbcType=VARCHAR},
+      </if>
+      <if test="scholarship != null">
+        #{scholarship,jdbcType=VARCHAR},
+      </if>
+      <if test="salaryAmount != null">
+        #{salaryAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="salaryCurrency != null">
+        #{salaryCurrency,jdbcType=VARCHAR},
+      </if>
+      <if test="livingExpensesAmount != null">
+        #{livingExpensesAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="livingExpensesCurrency != null">
+        #{livingExpensesCurrency,jdbcType=VARCHAR},
+      </if>
+      <if test="researchField != null">
+        #{researchField,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationRequirements != null">
+        #{applicationRequirements,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="applicationDeadline != null">
+        #{applicationDeadline,jdbcType=TIMESTAMP},
+      </if>
+      <if test="drugProhibition != null">
+        #{drugProhibition,jdbcType=BOOLEAN},
+      </if>
+      <if test="gunControl != null">
+        #{gunControl,jdbcType=BOOLEAN},
+      </if>
+      <if test="qsRank != null">
+        #{qsRank,jdbcType=INTEGER},
+      </if>
+      <if test="usnewsRank != null">
+        #{usnewsRank,jdbcType=INTEGER},
+      </if>
+      <if test="educationDuration != null">
+        #{educationDuration,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationDifficulty != null">
+        #{applicationDifficulty,jdbcType=VARCHAR},
+      </if>
+      <if test="referenceMaterial != null">
+        #{referenceMaterial,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    on duplicate key update 
+    <trim suffixOverrides=",">
+      <if test="id != null">
+        id = #{id,jdbcType=BIGINT},
+      </if>
+      <if test="universityName != null">
+        university_name = #{universityName,jdbcType=VARCHAR},
+      </if>
+      <if test="rankingData != null">
+        ranking_data = #{rankingData,jdbcType=VARCHAR},
+      </if>
+      <if test="officialWebsite != null">
+        official_website = #{officialWebsite,jdbcType=VARCHAR},
+      </if>
+      <if test="recruitmentWebsite != null">
+        recruitment_website = #{recruitmentWebsite,jdbcType=VARCHAR},
+      </if>
+      <if test="priority != null">
+        priority = #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="countryRegion != null">
+        country_region = #{countryRegion,jdbcType=VARCHAR},
+      </if>
+      <if test="scholarship != null">
+        scholarship = #{scholarship,jdbcType=VARCHAR},
+      </if>
+      <if test="salaryAmount != null">
+        salary_amount = #{salaryAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="salaryCurrency != null">
+        salary_currency = #{salaryCurrency,jdbcType=VARCHAR},
+      </if>
+      <if test="livingExpensesAmount != null">
+        living_expenses_amount = #{livingExpensesAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="livingExpensesCurrency != null">
+        living_expenses_currency = #{livingExpensesCurrency,jdbcType=VARCHAR},
+      </if>
+      <if test="researchField != null">
+        research_field = #{researchField,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationRequirements != null">
+        application_requirements = #{applicationRequirements,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="applicationDeadline != null">
+        application_deadline = #{applicationDeadline,jdbcType=TIMESTAMP},
+      </if>
+      <if test="drugProhibition != null">
+        drug_prohibition = #{drugProhibition,jdbcType=BOOLEAN},
+      </if>
+      <if test="gunControl != null">
+        gun_control = #{gunControl,jdbcType=BOOLEAN},
+      </if>
+      <if test="qsRank != null">
+        qs_rank = #{qsRank,jdbcType=INTEGER},
+      </if>
+      <if test="usnewsRank != null">
+        usnews_rank = #{usnewsRank,jdbcType=INTEGER},
+      </if>
+      <if test="educationDuration != null">
+        education_duration = #{educationDuration,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationDifficulty != null">
+        application_difficulty = #{applicationDifficulty,jdbcType=VARCHAR},
+      </if>
+      <if test="referenceMaterial != null">
+        reference_material = #{referenceMaterial,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>
