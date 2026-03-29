@@ -1,14 +1,16 @@
-# 🎓 JOSP-ChoosePhd - 博士选择系统后端
+# 🎓 JOSP-ChoosePhdJava - 大学排名查询系统后端
 
 ![Java](https://img.shields.io/badge/Java-17+-orange?logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?logo=springboot)
-![MyBatis](https://img.shields.io/badge/MyBatis-3.5+-red?logo=mybatis)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen?logo=springboot)
+![MyBatis-Plus](https://img.shields.io/badge/MyBatis--Plus-3.5.7-red?logo=mybatis)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue?logo=mysql)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-blue)
 
 ## 📖 项目简介
 
-JOSP-ChoosePhd是一个博士导师选择系统的后端服务,帮助学生找到合适的博士导师,提供导师信息管理、学生申请、匹配推荐等功能。
+JOSP-ChoosePhdJava是一个大学排名查询系统的后端服务,提供QS、US News等世界大学排名数据的查询、筛选和可视化功能。支持按国家、大洲、排名等条件查询大学信息,为考研/留学择校提供数据支持。
+
+**关联前端项目**: [JOSP-choosePhdVue3](../JOSP-choosePhdVue3)
 
 ## 🏗️ 系统架构
 
@@ -140,180 +142,169 @@ JOSP-choosePhdJava/
 
 ## 🔑 核心功能
 
-### 导师管理
+### 大学排名查询
+
+- **QS排名查询**: 支持QS世界大学排名查询和筛选
+- **US News排名查询**: 支持US News世界大学排名查询
+- **CS专业排名**: 支持计算机科学专业单独排名查询
+- **多条件筛选**: 按国家、大洲、排名范围等条件筛选
+- **ECharts可视化**: 提供排名数据可视化接口
 
 ```java
 @RestController
-@RequestMapping("/api/teachers")
-public class TeacherController {
+@RequestMapping("/query")
+public class QueryAllUniversityController {
     
-    @Autowired
-    private TeacherService teacherService;
-    
-    @PostMapping
-    public Result<Teacher> createTeacher(@RequestBody TeacherDTO teacherDTO) {
-        return Result.success(teacherService.createTeacher(teacherDTO));
-    }
-    
-    @GetMapping("/{id}")
-    public Result<TeacherVO> getTeacherDetail(@PathVariable Long id) {
-        return Result.success(teacherService.getTeacherDetail(id));
-    }
-    
-    @GetMapping("/search")
-    public Result<Page<TeacherVO>> searchTeachers(
-        @RequestParam String keyword,
-        @RequestParam(required = false) String researchField,
-        @RequestParam(defaultValue = "1") Integer page,
-        @RequestParam(defaultValue = "10") Integer size
+    @GetMapping("/queryAll")
+    @ApiOperation("查询大学汇总排名")
+    public Page<UniversityRankingsAll> queryAllUniversityRank(
+            @RequestParam Integer page,
+            @RequestParam Integer limit,
+            @RequestParam(required = false) String universityNameChinese,
+            @RequestParam(required = false) String universityTagsState,
+            @RequestParam(required = false) String universityTags,
+            @RequestParam(required = false, defaultValue = "100") Integer currentRank
     ) {
-        return Result.success(teacherService.searchTeachers(keyword, researchField, page, size));
+        return allQueryServiceImpl.queryAllData(page, limit,
+                universityNameChinese, universityTagsState, universityTags, currentRank);
+    }
+    
+    @GetMapping("/queryAllEcharts")
+    @ApiOperation("查询echarts大学汇总排名")
+    public ChartData queryAllUniversityRank(
+            @RequestParam(required = false) String universityNameChinese,
+            @RequestParam(required = false) String universityTagsState,
+            @RequestParam(required = false) String universityTags,
+            @RequestParam(required = false, defaultValue = "10") Integer currentRank,
+            @RequestParam(required = false) String rankVariant
+    ) {
+        return allQueryServiceImpl.queryAllEchartsData(
+                universityNameChinese, universityTagsState, universityTags, currentRank, rankVariant);
     }
 }
 ```
 
-### 学生申请
+### 用户登录认证
 
 ```java
-@Service
-public class ApplicationService {
+@RestController
+@RequestMapping("/vue-element-admin/user")
+public class LoginController {
     
-    @Autowired
-    private ApplicationMapper applicationMapper;
-    
-    @Autowired
-    private NotificationService notificationService;
-    
-    @Transactional
-    public Application submitApplication(ApplicationDTO dto) {
-        // 创建申请
-        Application application = new Application();
-        BeanUtils.copyProperties(dto, application);
-        application.setStatus(ApplicationStatus.PENDING);
-        applicationMapper.insert(application);
-        
-        // 通知导师
-        notificationService.notifyTeacher(application.getTeacherId(), 
-            "收到新的学生申请");
-        
-        return application;
-    }
-    
-    public void updateApplicationStatus(Long id, ApplicationStatus status) {
-        Application application = applicationMapper.selectById(id);
-        application.setStatus(status);
-        applicationMapper.updateById(application);
-        
-        // 通知学生
-        notificationService.notifyStudent(application.getStudentId(),
-            "您的申请状态已更新为: " + status.getDesc());
-    }
-}
-```
-
-### 智能推荐
-
-```java
-@Service
-public class RecommendService {
-    
-    @Autowired
-    private MatchEngine matchEngine;
-    
-    public List<TeacherRecommendVO> recommendTeachers(Long studentId) {
-        // 获取学生信息
-        Student student = studentService.getById(studentId);
-        
-        // 计算匹配度
-        List<Teacher> teachers = teacherService.getAll();
-        List<TeacherRecommendVO> recommendations = new ArrayList<>();
-        
-        for (Teacher teacher : teachers) {
-            double score = matchEngine.calculateMatchScore(student, teacher);
-            if (score > 0.6) { // 匹配度阈值
-                TeacherRecommendVO vo = new TeacherRecommendVO();
-                BeanUtils.copyProperties(teacher, vo);
-                vo.setMatchScore(score);
-                recommendations.add(vo);
-            }
+    @PostMapping("/login")
+    public ShowResult<LoginUser> userLogin(@RequestBody LoginUser loginUser) {
+        // MD5密码加密验证
+        String passwordMd5DigestAsHex = DigestUtils.md5DigestAsHex(loginUser.getPassword().getBytes());
+        LambdaQueryWrapper<LoginUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(LoginUser::getUsername, loginUser.getUsername())
+                         .eq(LoginUser::getPassword, passwordMd5DigestAsHex);
+        LoginUser userServiceOne = loginUserService.getOne(lambdaQueryWrapper);
+        if (StrUtil.isEmptyIfStr(userServiceOne)) {
+            return ShowResult.sendError("账号或密码错误");
         }
-        
-        // 按匹配度排序
-        recommendations.sort((a, b) -> Double.compare(b.getMatchScore(), a.getMatchScore()));
-        
-        return recommendations;
+        return ShowResult.sendSuccess(userServiceOne);
+    }
+    
+    @GetMapping("/info")
+    public ShowResult<AccountRole> userInfo() {
+        // 返回用户角色信息
+        AccountRole accountRole = new AccountRole();
+        accountRole.setRoles(Arrays.asList("admin"));
+        return ShowResult.sendSuccess(accountRole);
     }
 }
 ```
 
-### 匹配引擎
+## 📊 数据库表结构
 
-```java
-@Component
-public class MatchEngine {
-    
-    public double calculateMatchScore(Student student, Teacher teacher) {
-        double score = 0.0;
-        
-        // 研究方向匹配度 (40%)
-        score += calculateFieldMatch(student.getResearchField(), 
-                                     teacher.getResearchField()) * 0.4;
-        
-        // 学术背景匹配度 (30%)
-        score += calculateBackgroundMatch(student, teacher) * 0.3;
-        
-        // 地理位置 (20%)
-        score += calculateLocationMatch(student.getLocation(), 
-                                       teacher.getLocation()) * 0.2;
-        
-        // 其他因素 (10%)
-        score += calculateOtherFactors(student, teacher) * 0.1;
-        
-        return score;
-    }
-    
-    private double calculateFieldMatch(String studentField, String teacherField) {
-        // 使用文本相似度算法计算研究方向匹配度
-        return SimilarityUtils.cosineSimilarity(studentField, teacherField);
-    }
-}
+### 1. login_user - 用户登录表
+```sql
+CREATE TABLE login_user (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    username VARCHAR(50) COMMENT '用户名',
+    password VARCHAR(100) COMMENT '密码(MD5加密)',
+    create_time DATETIME COMMENT '创建时间'
+) COMMENT='用户登录表';
 ```
 
-## 📊 API文档
+### 2. university_rankings_all - 大学排名汇总表
+```sql
+CREATE TABLE university_rankings_all (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(200) COMMENT '大学名称(中文)',
+    university_name_english VARCHAR(200) COMMENT '大学名称(英文)',
+    university_tags VARCHAR(100) COMMENT '大学标签(国家)',
+    university_tags_state VARCHAR(100) COMMENT '大学标签(大洲)',
+    ranking_year INT COMMENT '排名年份',
+    current_rank_integer_qs INT COMMENT 'QS当前排名',
+    current_rank_integer_qs_cs INT COMMENT 'QS计算机排名',
+    current_rank_integer_usnews INT COMMENT 'US News当前排名',
+    current_rank_integer_usnews_cs INT COMMENT 'US News计算机排名'
+) COMMENT='大学排名数据汇总表';
+```
 
-### 导师管理API
+### 3. choose_phd - 院校信息表
+```sql
+CREATE TABLE choose_phd (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    university_name VARCHAR(200) COMMENT '大学名称',
+    ranking_data TEXT COMMENT '大学排名相关数据',
+    official_website VARCHAR(500) COMMENT '院校官网链接',
+    recruitment_website VARCHAR(500) COMMENT '社招网站链接',
+    priority INT COMMENT '优先级',
+    country_region VARCHAR(100) COMMENT '国家/地区',
+    scholarship TEXT COMMENT '奖学金信息',
+    salary_amount DECIMAL(10,2) COMMENT '薪资金额',
+    salary_currency VARCHAR(20) COMMENT '薪资货币类型',
+    living_expenses_amount DECIMAL(10,2) COMMENT '生活费用',
+    living_expenses_currency VARCHAR(20) COMMENT '生活费用货币类型',
+    research_field TEXT COMMENT '研究方向',
+    application_requirements TEXT COMMENT '申请要求',
+    application_deadline DATE COMMENT '招生截止时间',
+    drug_prohibition BOOLEAN COMMENT '是否禁毒',
+    gun_control BOOLEAN COMMENT '是否控枪',
+    qs_rank INT COMMENT 'QS排名',
+    usnews_rank INT COMMENT 'US News排名',
+    education_duration VARCHAR(50) COMMENT '学制',
+    application_difficulty VARCHAR(50) COMMENT '申请难度',
+    reference_material TEXT COMMENT '参考资料'
+) COMMENT='院校详细信息表';
+```
 
-| 接口 | 方法 | 路径 | 说明 |
-|------|------|------|------|
-| 创建导师 | POST | /api/teachers | 创建导师信息 |
-| 获取导师 | GET | /api/teachers/{id} | 获取导师详情 |
-| 更新导师 | PUT | /api/teachers/{id} | 更新导师信息 |
-| 删除导师 | DELETE | /api/teachers/{id} | 删除导师 |
-| 搜索导师 | GET | /api/teachers/search | 搜索导师列表 |
+### 4. university_rankings_qs - QS排名表
+```sql
+CREATE TABLE university_rankings_qs (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(200) COMMENT '大学名称(中文)',
+    university_name_english VARCHAR(200) COMMENT '大学名称(英文)',
+    university_tags VARCHAR(100) COMMENT '国家',
+    university_tags_state VARCHAR(100) COMMENT '大洲',
+    ranking_year INT COMMENT '排名年份',
+    current_rank_integer INT COMMENT '当前排名'
+) COMMENT='QS世界大学排名表';
+```
 
-### 申请管理API
-
-| 接口 | 方法 | 路径 | 说明 |
-|------|------|------|------|
-| 提交申请 | POST | /api/applications | 提交申请 |
-| 查看申请 | GET | /api/applications/{id} | 查看申请详情 |
-| 更新状态 | PUT | /api/applications/{id}/status | 更新申请状态 |
-| 我的申请 | GET | /api/applications/my | 查看我的申请 |
-
-### 推荐系统API
-
-| 接口 | 方法 | 路径 | 说明 |
-|------|------|------|------|
-| 推荐导师 | GET | /api/recommend/teachers | 获取推荐导师列表 |
-| 计算匹配度 | POST | /api/recommend/match | 计算师生匹配度 |
+### 5. university_rankings_usnews - US News排名表
+```sql
+CREATE TABLE university_rankings_usnews (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(200) COMMENT '大学名称(中文)',
+    university_name_english VARCHAR(200) COMMENT '大学名称(英文)',
+    university_tags VARCHAR(100) COMMENT '国家',
+    university_tags_state VARCHAR(100) COMMENT '大洲',
+    ranking_year INT COMMENT '排名年份',
+    current_rank_integer INT COMMENT '当前排名'
+) COMMENT='US News世界大学排名表';
+```
 
 ## 🎯 核心特性
 
-- **智能匹配**: 基于多维度因素的导师推荐算法
-- **实时通知**: 申请状态变更实时推送
-- **数据可视化**: 导师信息和学生申请数据可视化展示
-- **权限控制**: 学生、导师、管理员多角色权限管理
-- **全文搜索**: 支持导师信息的全文检索
+- **多源排名数据**: 整合QS、US News等多个权威排名数据源
+- **专业排名**: 支持计算机科学等专业单独排名查询
+- **多维筛选**: 按国家、大洲、排名范围等条件灵活筛选
+- **可视化接口**: 提供ECharts图表数据接口,支持数据可视化展示
+- **分页查询**: 支持大数据量分页查询,性能优秀
+- **Knife4j文档**: 集成Knife4j接口文档,方便API测试
 
 ## 📝 更新日志
 
@@ -336,7 +327,7 @@ public class MatchEngine {
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+本项目采用 AGPL-3.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
 
 ## 📮 联系方式
 
