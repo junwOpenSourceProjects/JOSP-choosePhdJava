@@ -1,76 +1,37 @@
 # 🎓 JOSP-ChoosePhdJava - 大学排名查询系统后端
 
-![Java](https://img.shields.io/badge/Java-17+-orange?logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen?logo=springboot)
-![MyBatis-Plus](https://img.shields.io/badge/MyBatis--Plus-3.5.7-red?logo=mybatis)
+![Java](https://img.shields.io/badge/Java-25-orange?logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-brightgreen?logo=springboot)
+![MyBatis-Plus](https://img.shields.io/badge/MyBatis--Plus-3.5.16-red?logo=mybatis)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue?logo=mysql)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-blue)
 
 ## 📖 项目简介
 
-JOSP-ChoosePhdJava是一个大学排名查询系统的后端服务,提供QS、US News等世界大学排名数据的查询、筛选和可视化功能。支持按国家、大洲、排名等条件查询大学信息,为考研/留学择校提供数据支持。
+JOSP-ChoosePhdJava 是一个大学排名查询系统的后端服务，提供 QS、US News 等世界大学排名数据的查询、筛选和可视化功能。支持按国家、大洲、排名等条件查询大学信息，为考研/留学择校提供数据支持。
 
 **关联前端项目**: [JOSP-choosePhdVue3](../JOSP-choosePhdVue3)
 
-## 🏗️ 系统架构
+## 🏗️ 技术栈
 
-```mermaid
-graph TB
-    subgraph "客户端层"
-        StudentClient[学生客户端]
-        TeacherClient[导师客户端]
-        AdminClient[管理客户端]
-    end
-    
-    subgraph "API层"
-        StudentAPI[学生API]
-        TeacherAPI[导师API]
-        ApplicationAPI[申请API]
-        RecommendAPI[推荐API]
-    end
-    
-    subgraph "业务层"
-        StudentService[学生服务]
-        TeacherService[导师服务]
-        ApplicationService[申请服务]
-        RecommendService[推荐服务]
-        MatchEngine[匹配引擎]
-    end
-    
-    subgraph "数据层"
-        StudentMapper[学生Mapper]
-        TeacherMapper[导师Mapper]
-        ApplicationMapper[申请Mapper]
-        MySQL[(MySQL数据库)]
-        Redis[Redis缓存]
-    end
-    
-    StudentClient --> StudentAPI
-    TeacherClient --> TeacherAPI
-    AdminClient --> ApplicationAPI
-    
-    StudentAPI --> StudentService
-    TeacherAPI --> TeacherService
-    ApplicationAPI --> ApplicationService
-    RecommendAPI --> RecommendService
-    
-    StudentService --> StudentMapper
-    TeacherService --> TeacherMapper
-    ApplicationService --> ApplicationMapper
-    
-    RecommendService --> MatchEngine
-    MatchEngine --> Redis
-    
-    StudentMapper --> MySQL
-    TeacherMapper --> MySQL
-    ApplicationMapper --> MySQL
-```
+| 类别 | 技术 | 版本 |
+|------|------|------|
+| 语言 | Java | 25 |
+| 框架 | Spring Boot | 3.4.4 |
+| ORM | MyBatis-Plus | 3.5.16 |
+| 数据库 | MySQL | 8.0+ |
+| 缓存 | Redis | 6.0+ |
+| API文档 | Knife4j | 3.0.3 |
+| JSON处理 | fastjson2 | 2.0.61 |
+| 工具库 | Hutool | 5.8.44 |
+| 分页插件 | PageHelper | 6.1.0 |
+| 多数据源 | dynamic-datasource | 4.3.1 |
 
 ## 🚀 快速开始
 
 ### 环境要求
 
-- JDK 17+
+- JDK 25+
 - Maven 3.6+
 - MySQL 8.0+
 - Redis 6.0+
@@ -88,134 +49,22 @@ cd JOSP-choosePhdJava
 # 修改 src/main/resources/application.yml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/choose_phd?useUnicode=true&characterEncoding=utf-8
-    username: root
+    url: jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC
+    username: your_username
     password: your_password
 
-# 4. 初始化数据库
-mysql -u root -p < db/schema.sql
-
-# 5. 编译项目
+# 4. 安装依赖
 mvn clean install
 
-# 6. 运行项目
+# 5. 启动项目
 mvn spring-boot:run
 ```
 
-## 🛠️ 技术栈
+### 接口文档
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Spring Boot | 3.x | 应用框架 |
-| MyBatis | 3.5+ | ORM框架 |
-| MySQL | 8.0+ | 关系数据库 |
-| Redis | 6.0+ | 缓存数据库 |
-| Spring Security | 3.x | 安全框架 |
-| JWT | - | 令牌认证 |
-| Maven | 3.6+ | 项目管理工具 |
+启动项目后访问 Knife4j 文档地址：`http://localhost:8080/doc.html`
 
-## 📁 项目结构
-
-```
-JOSP-choosePhdJava/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/josp/choosephd/
-│   │   │       ├── controller/      # 控制器层
-│   │   │       ├── service/         # 业务逻辑层
-│   │   │       ├── mapper/          # 数据访问层
-│   │   │       ├── entity/          # 实体类
-│   │   │       ├── dto/             # 数据传输对象
-│   │   │       ├── vo/              # 视图对象
-│   │   │       ├── config/          # 配置类
-│   │   │       ├── recommend/       # 推荐引擎
-│   │   │       └── utils/           # 工具类
-│   │   └── resources/
-│   │       ├── mapper/              # MyBatis映射文件
-│   │       ├── application.yml      # 配置文件
-│   │       └── db/                  # 数据库脚本
-│   └── test/                        # 测试代码
-├── pom.xml                          # Maven配置
-└── README.md                        # 项目说明
-```
-
-## 🔑 核心功能
-
-### 大学排名查询
-
-- **QS排名查询**: 支持QS世界大学排名查询和筛选
-- **US News排名查询**: 支持US News世界大学排名查询
-- **CS专业排名**: 支持计算机科学专业单独排名查询
-- **多条件筛选**: 按国家、大洲、排名范围等条件筛选
-- **ECharts可视化**: 提供排名数据可视化接口
-
-```java
-@RestController
-@RequestMapping("/query")
-public class QueryAllUniversityController {
-    
-    @GetMapping("/queryAll")
-    @ApiOperation("查询大学汇总排名")
-    public Page<UniversityRankingsAll> queryAllUniversityRank(
-            @RequestParam Integer page,
-            @RequestParam Integer limit,
-            @RequestParam(required = false) String universityNameChinese,
-            @RequestParam(required = false) String universityTagsState,
-            @RequestParam(required = false) String universityTags,
-            @RequestParam(required = false, defaultValue = "100") Integer currentRank
-    ) {
-        return allQueryServiceImpl.queryAllData(page, limit,
-                universityNameChinese, universityTagsState, universityTags, currentRank);
-    }
-    
-    @GetMapping("/queryAllEcharts")
-    @ApiOperation("查询echarts大学汇总排名")
-    public ChartData queryAllUniversityRank(
-            @RequestParam(required = false) String universityNameChinese,
-            @RequestParam(required = false) String universityTagsState,
-            @RequestParam(required = false) String universityTags,
-            @RequestParam(required = false, defaultValue = "10") Integer currentRank,
-            @RequestParam(required = false) String rankVariant
-    ) {
-        return allQueryServiceImpl.queryAllEchartsData(
-                universityNameChinese, universityTagsState, universityTags, currentRank, rankVariant);
-    }
-}
-```
-
-### 用户登录认证
-
-```java
-@RestController
-@RequestMapping("/vue-element-admin/user")
-public class LoginController {
-    
-    @PostMapping("/login")
-    public ShowResult<LoginUser> userLogin(@RequestBody LoginUser loginUser) {
-        // MD5密码加密验证
-        String passwordMd5DigestAsHex = DigestUtils.md5DigestAsHex(loginUser.getPassword().getBytes());
-        LambdaQueryWrapper<LoginUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(LoginUser::getUsername, loginUser.getUsername())
-                         .eq(LoginUser::getPassword, passwordMd5DigestAsHex);
-        LoginUser userServiceOne = loginUserService.getOne(lambdaQueryWrapper);
-        if (StrUtil.isEmptyIfStr(userServiceOne)) {
-            return ShowResult.sendError("账号或密码错误");
-        }
-        return ShowResult.sendSuccess(userServiceOne);
-    }
-    
-    @GetMapping("/info")
-    public ShowResult<AccountRole> userInfo() {
-        // 返回用户角色信息
-        AccountRole accountRole = new AccountRole();
-        accountRole.setRoles(Arrays.asList("admin"));
-        return ShowResult.sendSuccess(accountRole);
-    }
-}
-```
-
-## 📊 数据库表结构
+## 🗄️ 数据库表结构
 
 ### 1. login_user - 用户登录表
 ```sql
@@ -297,33 +146,73 @@ CREATE TABLE university_rankings_usnews (
 ) COMMENT='US News世界大学排名表';
 ```
 
+## 📡 主要 API 接口
+
+### 用户认证
+
+| 接口 | 方法 | 描述 |
+|------|------|------|
+| `/vue-element-admin/user/login` | POST | 用户登录（MD5密码验证） |
+| `/vue-element-admin/user/info` | GET | 获取用户角色信息 |
+
+### 大学排名查询
+
+| 接口 | 方法 | 描述 |
+|------|------|------|
+| `/query/queryAll` | GET | 分页查询大学汇总排名 |
+| `/query/queryAllEcharts` | GET | 查询ECharts图表数据 |
+
 ## 🎯 核心特性
 
 - **多源排名数据**: 整合QS、US News等多个权威排名数据源
 - **专业排名**: 支持计算机科学等专业单独排名查询
 - **多维筛选**: 按国家、大洲、排名范围等条件灵活筛选
-- **可视化接口**: 提供ECharts图表数据接口,支持数据可视化展示
-- **分页查询**: 支持大数据量分页查询,性能优秀
-- **Knife4j文档**: 集成Knife4j接口文档,方便API测试
+- **可视化接口**: 提供ECharts图表数据接口，支持数据可视化展示
+- **分页查询**: 支持大数据量分页查询，性能优秀
+- **Knife4j文档**: 集成Knife4j接口文档，方便API测试
+- **多数据源**: 支持动态多数据源配置
 
-## 📝 更新日志
+## 📁 项目结构
 
-### v1.0.0 (2024-01-01)
-- ✨ 初始版本发布
-- ✨ 实现导师信息管理
-- ✨ 实现学生申请流程
-- ✨ 实现智能推荐算法
-- ✨ 实现实时通知功能
+```
+JOSP-choosePhdJava/
+├── src/main/java/wo1261931780/choosecollegejava/
+│   ├── controller/          # 控制器层
+│   ├── service/             # 服务层
+│   ├── mapper/              # 数据访问层
+│   ├── entity/              # 实体类
+│   ├── common/              # 通用类
+│   └── ChooseCollegeJavaApplication.java
+├── src/main/resources/
+│   ├── application.yml       # 应用配置
+│   └── static/              # 静态资源
+├── pom.xml
+├── README.md
+└── SPEC.md
+```
+
+## 📝 提交规范
+
+```
+feat: 新功能
+fix: 修复问题
+docs: 文档更新
+style: 代码格式调整
+refactor: 重构
+perf: 性能优化
+test: 测试相关
+chore: 构建/工具相关
+```
 
 ## 👥 贡献指南
 
-欢迎贡献代码!请遵循以下步骤:
+欢迎贡献代码！请遵循以下步骤：
 
-1. Fork本仓库
+1. Fork 本仓库
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 提交Pull Request
+5. 提交 Pull Request
 
 ## 📄 许可证
 
@@ -335,4 +224,4 @@ CREATE TABLE university_rankings_usnews (
 
 ---
 
-⭐ 如果这个项目对你有帮助,欢迎Star支持!
+⭐ 如果这个项目对你有帮助，欢迎 Star 支持！
