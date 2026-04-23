@@ -72,3 +72,9 @@ replay_pid*
 application-local.yml
 application-dev.yml
 *.local
+
+# Compiled class files
+*.class
+
+# Maven local repository
+.m2/
