@@ -215,8 +215,8 @@
 		<!-- mybatis-plus 多数据源 -->
 		<dependency>
 			<groupId>com.baomidou</groupId>
-			<artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-			<version>4.3.1</version>
+			<artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
+			<version>4.5.0</version>
 		</dependency>
 
 		<!--mybatis-plus的代码生成器-->
@@ -260,8 +260,8 @@
 		<!--这里需要使用swagger技术，实际上是为了生成接口文档-->
 		<dependency>
 			<groupId>com.github.xiaoymin</groupId>
-			<artifactId>knife4j-spring-boot-starter</artifactId>
-			<version>3.0.3</version>
+			<artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+			<version>4.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
