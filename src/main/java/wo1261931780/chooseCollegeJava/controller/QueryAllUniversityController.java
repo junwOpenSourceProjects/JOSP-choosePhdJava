@@ -3,7 +3,7 @@ package wo1261931780.chooseCollegeJava.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +52,7 @@ public class QueryAllUniversityController {
 	}
 
 	@GetMapping("/queryQs")
-	@ApiOperation("查询大学排名数据")
+	@Operation(summary="查询大学排名数据")
 	public Page<UniversityAllDTO> queryUniversityRank(
 			@RequestParam Integer page,
 			@RequestParam Integer limit,
@@ -66,7 +66,7 @@ public class QueryAllUniversityController {
 	}
 
 	@GetMapping("/queryAll")
-	@ApiOperation("查询大学汇总排名")
+	@Operation(summary="查询大学汇总排名")
 	public Page<UniversityRankingsAll> queryAllUniversityRank(
 			@RequestParam Integer page,
 			@RequestParam Integer limit,
@@ -81,7 +81,7 @@ public class QueryAllUniversityController {
 	}
 
 	@GetMapping("/queryAllEcharts")
-	@ApiOperation("查询echarts大学汇总排名")
+	@Operation(summary="查询echarts大学汇总排名")
 	public ChartData queryAllUniversityRank(
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
@@ -94,13 +94,13 @@ public class QueryAllUniversityController {
 	}
 
 	@GetMapping("/updateEchartsData")
-	@ApiOperation("更新echarts对象表")
+	@Operation(summary="更新echarts对象表")
 	public ChartData queryAllUniversityRank2(
 	) {
 		return allQueryServiceImpl.updateEchartsData();
 	}
 	@GetMapping("/queryPartEcharts")
-	@ApiOperation("条件查询echarts大学汇总排名")
+	@Operation(summary="条件查询echarts大学汇总排名")
 	public EchartsDTO queryPartEcharts(
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
