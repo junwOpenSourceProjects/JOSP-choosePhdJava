@@ -191,6 +191,54 @@ JOSP-choosePhdJava/
 └── SPEC.md
 ```
 
+## 系统架构图
+
+```mermaid
+flowchart TB
+    subgraph Frontend["前端展示层"]
+        Vue["Vue3 + Element Plus<br/>大学排名展示"]
+    end
+
+    subgraph API["API 网关层"]
+        Knife4j["Knife4j API 文档"]
+    end
+
+    subgraph Controller["控制器层"]
+        QueryC["QueryController<br/>排名查询"]
+        UserC["LoginController<br/>用户认证"]
+    end
+
+    subgraph Service["业务逻辑层"]
+        RankingS["RankingService<br/>排名服务"]
+        UserS["LoginUserService<br/>用户服务"]
+        CacheS["CacheService<br/>缓存服务"]
+    end
+
+    subgraph Data["数据访问层"]
+        MP["MyBatis-Plus<br/>ORM 框架"]
+        PageHelper["PageHelper<br/>分页插件"]
+        Redis["Redis<br/>缓存支持"]
+    end
+
+    subgraph Database["数据存储层"]
+        MySQL[(MySQL 8.0+<br/>大学排名数据)]
+    end
+
+    Frontend -->|"HTTP REST"| Controller
+    Controller --> Service
+    Service --> MP
+    Service --> Redis
+    MP --> MySQL
+    Redis -->|"缓存加速"| MySQL
+
+    style Frontend fill:#e3f2fd,stroke:#1565c0
+    style API fill:#fff3e0,stroke:#f57c00
+    style Controller fill:#f3e5f5,stroke:#7b1fa2
+    style Service fill:#e8f5e9,stroke:#388e3c
+    style Data fill:#fce4ec,stroke:#c2185b
+    style Database fill:#e0f7fa,stroke:#00838f
+```
+
 ## 📝 提交规范
 
 ```
