@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import wo1261931780.chooseCollegeJava.dto.EchartsDTO;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
@@ -19,16 +21,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.service
- *
- * @author liujiajun_junw
- * @Date 2024-10-17-41  星期三
- * @Description
+ * AllQuery业务实现类
  */
 @Service
 public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper, UniversityRankingsQs> implements AllQueryService {
@@ -71,9 +71,11 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 	@Autowired
 	private UniversityRankingsEchartsMapper echartsMapper;
 	private final ObjectMapper objectMapper;
-
-
+	/**
+	 * 分页查询大学排名
+	 */
 	@Override
+	@Cacheable(value = "queryUniversityRank")
 	public Page<UniversityAllDTO> queryUniversityRank(
 			Integer page, Integer limit,
 			String rankVariant,
@@ -121,8 +123,11 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		dtoPage.setTotal(qsPage.getTotal());
 		return dtoPage;
 	}
-
+	/**
+	 * 分页查询大学汇总数据
+	 */
 	@Override
+	@Cacheable(value = "queryAllData")
 	public Page<UniversityRankingsAll> queryAllData(
 			Integer page, Integer limit,
 			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank) {
@@ -150,67 +155,103 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		// dtoPage.setTotal(rankingsAllList.size());
 		return allService.page(dtoPage, lambdaQueryWrapper);
 	}
-
+	/**
+	 * 查询 ECharts 排名数据
+	 */
 	@Override
+	@Cacheable(value = "queryAllEchartsData")
 	public ChartData queryAllEchartsData(
 			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank, String rankVariant) {
 		ChartData chartData = getOneChartData();
+		String variant = rankVariant == null ? "qs" : rankVariant.toLowerCase();
 		List<Series> seriesList = chartData.getSeries();
+		if (seriesList.isEmpty()) {
+			return chartData;
+		}
+
+		// 批量查询所有学校年份数据，避免 N+1
+		List<String> universityNames = seriesList.stream()
+				.map(Series::getName)
+				.toList();
+		LambdaQueryWrapper<UniversityRankingsAll> batchWrapper = new LambdaQueryWrapper<>();
+		batchWrapper.in(UniversityRankingsAll::getUniversityNameChinese, universityNames)
+				.orderByAsc(UniversityRankingsAll::getUniversityNameChinese)
+				.orderByAsc(UniversityRankingsAll::getRankingYear);
+		Map<String, List<UniversityRankingsAll>> grouped = allService.list(batchWrapper).stream()
+				.collect(Collectors.groupingBy(UniversityRankingsAll::getUniversityNameChinese));
+
 		seriesList.forEach(series -> {
-			LambdaQueryWrapper<UniversityRankingsAll> lambdaQueryWrapper = new LambdaQueryWrapper<>();
 			List<Double> seriesData = series.getData();
-			// 遍历所有系列，根据名称去查询qs排名，把数据一个一个对照set进去
-			lambdaQueryWrapper.eq(UniversityRankingsAll::getUniversityNameChinese, series.getName());
-			// 按照排名年份asc排序
-			lambdaQueryWrapper.orderByAsc(UniversityRankingsAll::getRankingYear);
-			List<UniversityRankingsAll> oneList = allService.list(lambdaQueryWrapper);// 获取该学校的所有年份数据
-			switch (rankVariant.toLowerCase()) {
-				// case "qs":
-				// 	break;
+			List<UniversityRankingsAll> oneList = grouped.getOrDefault(series.getName(), Collections.emptyList());
+			switch (variant) {
 				case "usnews":
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnews())));// 把usnews排名添加进去
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnews())));
 					break;
 				case "qs_cs":
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQsCs())));// 把qs+cs排名添加进去
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQsCs())));
 					break;
 				case "usnews_cs":
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnewsCs())));// 把usnews+cs排名添加进去
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnewsCs())));
 					break;
 				default:
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQs())));// 把qs排名添加进去
+					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQs())));
 			}
 		});
 		return chartData;
 	}
-
+	/**
+	 * 更新 ECharts 数据表并返回图表数据
+	 */
 	@Override
+	@CacheEvict(value = {"queryUniversityRank", "queryAllData", "queryAllEchartsData"}, allEntries = true)
 	public ChartData updateEchartsData() {
-		ChartData chartData = queryAllEchartsData(null, null, null, null, "qs");
-		// ChartData chartData = queryAllEchartsData(null, null, null, null, "qs_cs");
-		// ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews");
-		// ChartData chartData = queryAllEchartsData(null, null, null, null, "usnews_cs");
-		chartData.getSeries().forEach(series -> {
+		ChartData qsChart = queryAllEchartsData(null, null, null, null, "qs");
+		ChartData qsCsChart = queryAllEchartsData(null, null, null, null, "qs_cs");
+		ChartData usnewsChart = queryAllEchartsData(null, null, null, null, "usnews");
+		ChartData usnewsCsChart = queryAllEchartsData(null, null, null, null, "usnews_cs");
+
+		Map<String, String> qsMap = toDataMap(qsChart);
+		Map<String, String> qsCsMap = toDataMap(qsCsChart);
+		Map<String, String> usnewsMap = toDataMap(usnewsChart);
+		Map<String, String> usnewsCsMap = toDataMap(usnewsCsChart);
+
+		qsChart.getSeries().forEach(series -> {
+			String name = series.getName();
 			LambdaQueryWrapper<UniversityRankingsEcharts> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, series.getName());
+			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, name);
 			UniversityRankingsEcharts serviceOne = echartsService.getOne(lambdaQueryWrapper);
 			if (serviceOne == null) {
 				UniversityRankingsEcharts rankingsEcharts = new UniversityRankingsEcharts();
-				rankingsEcharts.setUniversityNameChinese(series.getName());
-				rankingsEcharts.setRankingQs(series.getData().toString());
-				// rankingsEcharts.setRankingQsCs(series.getData().toString());
-				// rankingsEcharts.setRankingUsnews(series.getData().toString());
-				// rankingsEcharts.setRankingUsnewsCs(series.getData().toString());
+				rankingsEcharts.setUniversityNameChinese(name);
+				rankingsEcharts.setRankingQs(qsMap.getOrDefault(name, "[]"));
+				rankingsEcharts.setRankingQsCs(qsCsMap.getOrDefault(name, "[]"));
+				rankingsEcharts.setRankingUsnews(usnewsMap.getOrDefault(name, "[]"));
+				rankingsEcharts.setRankingUsnewsCs(usnewsCsMap.getOrDefault(name, "[]"));
 				echartsService.save(rankingsEcharts);
 			} else {
-				serviceOne.setRankingQs(series.getData().toString());
-				// serviceOne.setRankingQsCs(series.getData().toString());
-				// serviceOne.setRankingUsnews(series.getData().toString());
-				// serviceOne.setRankingUsnewsCs(series.getData().toString());
+				serviceOne.setRankingQs(qsMap.getOrDefault(name, "[]"));
+				serviceOne.setRankingQsCs(qsCsMap.getOrDefault(name, "[]"));
+				serviceOne.setRankingUsnews(usnewsMap.getOrDefault(name, "[]"));
+				serviceOne.setRankingUsnewsCs(usnewsCsMap.getOrDefault(name, "[]"));
 				echartsService.insertOrUpdate(serviceOne);
 			}
 		});
-		return chartData;
+		return qsChart;
 	}
+
+	/**
+	 * 将 ChartData 按学校名称映射为排名数据字符串
+	 *
+	 * @param chartData 图表数据
+	 * @return 学校名称 -> 排名数据字符串
+	 */
+	private Map<String, String> toDataMap(ChartData chartData) {
+		return chartData.getSeries().stream()
+				.collect(Collectors.toMap(Series::getName, series -> series.getData().toString()));
+	}
+	/**
+	 * 查询部分 ECharts 数据
+	 */
 
 	@Override
 	public ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException {
@@ -261,6 +302,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		chartData.setSeries(addAsuList);
 		return chartData;
 	}
+	/**
+	 * addAsuData
+	 */
 
 	private List<Series> addAsuData(List<Series> seriesArrayList, String rankVariant) throws JsonProcessingException {
 		Series asuService = new Series();
@@ -294,6 +338,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		seriesArrayList.add(asuService);
 		return seriesArrayList;
 	}
+	/**
+	 * 查询部分 ECharts 数据（带筛选条件）
+	 */
 
 	@Override
 	public EchartsDTO queryPartEcharts2(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException {
@@ -341,6 +388,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		return doubles;
 	}
 
+	/**
+	 * 获取 ECharts 初始结构数据
+	 */
 	ChartData getOneChartData() {
 		// 设置一个新的方法用来组合数据为echarts格式
 		ChartData chartData = new ChartData();

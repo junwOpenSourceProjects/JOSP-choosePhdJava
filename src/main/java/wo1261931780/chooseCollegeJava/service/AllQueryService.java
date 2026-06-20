@@ -13,13 +13,7 @@ import wo1261931780.chooseCollegeJava.entity.UniversityRankingsUsnews;
 import java.util.List;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.service
- *
- * @author liujiajun_junw
- * @Date 2024-10-18-07  星期三
- * @Description
+ * AllQuery业务接口
  */
 public interface AllQueryService extends IService<UniversityRankingsQs> {
 	/**
@@ -35,6 +29,9 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 	 */
 	List<UniversityAllDTO> incorporationDto(List<UniversityRankingsQs> universityRankingsQsList,
 	                                        List<UniversityRankingsUsnews> universityRankingsUsnewsList);
+	/**
+	 * 分页查询大学排名
+	 */
 
 	Page<UniversityAllDTO> queryUniversityRank(
 			Integer page,
@@ -44,17 +41,31 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 			String universityTags,
 			Integer currentRank
 	);
+	/**
+	 * 分页查询大学汇总数据
+	 */
 
 	Page<UniversityRankingsAll> queryAllData(
 			Integer page, Integer limit,
 			String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank);
+	/**
+	 * 查询 ECharts 排名数据
+	 */
 
 	ChartData queryAllEchartsData(String universityNameChinese, String universityTagsState, String universityTags, Integer currentRank,String rankVariant);
+	/**
+	 * 更新 ECharts 数据表并返回图表数据
+	 */
 
 	ChartData updateEchartsData();
-
+	/**
+	 * 查询部分 ECharts 数据
+	 */
 
 	ChartData queryPartEcharts(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException;
+	/**
+	 * 查询部分 ECharts 数据（带筛选条件）
+	 */
 
 	EchartsDTO queryPartEcharts2(String universityNameChinese, String universityTagsState, String universityTags, String rankVariant) throws JsonProcessingException;
 

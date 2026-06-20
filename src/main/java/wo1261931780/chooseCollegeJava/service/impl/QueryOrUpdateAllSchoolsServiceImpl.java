@@ -22,13 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.service.impl
- *
- * @author liujiajun_junw
- * @Date 2024-10-13-44  星期六
- * @Description
+ * QueryOrUpdateAllSchools业务实现类
  */
 @Service
 @Slf4j
@@ -45,6 +39,9 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 	public QueryOrUpdateAllSchoolsServiceImpl(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
+	/**
+	 * 查询意向学校状态排名
+	 */
 
 	@Override
 	public List<RankingStatusDTO> queryRankingStatus() {
@@ -74,6 +71,9 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		});
 		return rankingStatusDTOS;
 	}
+	/**
+	 * 新增或更新意向学校信息
+	 */
 
 	@Override
 	public Boolean insertOrUpdate(UniversityConsider universityConsiderList) {
@@ -88,6 +88,9 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		// universityConsiderList.setId(IdUtil.getSnowflake(1, 1).nextId());
 		return considerService.insertOrUpdate(universityConsiderList);
 	}
+	/**
+	 * 批量新增意向学校
+	 */
 
 	@Override
 	public boolean insertBatch(List<String> nameList) {
@@ -108,6 +111,9 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		});
 		return considerService.saveBatch(considerList);
 	}
+	/**
+	 * 查询单个学校的抽屉图表数据
+	 */
 
 	@Override
 	public EchartsDTO drawerData(String name1) throws JsonProcessingException {

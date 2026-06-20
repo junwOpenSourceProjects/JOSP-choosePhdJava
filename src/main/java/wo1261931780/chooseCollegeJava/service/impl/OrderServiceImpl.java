@@ -7,16 +7,13 @@ import wo1261931780.chooseCollegeJava.service.OrderService;
 import java.util.List;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.service
- *
- * @author liujiajun_junw
- * @Date 2024-10-18-07  星期三
- * @Description
+ * Order业务实现类
  */
 @Service
 public class OrderServiceImpl implements OrderService {
+	/**
+	 * 按排名排序
+	 */
 	@Override
 	public List<UniversityRankingsQs> orderByRank(List<UniversityRankingsQs> universityRankingsQsList) {
 		return List.of();

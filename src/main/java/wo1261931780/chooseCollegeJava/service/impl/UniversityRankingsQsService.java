@@ -6,13 +6,7 @@ import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.mapper.UniversityRankingsQsMapper;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.service
- *
- * @author liujiajun_junw
- * @Date 2024-10-21-07  星期三
- * @Description
+ * UniversityRankingsQs业务接口
  */
 @Service
 public class UniversityRankingsQsService extends ServiceImpl<UniversityRankingsQsMapper, UniversityRankingsQs> {
