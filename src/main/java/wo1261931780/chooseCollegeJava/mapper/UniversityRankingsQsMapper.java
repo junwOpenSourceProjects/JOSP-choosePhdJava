@@ -50,4 +50,14 @@ public interface UniversityRankingsQsMapper extends BaseMapper<UniversityRanking
      */
 
     int insertOrUpdateSelective(UniversityRankingsQs record);
+
+    /**
+     * 列出所有 (rank_variant, ranking_year) 组合 (用于历史接口)
+     */
+    java.util.List<java.util.Map<String, String>> listDistinctGroup(@Param("rankVariant") String rankVariant);
+
+    /**
+     * 列出所有 (rank_variant, ranking_year) 组合的记录数
+     */
+    int countDistinctGroup(@Param("rankVariant") String rankVariant);
 }

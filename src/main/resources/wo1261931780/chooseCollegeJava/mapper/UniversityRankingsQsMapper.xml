@@ -448,4 +448,25 @@
       </if>
     </trim>
   </insert>
+  <select id="listDistinctGroup" resultType="java.util.Map">
+    SELECT DISTINCT rank_variant AS rankVariant, ranking_year AS rankingYear
+    FROM university_rankings_qs
+    <where>
+      <if test="rankVariant != null and rankVariant != ''">
+        AND rank_variant = #{rankVariant}
+      </if>
+    </where>
+    ORDER BY ranking_year DESC, rank_variant ASC
+  </select>
+  <select id="countDistinctGroup" resultType="int">
+    SELECT COUNT(*) FROM (
+      SELECT DISTINCT rank_variant, ranking_year
+      FROM university_rankings_qs
+      <where>
+        <if test="rankVariant != null and rankVariant != ''">
+          AND rank_variant = #{rankVariant}
+        </if>
+      </where>
+    ) t
+  </select>
 </mapper>
