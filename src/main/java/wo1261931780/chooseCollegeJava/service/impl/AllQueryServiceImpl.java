@@ -404,15 +404,8 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		ChartData chartData = new ChartData();
 		ArrayList<Series> seriesArrayList = new ArrayList<>();
 		// 首先要去重获取所有的UniversityNameChinese，把名称全部set进去，
-		// 创建 LambdaQueryWrapper 实例并配置查询条件
-		LambdaQueryWrapper<UniversityRankingsAll> wrapper = new LambdaQueryWrapper<>();
-		wrapper.select(UniversityRankingsAll::getUniversityNameChinese,
-				UniversityRankingsAll::getUniversityTags,
-				UniversityRankingsAll::getUniversityTagsState)
-				.groupBy(UniversityRankingsAll::getUniversityNameChinese);
-
-		// 执行查询，获取去重后的 UniversityRankingsAll 对象列表
-		List<UniversityRankingsAll> universityRecords = allMapper.selectList(wrapper);
+		// 用 mapper XML 的 selectDistinctUniversities, 避免 only_full_group_by SQL 错
+		List<UniversityRankingsAll> universityRecords = allMapper.selectDistinctUniversities();
 
 		// 将 UniversityRankingsAll 对象列表转换为仅包含 UniversityNameChinese 的 List<String>
 		List<String> universityNameList = universityRecords.stream()

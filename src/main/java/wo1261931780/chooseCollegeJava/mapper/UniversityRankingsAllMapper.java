@@ -50,4 +50,14 @@ public interface UniversityRankingsAllMapper extends BaseMapper<UniversityRankin
      */
 
     int insertOrUpdateSelective(UniversityRankingsAll record);
+    /**
+     * 从 qs (qs_world variant) + usnews (the_world variant) 两张主表按 (name, year) GROUP BY 聚合
+     * INSERT INTO university_rankings_all, 返回影响行数
+     */
+    int aggregateFromRawTables();
+    /**
+     * 取出所有去重 (按 name) 的大学 + tags + tags_state (兼容 only_full_group_by)
+     * 用在 echarts / chart series 取数, 替代 LambdaQueryWrapper.groupBy() 的 only_full_group_by 错误
+     */
+    java.util.List<UniversityRankingsAll> selectDistinctUniversities();
 }

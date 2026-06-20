@@ -15,6 +15,58 @@
     <result column="current_rank_integer_usnews" jdbcType="INTEGER" property="currentRankIntegerUsnews" />
     <result column="current_rank_integer_usnews_cs" jdbcType="INTEGER" property="currentRankIntegerUsnewsCs" />
   </resultMap>
+
+  <!-- 取出所有去重 (按 name) 的大学 + tags + tags_state (GROUP BY 时 MIN 包裹 tags 字段, 兼容 only_full_group_by) -->
+  <select id="selectDistinctUniversities" resultMap="BaseResultMap">
+    SELECT MIN(id) AS id, university_name_chinese,
+           MIN(university_tags) AS university_tags,
+           MIN(university_tags_state) AS university_tags_state
+    FROM computer_rank.university_rankings_all
+    WHERE university_name_chinese IS NOT NULL
+    GROUP BY university_name_chinese
+    ORDER BY MIN(id)
+  </select>
+
+  <!-- 汇总: 从 qs (qs_world variant) + usnews (the_world variant) 两张主表按 (name, year) GROUP BY 聚合
+       current_rank_integer_qs     ← qs_world 该年 rank
+       current_rank_integer_usnews ← the_world 该年 rank (THE 世界排名)
+       1 大学 1 年 1 行, 清空 all 表后 INSERT -->
+  <insert id="aggregateFromRawTables">
+    INSERT INTO computer_rank.university_rankings_all
+      (university_name_chinese, university_name_english, university_tags, university_tags_state,
+       ranking_year, current_rank_integer_qs, current_rank_integer_qs_cs,
+       current_rank_integer_usnews, current_rank_integer_usnews_cs)
+    SELECT
+      name_year.university_name_chinese,
+      MIN(COALESCE(name_year.university_name_english, '')) AS university_name_english,
+      MIN(COALESCE(name_year.university_tags, '')) AS university_tags,
+      MIN(COALESCE(name_year.university_tags_state, '')) AS university_tags_state,
+      name_year.ranking_year,
+      (SELECT qs.current_rank_integer FROM university_rankings_qs qs
+        WHERE qs.university_name_chinese = name_year.university_name_chinese
+          AND qs.ranking_year = name_year.ranking_year
+          AND qs.rank_variant = 'qs_world'
+          AND qs.current_rank_integer IS NOT NULL
+        LIMIT 1) AS current_rank_integer_qs,
+      NULL AS current_rank_integer_qs_cs,
+      (SELECT un.current_rank_integer FROM university_rankings_usnews un
+        WHERE un.university_name_chinese = name_year.university_name_chinese
+          AND un.ranking_year = name_year.ranking_year
+          AND un.rank_variant = 'the_world'
+          AND un.current_rank_integer IS NOT NULL
+        LIMIT 1) AS current_rank_integer_usnews,
+      NULL AS current_rank_integer_usnews_cs
+    FROM (
+      SELECT university_name_chinese, ranking_year, university_name_english, university_tags, university_tags_state
+      FROM university_rankings_qs
+      WHERE university_name_chinese IS NOT NULL AND ranking_year IS NOT NULL
+      UNION
+      SELECT university_name_chinese, ranking_year, university_name_english, university_tags, university_tags_state
+      FROM university_rankings_usnews
+      WHERE university_name_chinese IS NOT NULL AND ranking_year IS NOT NULL
+    ) name_year
+    GROUP BY name_year.university_name_chinese, name_year.ranking_year
+  </insert>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, university_name_chinese, university_name_english, university_tags, university_tags_state, 
