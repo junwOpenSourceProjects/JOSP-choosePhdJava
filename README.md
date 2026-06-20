@@ -60,7 +60,7 @@ mvn spring-boot:run
 
 ### 接口文档
 
-启动项目后访问 Swagger UI 文档地址：`http://localhost:8080/swagger-ui/index.html`，OpenAPI JSON 地址：`http://localhost:8080/v3/api-docs`
+启动项目后访问 Swagger UI 文档地址：`http://localhost:8080/api/v1/swagger-ui/index.html`，OpenAPI JSON 地址：`http://localhost:8080/api/v1/v3/api-docs`
 
 ## 🗄️ 数据库表结构
 
