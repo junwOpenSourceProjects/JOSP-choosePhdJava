@@ -73,6 +73,9 @@ application-local.yml
 application-dev.yml
 *.local
 
+# Local data
+qs 排名/
+
 # Compiled class files
 *.class
 
