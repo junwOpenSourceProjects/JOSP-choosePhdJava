@@ -11,15 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
-*Created by Intellij IDEA.
-*Project:chooseCollegeJava
-*Package:wo1261931780.chooseCollegeJava.entity
-*@author liujiajun_junw
-*@Date 2024-10-04-18  星期五
-*@Description 
-*/
-
-/**
  * echarts排名数据
  */
 @Schema(description="echarts排名数据")

@@ -14,15 +14,6 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
-*Created by Intellij IDEA.
-*Project:JOSP-examinationSystemJava
-*Package:wo1261931780.JOSPexaminationSystemJava.entity
-*@author liujiajun_junw
-*@Date 2023-03-15-23  星期六
-*@description
-*/
-
-/**
  * 账号角色表
  */
 @Schema(description = "账号角色表")

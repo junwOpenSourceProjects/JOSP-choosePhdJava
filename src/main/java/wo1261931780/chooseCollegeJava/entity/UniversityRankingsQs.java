@@ -11,15 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
-*Created by Intellij IDEA.
-*Project:chooseCollegeJava
-*Package:wo1261931780.chooseCollegeJava.entity
-*@author liujiajun_junw
-*@Date 2024-10-16-37  星期三
-*@Description 
-*/
-
-/**
  * 大学qs排名数据
  * @author junw
  */

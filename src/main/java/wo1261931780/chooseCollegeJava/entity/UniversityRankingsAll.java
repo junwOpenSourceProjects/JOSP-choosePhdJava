@@ -13,16 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.entity
- *
- * @author liujiajun_junw
- * @Date 2024-10-15-06  星期四
- * @Description
- */
-
-/**
  * 大学排名数据汇总
  * @author junw
  */

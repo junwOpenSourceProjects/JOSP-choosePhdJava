@@ -6,22 +6,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.entity
- *
- * @author liujiajun_junw
- * @Date 2024-10-14-30  星期四
- * @Description
+ * 折线图渲染的数据
  */
 @Schema(description = "折线图渲染的数据")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChartData {
+public class ChartData implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	@Schema(description = "数据体")
 	private List<Series> series;
 }

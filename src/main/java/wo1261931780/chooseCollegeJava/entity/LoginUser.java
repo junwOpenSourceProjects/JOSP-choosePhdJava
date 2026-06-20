@@ -12,16 +12,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by Intellij IDEA.
- * Project:JOSP-javaFirst
- * Package:wo1261931780.javaFirst.demo
- *
- * @author liujiajun_junw
- * @Date 2023-03-20-20  星期四
- * @description
- */
-
-/**
  * 登录用户表
  */
 @Schema(description = "登录用户表")
@@ -33,7 +23,7 @@ public class LoginUser implements Serializable {
 	/**
 	 * 主键
 	 */
-	@TableId(value = "id", type = IdType.INPUT)
+	@TableId(value = "id", type = IdType.AUTO)
 	@Schema(description = "主键")
 	private Long id;
 	
@@ -85,6 +75,13 @@ public class LoginUser implements Serializable {
 	@TableField(value = "`status`")
 	@Schema(description = "状态 0:禁用，1:正常")
 	private Integer status;
+
+	/**
+	 * 角色 ROLE_USER/ROLE_ADMIN
+	 */
+	@TableField(value = "role")
+	@Schema(description = "角色 ROLE_USER/ROLE_ADMIN")
+	private String role;
 	
 	/**
 	 * 创建时间
@@ -134,6 +131,8 @@ public class LoginUser implements Serializable {
 	public static final String COL_ID_NUMBER = "id_number";
 	
 	public static final String COL_STATUS = "status";
+
+	public static final String COL_ROLE = "role";
 	
 	public static final String COL_CREATE_TIME = "create_time";
 	

@@ -5,22 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.entity
- *
- * @author liujiajun_junw
- * @Date 2024-10-14-31  星期四
- * @Description
+ * 折线图内部包含的所有变量
  */
 @Schema(description = "折线图内部包含的所有变量")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Series {
+public class Series implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	@Schema(description = "大学名称（中文）")
 	private String name;
 

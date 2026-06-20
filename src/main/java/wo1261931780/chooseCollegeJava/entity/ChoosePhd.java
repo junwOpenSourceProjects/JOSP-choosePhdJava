@@ -13,15 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
-*Created by Intellij IDEA.
-*Project:JOSP-choosePhdJava
-*Package:wo1261931780.chooseCollegeJava.entity
-*@author liujiajun_junw
-*@Date 2024-11-16-53  星期日
-*@Description 
-*/
-
-/**
  * 院校信息表
  */
 @Schema(description="院校信息表")
