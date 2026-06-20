@@ -7,29 +7,47 @@ import org.apache.ibatis.annotations.Param;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQsCs;
 
 /**
-*Created by Intellij IDEA.
-*Project:chooseCollegeJava
-*Package:wo1261931780.chooseCollegeJava.mapper
-*@author liujiajun_junw
-*@Date 2024-10-00-56  星期四
-*@Description 
-*/
-
+ * UniversityRankingsQsCs数据访问层
+ */
 @Mapper
 public interface UniversityRankingsQsCsMapper extends BaseMapper<UniversityRankingsQsCs> {
+    /**
+     * 批量更新
+     */
     int updateBatch(@Param("list") List<UniversityRankingsQsCs> list);
+    /**
+     * 批量更新（多查询方式）
+     */
 
     int updateBatchUseMultiQuery(@Param("list") List<UniversityRankingsQsCs> list);
+    /**
+     * 批量选择性更新
+     */
 
     int updateBatchSelective(@Param("list") List<UniversityRankingsQsCs> list);
+    /**
+     * 批量插入
+     */
 
     int batchInsert(@Param("list") List<UniversityRankingsQsCs> list);
+    /**
+     * 批量选择性插入（NULL 使用默认值）
+     */
 
     int batchInsertSelectiveUseDefaultForNull(@Param("list") List<UniversityRankingsQsCs> list);
+    /**
+     * 按主键集合批量删除
+     */
 
     int deleteByPrimaryKeyIn(List<Integer> list);
+    /**
+     * 新增或更新意向学校信息
+     */
 
     boolean insertOrUpdate(UniversityRankingsQsCs record);
+    /**
+     * 选择性插入或更新
+     */
 
     int insertOrUpdateSelective(UniversityRankingsQsCs record);
 }
