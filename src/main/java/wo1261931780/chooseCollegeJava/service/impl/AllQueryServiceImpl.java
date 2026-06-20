@@ -185,16 +185,16 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			List<UniversityRankingsAll> oneList = grouped.getOrDefault(series.getName(), Collections.emptyList());
 			switch (variant) {
 				case "usnews":
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnews())));
+					oneList.forEach(one -> seriesData.add(toRankDouble(one.getCurrentRankIntegerUsnews())));
 					break;
 				case "qs_cs":
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQsCs())));
+					oneList.forEach(one -> seriesData.add(toRankDouble(one.getCurrentRankIntegerQsCs())));
 					break;
 				case "usnews_cs":
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerUsnewsCs())));
+					oneList.forEach(one -> seriesData.add(toRankDouble(one.getCurrentRankIntegerUsnewsCs())));
 					break;
 				default:
-					oneList.forEach(one -> seriesData.add(Double.valueOf(one.getCurrentRankIntegerQs())));
+					oneList.forEach(one -> seriesData.add(toRankDouble(one.getCurrentRankIntegerQs())));
 			}
 		});
 		return chartData;
@@ -355,6 +355,10 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		chartData.getSeries().forEach(series -> strings.add(series.getName()));
 		echartsDTO.setLegendData(strings);
 		return echartsDTO;
+	}
+
+	private Double toRankDouble(Integer rank) {
+		return rank == null ? null : Double.valueOf(rank);
 	}
 
 	private List<Double> getDoubles(String rankVariant, UniversityRankingsEcharts all) {

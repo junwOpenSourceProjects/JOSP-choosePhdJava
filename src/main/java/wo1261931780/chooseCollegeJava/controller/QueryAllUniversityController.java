@@ -23,6 +23,8 @@ import wo1261931780.chooseCollegeJava.entity.UniversityRankingsAll;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.service.impl.AllQueryServiceImpl;
 
+import java.util.List;
+
 /**
  * 大学排名查询控制器
  */
@@ -115,19 +117,36 @@ public class QueryAllUniversityController {
 	 * @param universityTags        国家
 	 * @param currentRank           当前排名上限
 	 * @param rankVariant           排名类型
-	 * @return ECharts 图表数据
+	 * @return ECharts 图表数据（包装为 EchartsDTO，与 queryPartEcharts 保持一致）
 	 */
 	@GetMapping("/queryAllEcharts")
 	@Operation(summary = "查询echarts大学汇总排名")
-	public ChartData queryAllUniversityRank(
+	public EchartsDTO queryAllUniversityRank(
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
 			@RequestParam(required = false, defaultValue = "10") Integer currentRank,
 			@RequestParam(required = false) String rankVariant
 	) {
-		return allQueryService.queryAllEchartsData(
+		ChartData chartData = allQueryService.queryAllEchartsData(
 				universityNameChinese, universityTagsState, universityTags, currentRank, rankVariant);
+		EchartsDTO dto = new EchartsDTO();
+		dto.setChatData(chartData);
+		dto.setLegendData(extractYears(universityNameChinese, universityTagsState, universityTags));
+		return dto;
+	}
+
+	/**
+	 * 从汇总表中提取去重排序后的年份作为 X 轴
+	 */
+	private List<String> extractYears(String universityNameChinese, String universityTagsState, String universityTags) {
+		return allQueryService.queryAllData(1, 1000, universityNameChinese, universityTagsState, universityTags, null)
+				.getRecords().stream()
+				.map(UniversityRankingsAll::getRankingYear)
+				.map(String::valueOf)
+				.distinct()
+				.sorted()
+				.toList();
 	}
 
 	/**
