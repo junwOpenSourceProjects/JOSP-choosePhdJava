@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author junw
+ * 统一响应结果封装
  */
 @Data
 @AllArgsConstructor

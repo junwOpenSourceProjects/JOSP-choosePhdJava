@@ -2,9 +2,17 @@ package wo1261931780.chooseCollegeJava;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
+/**
+ * ChooseCollegeJava应用启动类
+ */
+@EnableCaching
 @SpringBootApplication
 public class ChooseCollegeJavaApplication {
+	/**
+	 * 应用入口
+	 */
 
 	public static void main(String[] args) {
 		SpringApplication.run(ChooseCollegeJavaApplication.class, args);
