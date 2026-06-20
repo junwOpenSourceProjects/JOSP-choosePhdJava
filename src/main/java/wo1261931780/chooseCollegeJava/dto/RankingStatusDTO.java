@@ -9,13 +9,7 @@ import wo1261931780.chooseCollegeJava.entity.UniversityConsider;
 import wo1261931780.chooseCollegeJava.entity.UniversityRankingsEcharts;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.dto
- *
- * @author liujiajun_junw
- * @Date 2024-10-13-38  星期六
- * @Description
+ * RankingStatus数据传输对象
  */
 @Data
 @AllArgsConstructor

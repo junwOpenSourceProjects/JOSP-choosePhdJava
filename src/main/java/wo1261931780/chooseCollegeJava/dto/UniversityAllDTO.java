@@ -12,15 +12,6 @@ import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 
 import java.io.Serializable;
 
-/**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.dto
- *
- * @author liujiajun_junw
- * @Date 2024-10-17-43  星期三
- * @Description
- */
 @Schema(description = "大学qs排名数据")
 @Data
 @AllArgsConstructor

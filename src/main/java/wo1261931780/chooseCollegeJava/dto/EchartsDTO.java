@@ -8,13 +8,7 @@ import wo1261931780.chooseCollegeJava.entity.ChartData;
 import java.util.List;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.dto
- *
- * @author liujiajun_junw
- * @Date 2024-10-06-56  星期五
- * @Description
+ * Echarts数据传输对象
  */
 @Data
 @AllArgsConstructor
