@@ -266,6 +266,10 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		if (universityNameChinese != null && !universityNameChinese.isEmpty()) {
 			lambdaQueryWrapper.eq(UniversityRankingsEcharts::getUniversityNameChinese, universityNameChinese);
 			UniversityRankingsEcharts serviceOne = echartsService.getOne(lambdaQueryWrapper);
+			// rankVariant=all 特殊处理: 4 维趋势 (qs/qs_cs/usnews/usnews_cs 同校)
+			if ("all".equalsIgnoreCase(rankVariant) && serviceOne != null) {
+				return buildAllVariantChartData(serviceOne);
+			}
 			Series series = new Series();
 			series.setName(universityNameChinese);
 			series.setType("line");
@@ -402,7 +406,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		// 首先要去重获取所有的UniversityNameChinese，把名称全部set进去，
 		// 创建 LambdaQueryWrapper 实例并配置查询条件
 		LambdaQueryWrapper<UniversityRankingsAll> wrapper = new LambdaQueryWrapper<>();
-		wrapper.select(UniversityRankingsAll::getUniversityNameChinese)
+		wrapper.select(UniversityRankingsAll::getUniversityNameChinese,
+				UniversityRankingsAll::getUniversityTags,
+				UniversityRankingsAll::getUniversityTagsState)
 				.groupBy(UniversityRankingsAll::getUniversityNameChinese);
 
 		// 执行查询，获取去重后的 UniversityRankingsAll 对象列表
@@ -414,9 +420,11 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 				.toList();
 		log.debug(String.valueOf(universityNameList.size()));
 		// 然后遍历，根据名称去查询qs排名，把数据一个一个对照set进去
-		universityNameList.forEach(all -> {
+		universityRecords.forEach(rec -> {
 			Series series = new Series();
-			series.setName(all);
+			series.setName(rec.getUniversityNameChinese());
+			series.setCountry(rec.getUniversityTags());
+			series.setRegion(rec.getUniversityTagsState());
 			series.setType("line");
 			series.setSmooth(Boolean.TRUE);
 			series.setEmphasis(new Emphasis("series"));
@@ -426,6 +434,40 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		});
 		chartData.setSeries(seriesArrayList);
 		return chartData;
+	}
+
+	/**
+	 * 4 维趋势: 同校 qs / qs_cs / usnews / usnews_cs 4 条 series
+	 */
+	private ChartData buildAllVariantChartData(UniversityRankingsEcharts rec) throws JsonProcessingException {
+		ChartData chartData = new ChartData();
+		List<Series> list = new ArrayList<>();
+		list.add(buildSeries(rec.getUniversityNameChinese() + " · QS 综合", parseJsonList(rec.getRankingQs())));
+		list.add(buildSeries(rec.getUniversityNameChinese() + " · QS 计算机", parseJsonList(rec.getRankingQsCs())));
+		list.add(buildSeries(rec.getUniversityNameChinese() + " · US News 综合", parseJsonList(rec.getRankingUsnews())));
+		list.add(buildSeries(rec.getUniversityNameChinese() + " · US News 计算机", parseJsonList(rec.getRankingUsnewsCs())));
+		chartData.setSeries(list);
+		return chartData;
+	}
+
+	private Series buildSeries(String name, List<Double> data) {
+		Series s = new Series();
+		s.setName(name);
+		s.setType("line");
+		s.setSmooth(Boolean.TRUE);
+		s.setEmphasis(new Emphasis("series"));
+		s.setData(data);
+		return s;
+	}
+
+	/** 解析 echarts 表里的 JSON 数组字段, 失败返空 list */
+	private List<Double> parseJsonList(String json) throws JsonProcessingException {
+		if (json == null || json.isEmpty()) return new ArrayList<>();
+		try {
+			return objectMapper.readValue(json, new TypeReference<>() {});
+		} catch (Exception e) {
+			return new ArrayList<>();
+		}
 	}
 
 	/**

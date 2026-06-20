@@ -21,6 +21,12 @@ public class Series implements Serializable {
 	@Schema(description = "大学名称（中文）")
 	private String name;
 
+	@Schema(description = "国家/地区（大学标签 country, 从 university_tags 取）")
+	private String country;
+
+	@Schema(description = "洲（大学标签 state, 从 university_tags_state 取）")
+	private String region;
+
 	@Schema(description = "可视化类型，默认line")
 	private String type;
 
