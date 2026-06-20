@@ -31,4 +31,9 @@ public interface QueryOrUpdateAllSchoolsService {
 	 */
 
 	EchartsDTO drawerData(String name1) throws JsonProcessingException;
+
+	/**
+	 * 列出 echarts 表所有大学名
+	 */
+	List<String> listEchartsUniversities();
 }

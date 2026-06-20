@@ -74,4 +74,20 @@ public class RankingStatusController {
 	public EchartsDTO drawerData(@RequestBody String name) throws JsonProcessingException {
 		return schoolsService.drawerData(name);
 	}
+
+	/**
+	 * 列出 echarts 表所有大学 (供 4 维趋势图下拉用)
+	 */
+	@GetMapping("/listEchartsUniversities")
+	public List<String> listEchartsUniversities() {
+		return schoolsService.listEchartsUniversities();
+	}
+
+	/**
+	 * 4 维趋势图 (qs/qs_cs/usnews/usnews_cs) - 走 query param, 解决前端 $fetch JSON.stringify 把字符串带引号的坑
+	 */
+	@GetMapping("/trendAllVariants")
+	public EchartsDTO trendAllVariants(@RequestParam String universityNameChinese) throws JsonProcessingException {
+		return schoolsService.drawerData(universityNameChinese);
+	}
 }

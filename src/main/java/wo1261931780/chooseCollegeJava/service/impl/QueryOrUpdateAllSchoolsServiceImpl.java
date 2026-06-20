@@ -132,8 +132,17 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		}
 		log.info("series size:{}", series.size());
 		LambdaQueryWrapper<UniversityRankingsEcharts> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.like(UniversityRankingsEcharts::getUniversityNameChinese, name1);
-		UniversityRankingsEcharts serviceOne = echartsService.getOne(queryWrapper);
+		// 先精确匹配, 失败再用 like (兼容前端传简称的场景)
+		UniversityRankingsEcharts serviceOne = echartsService.getOne(
+				new LambdaQueryWrapper<UniversityRankingsEcharts>().eq(UniversityRankingsEcharts::getUniversityNameChinese, name1));
+		if (serviceOne == null) {
+			queryWrapper.like(UniversityRankingsEcharts::getUniversityNameChinese, name1);
+			serviceOne = echartsService.getOne(queryWrapper);
+		}
+		if (serviceOne == null) {
+			log.warn("drawerData: 找不到 echarts 大学, name={}", name1);
+			return new EchartsDTO();
+		}
 		UniversityRankingsEcharts serviceTwo = echartsService.getOne(new LambdaQueryWrapper<UniversityRankingsEcharts>().eq(UniversityRankingsEcharts::getUniversityNameChinese, "亚利桑那州立大学"));
 		for (int i = 0; i < series.size(); i++) {
 			if (i == 0) {
@@ -178,5 +187,19 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		echartsDTO.setChatData(new ChartData(series));
 		echartsDTO.setLegendData(strings);
 		return echartsDTO;
+	}
+
+	/**
+	 * 列出 echarts 表所有大学
+	 */
+	@Override
+	public List<String> listEchartsUniversities() {
+		LambdaQueryWrapper<UniversityRankingsEcharts> wrapper = new LambdaQueryWrapper<>();
+		wrapper.select(UniversityRankingsEcharts::getUniversityNameChinese);
+		return echartsService.list(wrapper).stream()
+				.map(UniversityRankingsEcharts::getUniversityNameChinese)
+				.distinct()
+				.sorted()
+				.toList();
 	}
 }
