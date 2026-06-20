@@ -4,12 +4,17 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import wo1261931780.chooseCollegeJava.config.RequireRole;
+import wo1261931780.chooseCollegeJava.config.RoleConstants;
 import wo1261931780.chooseCollegeJava.config.ShowResult;
 import wo1261931780.chooseCollegeJava.dto.EchartsDTO;
 import wo1261931780.chooseCollegeJava.dto.UniversityAllDTO;
@@ -19,28 +24,27 @@ import wo1261931780.chooseCollegeJava.entity.UniversityRankingsQs;
 import wo1261931780.chooseCollegeJava.service.impl.AllQueryServiceImpl;
 
 /**
- * Created by Intellij IDEA.
- * Project:chooseCollegeJava
- * Package:wo1261931780.chooseCollegeJava.controller
- *
- * @author liujiajun_junw
- * @Date 2024-10-17-52  星期三
- * @Description
+ * 大学排名查询控制器
  */
 @Slf4j
+@Validated
 @RequestMapping("/query")
 @RestController
 public class QueryAllUniversityController {
 	@Autowired
 	private AllQueryServiceImpl allQueryService;
 
-	@Autowired
-	private AllQueryServiceImpl allQueryServiceImpl;
-
+	/**
+	 * 查询 QS 排名列表
+	 *
+	 * @param page  页码
+	 * @param limit 每页条数
+	 * @return QS 排名分页结果
+	 */
 	@GetMapping("/qs")
 	public ShowResult<Page<UniversityRankingsQs>> showQsResult(
-			@RequestParam Integer page
-			, @RequestParam Integer limit
+			@RequestParam @Min(1) Integer page,
+			@RequestParam @Min(1) @Max(500) Integer limit
 	) {
 		Page<UniversityRankingsQs> qsPage = new Page<>();
 		qsPage.setCurrent(page);
@@ -51,37 +55,70 @@ public class QueryAllUniversityController {
 		return ShowResult.sendSuccess(rankingsQsPage);
 	}
 
+	/**
+	 * 分页查询大学排名
+	 *
+	 * @param page               页码
+	 * @param limit              每页条数
+	 * @param rankVariant        排名类型（qs/usnews/all）
+	 * @param universityTagsState 洲
+	 * @param universityTags     国家
+	 * @param currentRank        当前排名上限
+	 * @return 大学排名分页结果
+	 */
 	@GetMapping("/queryQs")
-	@Operation(summary="查询大学排名数据")
+	@Operation(summary = "查询大学排名数据")
 	public Page<UniversityAllDTO> queryUniversityRank(
-			@RequestParam Integer page,
-			@RequestParam Integer limit,
-			@RequestParam(defaultValue = "qs") String rankVariant, // 如 "qs", "usnews", "all"
+			@RequestParam @Min(1) Integer page,
+			@RequestParam @Min(1) @Max(500) Integer limit,
+			@RequestParam(defaultValue = "qs") String rankVariant,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
-			@RequestParam(required = false) Integer currentRank
+			@RequestParam(required = false) @Min(1) Integer currentRank
 	) {
-		return allQueryServiceImpl.queryUniversityRank(page, limit, rankVariant,
+		return allQueryService.queryUniversityRank(page, limit, rankVariant,
 				universityTagsState, universityTags, currentRank);
 	}
 
+	/**
+	 * 分页查询大学汇总排名
+	 *
+	 * @param page                页码
+	 * @param limit               每页条数
+	 * @param universityNameChinese 学校中文名
+	 * @param universityTagsState  洲
+	 * @param universityTags      国家
+	 * @param currentRank         当前排名上限
+	 * @return 大学汇总排名分页结果
+	 */
 	@GetMapping("/queryAll")
-	@Operation(summary="查询大学汇总排名")
+	@Operation(summary = "查询大学汇总排名")
 	public Page<UniversityRankingsAll> queryAllUniversityRank(
-			@RequestParam Integer page,
-			@RequestParam Integer limit,
+			@RequestParam @Min(1) Integer page,
+			@RequestParam @Min(1) @Max(500) Integer limit,
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
-			@RequestParam(required = false, defaultValue = "100") Integer currentRank
+			@RequestParam(required = false, defaultValue = "100") @Min(1) Integer currentRank
 	) {
-		log.info("universityNameChinese:{}, universityTagsState:{}, universityTags:{}, currentRank:{}", universityNameChinese, universityTagsState, universityTags, currentRank);
-		return allQueryServiceImpl.queryAllData(page, limit,
+		log.info("universityNameChinese:{}, universityTagsState:{}, universityTags:{}, currentRank:{}",
+				universityNameChinese, universityTagsState, universityTags, currentRank);
+		return allQueryService.queryAllData(page, limit,
 				universityNameChinese, universityTagsState, universityTags, currentRank);
 	}
 
+	/**
+	 * 查询 ECharts 排名数据
+	 *
+	 * @param universityNameChinese 学校中文名
+	 * @param universityTagsState   洲
+	 * @param universityTags        国家
+	 * @param currentRank           当前排名上限
+	 * @param rankVariant           排名类型
+	 * @return ECharts 图表数据
+	 */
 	@GetMapping("/queryAllEcharts")
-	@Operation(summary="查询echarts大学汇总排名")
+	@Operation(summary = "查询echarts大学汇总排名")
 	public ChartData queryAllUniversityRank(
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
@@ -89,26 +126,41 @@ public class QueryAllUniversityController {
 			@RequestParam(required = false, defaultValue = "10") Integer currentRank,
 			@RequestParam(required = false) String rankVariant
 	) {
-		return allQueryServiceImpl.queryAllEchartsData(
+		return allQueryService.queryAllEchartsData(
 				universityNameChinese, universityTagsState, universityTags, currentRank, rankVariant);
 	}
 
+	/**
+	 * 更新 ECharts 数据表并返回图表数据
+	 *
+	 * @return ECharts 图表数据
+	 */
 	@GetMapping("/updateEchartsData")
-	@Operation(summary="更新echarts对象表")
-	public ChartData queryAllUniversityRank2(
-	) {
-		return allQueryServiceImpl.updateEchartsData();
+	@Operation(summary = "更新echarts对象表")
+	@RequireRole(RoleConstants.ROLE_ADMIN)
+	public ChartData queryAllUniversityRank2() {
+		return allQueryService.updateEchartsData();
 	}
+
+	/**
+	 * 按条件查询部分 ECharts 数据
+	 *
+	 * @param universityNameChinese 学校中文名
+	 * @param universityTagsState   洲
+	 * @param universityTags        国家
+	 * @param rankVariant           排名类型
+	 * @return ECharts 数据
+	 * @throws JsonProcessingException JSON 处理异常
+	 */
 	@GetMapping("/queryPartEcharts")
-	@Operation(summary="条件查询echarts大学汇总排名")
+	@Operation(summary = "条件查询echarts大学汇总排名")
 	public EchartsDTO queryPartEcharts(
 			@RequestParam(required = false) String universityNameChinese,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
 			@RequestParam(defaultValue = "qs") String rankVariant
 	) throws JsonProcessingException {
-		return allQueryServiceImpl.queryPartEcharts2(
-				universityNameChinese, universityTagsState, universityTags,  rankVariant);
+		return allQueryService.queryPartEcharts2(
+				universityNameChinese, universityTagsState, universityTags, rankVariant);
 	}
-
 }

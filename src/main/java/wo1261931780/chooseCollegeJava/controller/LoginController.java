@@ -1,79 +1,67 @@
 package wo1261931780.chooseCollegeJava.controller;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.DigestUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import wo1261931780.chooseCollegeJava.config.RoleInterceptor;
 import wo1261931780.chooseCollegeJava.config.ShowResult;
 import wo1261931780.chooseCollegeJava.entity.AccountRole;
 import wo1261931780.chooseCollegeJava.entity.LoginUser;
 import wo1261931780.chooseCollegeJava.service.impl.LoginUserService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 /**
- * Created by Intellij IDEA.
- * Project:JOSP-javaFirst
- * Package:wo1261931780.javaFirst.controller
- *
- * @author liujiajun_junw
- * @Date 2023-03-20-08  星期四
- * @description
+ * 登录控制器
  */
 @RequestMapping("/vue-element-admin/user")
 @RestController
 public class LoginController {
 	@Autowired
 	private LoginUserService loginUserService;
-	//http://localhost:8081/vue-element-admin/user/login
-	@PostMapping("/login")
-	public ShowResult<LoginUser> userLogin(@RequestBody LoginUser loginUser) {
-		// 判断
-		if (loginUser != null) {
-			// 查询
-			//LoginUser byId = loginUserService.getById(loginUser.getId());
-			//if (StrUtil.isEmptyIfStr(byId)) {
-			//	return ShowResult.sendError("用户不存在");
-			//}
-			LambdaQueryWrapper<LoginUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-			//这里密码有一个加密的过程
-			String passwordMd5DigestAsHex = DigestUtils.md5DigestAsHex(loginUser.getPassword().getBytes());
-			// 查询账号密码是否正确
-			lambdaQueryWrapper.eq(LoginUser::getUsername, loginUser.getUsername())
-					.eq(LoginUser::getPassword, passwordMd5DigestAsHex);
-			LoginUser userServiceOne = loginUserService.getOne(lambdaQueryWrapper);
-			if (StrUtil.isEmptyIfStr(userServiceOne)) {
-				return ShowResult.sendError("账号或密码错误");
-			}
-			return ShowResult.sendSuccess(userServiceOne);
-		}
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-		// 没有id就执行注册流程
-		//if (CharSequenceUtil.isNotEmpty(loginUser.getUsername()) && CharSequenceUtil.isNotEmpty(loginUser.getPassword())) {
-		//	loginUser.setId(Long.valueOf(UUID.randomUUID().toString()));// 随机一个id
-		//	//新增这里有问题，因为id是long类型，而UUID是String类型，所以会报错
-		//	loginUser.setPassword(DigestUtils.md5DigestAsHex(loginUser.getPassword().getBytes()));// 密码通过MD5加密，然后保存回去
-		//	loginUserService.insertOrUpdate(loginUser);// 插入一条数据
-		//	return ShowResult.sendSuccess(loginUser);
-		//}
-		return ShowResult.sendError("登录失败");
+	/**
+	 * 用户登录
+	 *
+	 * @param loginUser 登录信息
+	 * @param session   HttpSession
+	 * @return 登录成功后的用户信息
+	 */
+	@PostMapping("/login")
+	public ShowResult<LoginUser> userLogin(@Valid @RequestBody LoginUser loginUser, HttpSession session) {
+		LambdaQueryWrapper<LoginUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+		lambdaQueryWrapper.eq(LoginUser::getUsername, loginUser.getUsername());
+		LoginUser userServiceOne = loginUserService.getOne(lambdaQueryWrapper);
+		if (userServiceOne == null || !passwordEncoder.matches(loginUser.getPassword(), userServiceOne.getPassword())) {
+			return ShowResult.sendError("账号或密码错误");
+		}
+		userServiceOne.setPassword(null);
+		session.setAttribute(RoleInterceptor.CURRENT_USER, userServiceOne);
+		return ShowResult.sendSuccess(userServiceOne);
 	}
 
 	/**
-	 * 获取用户信息，暂时写死
+	 * 获取当前登录用户信息
+	 *
+	 * @param session HttpSession
 	 * @return 用户信息
 	 */
 	@GetMapping("/info")
-	public ShowResult<AccountRole> userInfo() {
+	public ShowResult<AccountRole> userInfo(HttpSession session) {
+		LoginUser currentUser = (LoginUser) session.getAttribute(RoleInterceptor.CURRENT_USER);
+		if (currentUser == null) {
+			return ShowResult.sendError("未登录");
+		}
 		AccountRole accountRole = new AccountRole();
-		List<String> strings = new ArrayList<>();
-		strings.add("admin");
-		accountRole.setRoles(strings);
-		accountRole.setIntroduction("I am a super administrator");
+		accountRole.setRoles(Collections.singletonList(currentUser.getRole()));
+		accountRole.setIntroduction("I am " + currentUser.getRole());
 		accountRole.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-		accountRole.setName("Super Admin");
+		accountRole.setName(currentUser.getUsername());
 		return ShowResult.sendSuccess(accountRole);
 	}
 }
