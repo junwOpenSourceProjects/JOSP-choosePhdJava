@@ -12,15 +12,13 @@
 | 类别 | 技术 | 版本 |
 |------|------|------|
 | 语言 | Java | 25 |
-| 框架 | Spring Boot | 3.4.4 |
+| 框架 | Spring Boot | 4.1.0 |
 | ORM | MyBatis-Plus | 3.5.16 |
-| 数据库 | MySQL | 8.0+ |
+| 数据库 | MySQL | 8.0+ / Connector 9.7.0 |
 | 缓存 | Redis | 6.0+ |
-| API文档 | Knife4j | 3.0.3 |
-| JSON处理 | fastjson2 | 2.0.61 |
-| 工具库 | Hutool | 5.8.44 |
-| 分页插件 | PageHelper | 6.1.0 |
-| 多数据源 | dynamic-datasource | 4.3.1 |
+| API文档 | SpringDoc OpenAPI | 3.0.3 |
+| JSON处理 | Jackson2 | 由 Spring Boot 4 托管 |
+| 工具库 | Hutool | 5.8.46 |
 
 ## 3. 项目结构
 
@@ -250,7 +248,7 @@ erDiagram
 - **多维筛选**: 按国家、大洲、排名范围等条件灵活筛选
 - **可视化接口**: 提供ECharts图表数据接口,支持数据可视化展示
 - **分页查询**: 支持大数据量分页查询,性能优秀
-- **Knife4j文档**: 集成Knife4j接口文档,方便API测试
+- **OpenAPI文档**: 集成 SpringDoc OpenAPI 3.0.3，Swagger UI 方便 API 测试
 - **多数据源**: 支持动态多数据源配置
 
 ## 8. 配置说明
@@ -261,7 +259,7 @@ erDiagram
 - Redis缓存配置
 - MyBatis-Plus配置
 - 动态数据源配置
-- Knife4j文档配置
+- SpringDoc OpenAPI 文档配置
 - Actuator监控配置
 
 ## 9. 许可证
