@@ -455,9 +455,10 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		UniversityRankingsUsnewsCs usnewsResult2 = list3.size() > 1 ? list3.get(0) : UsnewsCsService.getOne(queryWrapperusnewscs);
 
 		UniversityAllDTO universityAllDTO = new UniversityAllDTO();
-		universityAllDTO.setCurrentQsComputerRank(qsCsResult == null ? 0 : qsCsResult.getCurrentRankInteger());
-		universityAllDTO.setCurrentUsnewsAllRank(usnewsResult == null ? 0 : usnewsResult.getCurrentRankInteger());
-		universityAllDTO.setCurrentUsnewsComputerRank(usnewsResult2 == null ? 0 : usnewsResult2.getCurrentRankInteger());
+		// null 留 null,前端用 null 区分"该榜单未上榜" 而不是误以为排名第 0
+		universityAllDTO.setCurrentQsComputerRank(qsCsResult == null ? null : qsCsResult.getCurrentRankInteger());
+		universityAllDTO.setCurrentUsnewsAllRank(usnewsResult == null ? null : usnewsResult.getCurrentRankInteger());
+		universityAllDTO.setCurrentUsnewsComputerRank(usnewsResult2 == null ? null : usnewsResult2.getCurrentRankInteger());
 		return universityAllDTO;
 	}
 }
