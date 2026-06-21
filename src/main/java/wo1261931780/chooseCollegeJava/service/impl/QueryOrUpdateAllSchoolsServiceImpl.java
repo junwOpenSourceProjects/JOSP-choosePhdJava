@@ -138,14 +138,25 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 			return new EchartsDTO();
 		}
 		// 单校 4 维 series (qs / qs_cs / usnews / usnews_cs)
-		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingQs())));
-		strings.add(name1 + "qs");
-		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingQsCs())));
-		strings.add(name1 + "QsCs");
-		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingUsnews())));
-		strings.add(name1 + "Usnews");
-		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingUsnewsCs())));
-		strings.add(name1 + "UsnewsCs");
+		// 数据语义: ranking_qs/qs_cs/... 是 Double 数组, data[i] = 该校在某个时段的排名
+		// 没有"具体哪年"权威映射, 所以 legendData 用 1-indexed 位置数组 (eg ['1', '2', ..., '27'])
+		// series.name 拼后缀让前端按 endsWith 拆维度 (qs / qs_cs / usnews / usnews_cs)
+		List<Double> qsList = parseJsonList(serviceOne.getRankingQs());
+		List<Double> qsCsList = parseJsonList(serviceOne.getRankingQsCs());
+		List<Double> usList = parseJsonList(serviceOne.getRankingUsnews());
+		List<Double> usCsList = parseJsonList(serviceOne.getRankingUsnewsCs());
+
+		series.add(buildSeries(name1 + "qs", qsList));
+		series.add(buildSeries(name1 + "qs_cs", qsCsList));
+		series.add(buildSeries(name1 + "usnews", usList));
+		series.add(buildSeries(name1 + "usnews_cs", usCsList));
+
+		// legendData = 位置数组, 用 4 维中最长的长度, 短维度用 null 补齐
+		int maxLen = Math.max(Math.max(qsList.size(), qsCsList.size()),
+				Math.max(usList.size(), usCsList.size()));
+		for (int i = 1; i <= maxLen; i++) {
+			strings.add(String.valueOf(i));
+		}
 
 		EchartsDTO echartsDTO = new EchartsDTO();
 		echartsDTO.setChatData(new ChartData(series));
