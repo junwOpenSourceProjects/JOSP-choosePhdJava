@@ -39,7 +39,8 @@ public interface AllQueryService extends IService<UniversityRankingsQs> {
 			String rankVariant,
 			String universityTagsState,
 			String universityTags,
-			Integer currentRank
+			Integer currentRank,
+			String universityNameChinese
 	);
 	/**
 	 * 分页查询大学汇总数据

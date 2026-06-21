@@ -80,7 +80,8 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 			Integer page, Integer limit,
 			String rankVariant,
 			String universityTagsState, String universityTags,
-			Integer currentRank) {
+			Integer currentRank,
+			String universityNameChinese) {
 		List<UniversityAllDTO> dtoList = new ArrayList<>();
 
 		// 创建分页对象
@@ -96,6 +97,9 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 		}
 		if (currentRank != null) {
 			queryWrapper.le("current_rank_integer", currentRank);
+		}
+		if (universityNameChinese != null && !universityNameChinese.isEmpty()) {
+			queryWrapper.like("university_name_chinese", universityNameChinese);
 		}
 
 		Page<UniversityRankingsQs> qsPage = qsMapper.selectPage(new Page<>(page, limit),

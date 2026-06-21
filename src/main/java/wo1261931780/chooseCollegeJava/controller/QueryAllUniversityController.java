@@ -76,10 +76,11 @@ public class QueryAllUniversityController {
 			@RequestParam(defaultValue = "qs") String rankVariant,
 			@RequestParam(required = false) String universityTagsState,
 			@RequestParam(required = false) String universityTags,
-			@RequestParam(required = false) @Min(1) Integer currentRank
+			@RequestParam(required = false) @Min(1) Integer currentRank,
+			@RequestParam(required = false) String universityNameChinese
 	) {
 		return allQueryService.queryUniversityRank(page, limit, rankVariant,
-				universityTagsState, universityTags, currentRank);
+				universityTagsState, universityTags, currentRank, universityNameChinese);
 	}
 
 	/**
