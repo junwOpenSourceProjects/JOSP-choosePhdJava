@@ -77,10 +77,10 @@ public class UniversityRankingsUsnewsSubject implements Serializable {
     private Integer currentRankInteger;
 
     /**
-     * 当前排名（原始数据，例如\"#1\"）
+     * 当前排名（原始数据，例如 #1）
      */
     @TableField(value = "current_rank_raw")
-    @Schema(description = "当前排名（原始数据，例如\"#1\"）")
+    @Schema(description = "当前排名（原始数据，例如 #1）")
     private String currentRankRaw;
 
     /**

@@ -168,6 +168,11 @@ public interface UniversityRankings{class_name}Mapper extends BaseMapper<Univers
         @Param("rankingYear") String rankingYear,
         @Param("currentRankLimit") Integer currentRankLimit
     );
+
+    /**
+     * 列出所有 distinct ranking_year (按年倒序, 供前端 filter)
+     */
+    java.util.List<String> selectDistinctYears();
 }}
 '''
 
@@ -210,6 +215,11 @@ def gen_mapper_xml(class_name: str, table_suffix: str) -> str:
       #{{id,jdbcType=INTEGER}}
     </foreach>
   </delete>
+  <select id="selectDistinctYears" resultType="java.lang.String">
+    SELECT DISTINCT ranking_year FROM computer_rank.university_rankings_{table_suffix}
+    WHERE ranking_year IS NOT NULL AND ranking_year != ''
+    ORDER BY ranking_year DESC
+  </select>
   <select id="queryByCondition" resultMap="BaseResultMap">
     SELECT * FROM computer_rank.university_rankings_{table_suffix}
     <where>
