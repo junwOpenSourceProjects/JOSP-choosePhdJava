@@ -71,6 +71,33 @@ public class Backup2RankingsController {
     }
 
     /**
+     * 列出某张表的所有 ranking_year (按年倒序, 供前端 filter)
+     */
+    @GetMapping("/listYears")
+    @Operation(summary = "列出某张表的 distinct ranking_year (按年倒序)")
+    public ShowResult<List<String>> listYears(@RequestParam String rankTable) {
+        if (!SUPPORTED_TABLES.contains(rankTable)) {
+            return ShowResult.sendSuccess(List.of());
+        }
+        List<String> years = fetchYears(rankTable);
+        return ShowResult.sendSuccess(years);
+    }
+
+    private List<String> fetchYears(String rankTable) {
+        // 不传 year (其它过滤) 拿所有 distinct year
+        return switch (rankTable) {
+            case "arwu_subject" -> arwuSubjectMapper.selectDistinctYears();
+            case "edurank_region" -> edurankRegionMapper.selectDistinctYears();
+            case "declining_trend" -> decliningTrendMapper.selectDistinctYears();
+            case "mosiur_world" -> mosiurWorldMapper.selectDistinctYears();
+            case "rur_world" -> rurWorldMapper.selectDistinctYears();
+            case "usnews_subject" -> usnewsSubjectMapper.selectDistinctYears();
+            case "qs_sustainability" -> qsSustainabilityMapper.selectDistinctYears();
+            default -> List.of();
+        };
+    }
+
+    /**
      * 通用分页查询
      */
     @GetMapping("/list")

@@ -35,6 +35,11 @@
       #{id,jdbcType=INTEGER}
     </foreach>
   </delete>
+  <select id="selectDistinctYears" resultType="java.lang.String">
+    SELECT DISTINCT ranking_year FROM computer_rank.university_rankings_edurank_region
+    WHERE ranking_year IS NOT NULL AND ranking_year != ''
+    ORDER BY ranking_year DESC
+  </select>
   <select id="queryByCondition" resultMap="BaseResultMap">
     SELECT * FROM computer_rank.university_rankings_edurank_region
     <where>

@@ -45,4 +45,9 @@ public interface UniversityRankingsUsnewsSubjectMapper extends BaseMapper<Univer
         @Param("rankingYear") String rankingYear,
         @Param("currentRankLimit") Integer currentRankLimit
     );
+
+    /**
+     * 列出所有 distinct ranking_year (按年倒序, 供前端 filter)
+     */
+    java.util.List<String> selectDistinctYears();
 }
