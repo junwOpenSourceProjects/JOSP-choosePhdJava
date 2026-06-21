@@ -178,8 +178,13 @@ public class AllQueryServiceImpl extends ServiceImpl<UniversityRankingsQsMapper,
 				.map(Series::getName)
 				.toList();
 		LambdaQueryWrapper<UniversityRankingsAll> batchWrapper = new LambdaQueryWrapper<>();
-		batchWrapper.in(UniversityRankingsAll::getUniversityNameChinese, universityNames)
-				.orderByAsc(UniversityRankingsAll::getUniversityNameChinese)
+		batchWrapper.in(UniversityRankingsAll::getUniversityNameChinese, universityNames);
+		// currentRank 过滤: 取 max(QS, US News) 最小值 <= currentRank 的校
+		// (用 currentRankIntegerQs 兜底, null 跳过)
+		if (currentRank != null) {
+			batchWrapper.le(UniversityRankingsAll::getCurrentRankIntegerQs, currentRank);
+		}
+		batchWrapper.orderByAsc(UniversityRankingsAll::getUniversityNameChinese)
 				.orderByAsc(UniversityRankingsAll::getRankingYear);
 		Map<String, List<UniversityRankingsAll>> grouped = allService.list(batchWrapper).stream()
 				.collect(Collectors.groupingBy(UniversityRankingsAll::getUniversityNameChinese));
