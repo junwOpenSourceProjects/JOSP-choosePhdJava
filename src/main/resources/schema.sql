@@ -298,6 +298,7 @@ CREATE TABLE IF NOT EXISTS university_rankings_declining_trend
 
 ALTER TABLE university_rankings_declining_trend ADD INDEX idx_declining_name_year (university_name_chinese, ranking_year);
 ALTER TABLE university_rankings_declining_trend ADD INDEX idx_declining_category (ranking_category);
+ALTER TABLE university_rankings_declining_trend ADD UNIQUE INDEX uniq_declining_dedup (university_name_chinese, ranking_year, ranking_category, current_rank_integer, current_rank_raw);
 
 -- MOSIUR 全球排名 (≈ 8000 行)
 CREATE TABLE IF NOT EXISTS university_rankings_mosiur_world
