@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -124,7 +127,13 @@ public class ImportController {
 	}
 
 	/** 历史组: 一种排名 + 一个年份 */
-	public record HistoryGroup(String rankVariant, String rankingYear) {}
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class HistoryGroup {
+		private String rankVariant;
+		private String rankingYear;
+	}
 
 	// log 字段
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImportController.class);
