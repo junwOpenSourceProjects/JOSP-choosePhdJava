@@ -236,3 +236,138 @@ ALTER TABLE university_consider ADD INDEX idx_consider_name (university_name_chi
 
 ALTER TABLE choose_phd ADD INDEX idx_phd_name (university_name);
 ALTER TABLE choose_phd ADD INDEX idx_phd_country (country_region);
+
+-- =============================================================================
+-- "备份 2" 新增的 7 张榜单表 (2026-06-21 灌库, 详见 scripts/ranking_import/)
+-- =============================================================================
+
+-- ARWU 学科排名 (11 学科 × 9 年 ≈ 30000 行)
+CREATE TABLE IF NOT EXISTS university_rankings_arwu_subject
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL COMMENT '大学名称（中文）',
+    university_name_english VARCHAR(255)          DEFAULT NULL COMMENT '大学名称（英文）',
+    university_tags         VARCHAR(100)          DEFAULT NULL COMMENT '大学标签（国家）',
+    university_tags_state   VARCHAR(100)          DEFAULT NULL COMMENT '大学标签（地区）',
+    ranking_category        VARCHAR(100)          DEFAULT NULL COMMENT '排名类别（学科名）',
+    ranking_year            VARCHAR(20)           DEFAULT NULL COMMENT '排名年份',
+    current_rank_integer    INT                   DEFAULT NULL COMMENT '当前排名（整数）',
+    current_rank_raw        VARCHAR(50)           DEFAULT NULL COMMENT '当前排名（原始，例如"#1"）',
+    rank_variant            VARCHAR(100)          DEFAULT NULL COMMENT 'rank_variant slug（arwu_subject）',
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='ARWU 大学学科排名';
+
+ALTER TABLE university_rankings_arwu_subject ADD INDEX idx_arwu_subject_name_year (university_name_chinese, ranking_year);
+ALTER TABLE university_rankings_arwu_subject ADD INDEX idx_arwu_subject_category (ranking_category);
+ALTER TABLE university_rankings_arwu_subject ADD INDEX idx_arwu_subject_variant (rank_variant);
+
+-- EduRank 6 个地区排名 (≈ 1400 行)
+CREATE TABLE IF NOT EXISTS university_rankings_edurank_region
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL,
+    university_name_english VARCHAR(255)          DEFAULT NULL,
+    university_tags         VARCHAR(100)          DEFAULT NULL,
+    university_tags_state   VARCHAR(100)          DEFAULT NULL,
+    ranking_category        VARCHAR(100)          DEFAULT NULL COMMENT '排名类别（地区名）',
+    ranking_year            VARCHAR(20)           DEFAULT NULL,
+    current_rank_integer    INT                   DEFAULT NULL,
+    current_rank_raw        VARCHAR(50)           DEFAULT NULL,
+    rank_variant            VARCHAR(100)          DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='EduRank 大学地区排名';
+
+ALTER TABLE university_rankings_edurank_region ADD INDEX idx_edurank_region_name_year (university_name_chinese, ranking_year);
+ALTER TABLE university_rankings_edurank_region ADD INDEX idx_edurank_region_category (ranking_category);
+
+-- 下降趋势 (6 source × 多年 ≈ 10000 行)
+CREATE TABLE IF NOT EXISTS university_rankings_declining_trend
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL,
+    university_name_english VARCHAR(255)          DEFAULT NULL,
+    university_tags         VARCHAR(100)          DEFAULT NULL,
+    university_tags_state   VARCHAR(100)          DEFAULT NULL,
+    ranking_category        VARCHAR(100)          DEFAULT NULL COMMENT '原榜单 source slug',
+    ranking_year            VARCHAR(20)           DEFAULT NULL,
+    current_rank_integer    INT                   DEFAULT NULL COMMENT '下降名次（正数 = 下降）',
+    current_rank_raw        VARCHAR(200)          DEFAULT NULL,
+    rank_variant            VARCHAR(100)          DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='大学排名下降趋势';
+
+ALTER TABLE university_rankings_declining_trend ADD INDEX idx_declining_name_year (university_name_chinese, ranking_year);
+ALTER TABLE university_rankings_declining_trend ADD INDEX idx_declining_category (ranking_category);
+
+-- MOSIUR 全球排名 (≈ 8000 行)
+CREATE TABLE IF NOT EXISTS university_rankings_mosiur_world
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL,
+    university_name_english VARCHAR(255)          DEFAULT NULL,
+    university_tags         VARCHAR(100)          DEFAULT NULL,
+    university_tags_state   VARCHAR(100)          DEFAULT NULL,
+    ranking_category        VARCHAR(100)          DEFAULT NULL,
+    ranking_year            VARCHAR(20)           DEFAULT NULL,
+    current_rank_integer    INT                   DEFAULT NULL,
+    current_rank_raw        VARCHAR(50)           DEFAULT NULL,
+    rank_variant            VARCHAR(100)          DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='MOSIUR 大学全球排名';
+
+ALTER TABLE university_rankings_mosiur_world ADD INDEX idx_mosiur_world_name_year (university_name_chinese, ranking_year);
+
+-- RUR 全球学术排名 (≈ 13000 行)
+CREATE TABLE IF NOT EXISTS university_rankings_rur_world
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL,
+    university_name_english VARCHAR(255)          DEFAULT NULL,
+    university_tags         VARCHAR(100)          DEFAULT NULL,
+    university_tags_state   VARCHAR(100)          DEFAULT NULL,
+    ranking_category        VARCHAR(100)          DEFAULT NULL,
+    ranking_year            VARCHAR(20)           DEFAULT NULL,
+    current_rank_integer    INT                   DEFAULT NULL,
+    current_rank_raw        VARCHAR(50)           DEFAULT NULL,
+    rank_variant            VARCHAR(100)          DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='RUR 大学全球学术排名';
+
+ALTER TABLE university_rankings_rur_world ADD INDEX idx_rur_world_name_year (university_name_chinese, ranking_year);
+
+-- US News 学科排名 (51 学科 × 多年 ≈ 30000 行)
+CREATE TABLE IF NOT EXISTS university_rankings_usnews_subject
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL,
+    university_name_english VARCHAR(255)          DEFAULT NULL,
+    university_tags         VARCHAR(100)          DEFAULT NULL,
+    university_tags_state   VARCHAR(100)          DEFAULT NULL,
+    ranking_category        VARCHAR(100)          DEFAULT NULL COMMENT '学科名',
+    ranking_year            VARCHAR(20)           DEFAULT NULL,
+    current_rank_integer    INT                   DEFAULT NULL,
+    current_rank_raw        VARCHAR(50)           DEFAULT NULL,
+    rank_variant            VARCHAR(100)          DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='US News 大学学科排名';
+
+ALTER TABLE university_rankings_usnews_subject ADD INDEX idx_usnews_subject_name_year (university_name_chinese, ranking_year);
+ALTER TABLE university_rankings_usnews_subject ADD INDEX idx_usnews_subject_category (ranking_category);
+
+-- QS 可持续大学排名 (≈ 4000 行)
+CREATE TABLE IF NOT EXISTS university_rankings_qs_sustainability
+(
+    id                      INT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    university_name_chinese VARCHAR(255)          DEFAULT NULL,
+    university_name_english VARCHAR(255)          DEFAULT NULL,
+    university_tags         VARCHAR(100)          DEFAULT NULL,
+    university_tags_state   VARCHAR(100)          DEFAULT NULL,
+    ranking_category        VARCHAR(100)          DEFAULT NULL,
+    ranking_year            VARCHAR(20)           DEFAULT NULL,
+    current_rank_integer    INT                   DEFAULT NULL,
+    current_rank_raw        VARCHAR(50)           DEFAULT NULL,
+    rank_variant            VARCHAR(100)          DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT ='QS 大学可持续排名';
+
+ALTER TABLE university_rankings_qs_sustainability ADD INDEX idx_qs_sustainability_name_year (university_name_chinese, ranking_year);
