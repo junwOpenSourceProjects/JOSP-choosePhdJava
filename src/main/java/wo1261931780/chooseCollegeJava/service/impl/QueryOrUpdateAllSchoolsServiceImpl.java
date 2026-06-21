@@ -113,6 +113,9 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 	}
 	/**
 	 * 查询单个学校的抽屉图表数据
+	 *
+	 * <p>返 4 条 series (qs/qs_cs/usnews/usnews_cs 4 维) + 4 个 legendData,
+	 * 不再硬编码附加 "亚利桑那州立大学" 对比基线 (旧版调试用, 已 100% 污染前端详情页)</p>
 	 */
 
 	@Override
@@ -121,72 +124,53 @@ public class QueryOrUpdateAllSchoolsServiceImpl implements QueryOrUpdateAllSchoo
 		List<Series> series = new ArrayList<>();
 		List<String> strings = new ArrayList<>();
 
-		while (series.size() < 8) {
-			Series series1 = new Series();
-			series1.setName(name1);
-			series1.setType("line");
-			series1.setSmooth(Boolean.TRUE);
-			series1.setEmphasis(new Emphasis("series"));
-			series.add(series1);
-			strings.add(name1);
-		}
-		log.info("series size:{}", series.size());
-		LambdaQueryWrapper<UniversityRankingsEcharts> queryWrapper = new LambdaQueryWrapper<>();
+		log.info("drawerData: query single school 4-dim trend, name={}", name1);
 		// 先精确匹配, 失败再用 like (兼容前端传简称的场景)
 		UniversityRankingsEcharts serviceOne = echartsService.getOne(
 				new LambdaQueryWrapper<UniversityRankingsEcharts>().eq(UniversityRankingsEcharts::getUniversityNameChinese, name1));
 		if (serviceOne == null) {
-			queryWrapper.like(UniversityRankingsEcharts::getUniversityNameChinese, name1);
-			serviceOne = echartsService.getOne(queryWrapper);
+			LambdaQueryWrapper<UniversityRankingsEcharts> likeWrapper = new LambdaQueryWrapper<>();
+			likeWrapper.like(UniversityRankingsEcharts::getUniversityNameChinese, name1);
+			serviceOne = echartsService.getOne(likeWrapper);
 		}
 		if (serviceOne == null) {
 			log.warn("drawerData: 找不到 echarts 大学, name={}", name1);
 			return new EchartsDTO();
 		}
-		UniversityRankingsEcharts serviceTwo = echartsService.getOne(new LambdaQueryWrapper<UniversityRankingsEcharts>().eq(UniversityRankingsEcharts::getUniversityNameChinese, "亚利桑那州立大学"));
-		for (int i = 0; i < series.size(); i++) {
-			if (i == 0) {
-				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingQs(), new TypeReference<>() {
-				}));
-				strings.set(i, name1 + "qs");
-			} else if (i == 1) {
-				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingQsCs(), new TypeReference<>() {
-				}));
-				strings.set(i, name1 + "QsCs");
-			} else if (i == 2) {
-				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingUsnews(), new TypeReference<>() {
-				}));
-				strings.set(i, name1 + "Usnews");
-			} else if (i == 3) {
-				series.get(i).setData(objectMapper.readValue(serviceOne.getRankingUsnewsCs(), new TypeReference<>() {
-				}));
-				strings.set(i, name1 + "UsnewsCs");
-			} else if (i == 4) {
-				series.get(i).setName("亚利桑那州立大学");
-				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingQs(), new TypeReference<>() {
-				}));
-				strings.set(i, "亚利桑那州立大学qs");
-			} else if (i == 5) {
-				series.get(i).setName("亚利桑那州立大学");
-				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingQsCs(), new TypeReference<>() {
-				}));
-				strings.set(i, "亚利桑那州立大学QsCs");
-			} else if (i == 6) {
-				series.get(i).setName("亚利桑那州立大学");
-				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingUsnews(), new TypeReference<>() {
-				}));
-				strings.set(i, "亚利桑那州立大学Usnews");
-			} else if (i == 7) {
-				series.get(i).setName("亚利桑那州立大学");
-				series.get(i).setData(objectMapper.readValue(serviceTwo.getRankingUsnewsCs(), new TypeReference<>() {
-				}));
-				strings.set(i, "亚利桑那州立大学UsnewsCs");
-			}
-		}
+		// 单校 4 维 series (qs / qs_cs / usnews / usnews_cs)
+		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingQs())));
+		strings.add(name1 + "qs");
+		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingQsCs())));
+		strings.add(name1 + "QsCs");
+		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingUsnews())));
+		strings.add(name1 + "Usnews");
+		series.add(buildSeries(name1, parseJsonList(serviceOne.getRankingUsnewsCs())));
+		strings.add(name1 + "UsnewsCs");
+
 		EchartsDTO echartsDTO = new EchartsDTO();
 		echartsDTO.setChatData(new ChartData(series));
 		echartsDTO.setLegendData(strings);
 		return echartsDTO;
+	}
+
+	private Series buildSeries(String name, List<Double> data) {
+		Series s = new Series();
+		s.setName(name);
+		s.setType("line");
+		s.setSmooth(Boolean.TRUE);
+		s.setEmphasis(new Emphasis("series"));
+		s.setData(data);
+		return s;
+	}
+
+	/** 解析 echarts 表里的 JSON 数组字段, 失败返空 list */
+	private List<Double> parseJsonList(String json) {
+		if (json == null || json.isEmpty()) return new ArrayList<>();
+		try {
+			return objectMapper.readValue(json, new TypeReference<>() {});
+		} catch (Exception e) {
+			return new ArrayList<>();
+		}
 	}
 
 	/**
