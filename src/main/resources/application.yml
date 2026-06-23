@@ -1,59 +1,45 @@
 spring:
   application:
-    name: chooseCollegeJava
-  datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/computer_rank?useSSL=true&useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jackson2:
+    name: choosephd-api
+  profiles:
+    active: dev
+  jackson:
     date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
-    serialization:
-      write-dates-as-timestamps: false
-  http:
-    converters:
-      preferred-json-mapper: jackson2
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      database: ${REDIS_DB:0}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 server:
-  port: 8081
-  servlet:
-    context-path: /api/v1
+  port: 18080
+  compression:
+    enabled: true
+  forward-headers-strategy: framework
 
 mybatis-plus:
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
   global-config:
     db-config:
       id-type: auto
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
-  mapper-locations: classpath*:wo1261931780/chooseCollegeJava/mapper/**/*.xml
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: when-authorized
-
-logging:
-  level:
-    wo1261931780.chooseCollegeJava: debug
-    com.baomidou.mybatisplus: debug
+choosephd:
+  data:
+    raw-dir: ${CHOOSEPHD_RAW_DIR:/Users/junw/Desktop/ranking_data 备份 2}
+  security:
+    # 自用工具,默认账密:admin / admin
+    bootstrap-admin-username: admin
+    bootstrap-admin-password: ${CHOOSEPHD_ADMIN_PWD:admin}
+    # JWT 签名密钥(≥32 字节,生产请覆盖)
+    jwt-secret: ${CHOOSEPHD_JWT_SECRET:choosePhd-jwt-secret-please-change-in-prod-32bytes-min}
+    jwt-ttl-hours: 168
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://127.0.0.1:3000

@@ -1,273 +1,54 @@
-# 🎓 JOSP-ChoosePhdJava - 大学排名查询系统后端
+# choosephd-api · 后端服务
 
-![Java](https://img.shields.io/badge/Java-25-orange?logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen?logo=springboot)
-![MyBatis-Plus](https://img.shields.io/badge/MyBatis--Plus-3.5.16-red?logo=mybatis)
-![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue?logo=mysql)
-![License](https://img.shields.io/badge/License-AGPL--3.0-blue)
+> choosePhd 院校选择系统 · 重做版后端。Spring Boot 3.3 + MyBatis-Plus 3.5 + MySQL 8 + Flyway 10 + JWT。
 
-## 📖 项目简介
+## 与旧版本差异
 
-JOSP-ChoosePhdJava 是一个大学排名查询系统的后端服务，提供 QS、US News 等世界大学排名数据的查询、筛选和可视化功能。支持按国家、大洲、排名等条件查询大学信息，为考研/留学择校提供数据支持。
+旧版本每个榜单各自一张表(7 张表)+ 复杂 DTO + 多 controller 分散导入。
+新版本规范化到 5 张核心表 + 2 张字典 + 1 张应用表,详见 `src/main/resources/db/migration/V1__init_choosephd_schema.sql`。
 
-**关联前端项目**: [JOSP-choosePhdVue3](../JOSP-choosePhdVue3)
-
-## 🏗️ 技术栈
-
-| 类别 | 技术 | 版本 |
-|------|------|------|
-| 语言 | Java | 25 |
-| 框架 | Spring Boot | 4.1.0 |
-| ORM | MyBatis-Plus | 3.5.16 |
-| 数据库 | MySQL | 8.0+ / Connector 9.7.0 |
-| 缓存 | Redis | 6.0+ |
-| API文档 | SpringDoc OpenAPI | 3.0.3 |
-| JSON处理 | Jackson2 | 由 Spring Boot 4 托管 |
-| 工具库 | Hutool | 5.8.46 |
-
-## 🚀 快速开始
-
-### 环境要求
-
-- JDK 25+
-- Maven 3.6+
-- MySQL 8.0+
-- Redis 6.0+
-
-### 安装步骤
+## 快速开始
 
 ```bash
-# 1. 克隆项目
-git clone https://github.com/yourusername/JOSP-choosePhdJava.git
+# 1. 确认 MySQL 已启动,root 账号可空密码连接
+mysql -uroot -e "SELECT VERSION();"
 
-# 2. 进入项目目录
-cd JOSP-choosePhdJava
+# 2. 配置(若不是默认 root/空密码)
+#    编辑 src/main/resources/application-dev.yml
 
-# 3. 配置数据库
-# 修改 src/main/resources/application.yml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC
-    username: your_username
-    password: your_password
+# 3. 启动
+./mvnw spring-boot:run
 
-# 4. 安装依赖
-mvn clean install
+# 4. 健康检查
+curl http://localhost:8080/api/v1/health
 
-# 5. 启动项目
-mvn spring-boot:run
+# 5. 登录(默认 admin/admin)
+curl -X POST http://localhost:8080/api/v1/auth/login \
+     -H 'Content-Type: application/json' \
+     -d '{"username":"admin","password":"admin"}'
+
+# 6. 触发全量数据导入(异步可改)
+curl -X POST http://localhost:8080/api/v1/admin/import/run \
+     -H "Authorization: Bearer <token>"
+
+# 7. 查看导入进度
+curl http://localhost:8080/api/v1/admin/import/jobs \
+     -H "Authorization: Bearer <token>"
 ```
 
-### 接口文档
+## 数据源约定
 
-启动项目后访问 Swagger UI 文档地址：`http://localhost:8080/api/v1/swagger-ui/index.html`，OpenAPI JSON 地址：`http://localhost:8080/api/v1/v3/api-docs`
+读取 `${CHOOSEPHD_RAW_DIR:~/Desktop/ranking_data 备份 2}` 下的子目录,目录名 → 榜单 code 映射见
+`com.choosephd.api.importing.RawDataScanner#mapSourceCode`。
 
-## 🗄️ 数据库表结构
+## 端点清单(Phase 1 范围)
 
-### 1. login_user - 用户登录表
-```sql
-CREATE TABLE login_user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
-    username VARCHAR(50) COMMENT '用户名',
-    password VARCHAR(100) COMMENT '密码(MD5加密)',
-    create_time DATETIME COMMENT '创建时间'
-) COMMENT='用户登录表';
-```
+- `GET  /api/v1/health` — 健康检查(公开)
+- `POST /api/v1/auth/login` — 登录拿 JWT(公开)
+- `GET  /api/v1/dict/regions` — 地区字典(公开)
+- `GET  /api/v1/dict/subjects` — 学科字典(公开)
+- `GET  /api/v1/dict/sources` — 榜单元数据(公开)
+- `POST /api/v1/admin/import/run` — 全量扫描并导入(需登录)
+- `GET  /api/v1/admin/import/jobs` — 导入任务列表(需登录)
 
-### 2. university_rankings_all - 大学排名汇总表
-```sql
-CREATE TABLE university_rankings_all (
-    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
-    university_name_chinese VARCHAR(200) COMMENT '大学名称(中文)',
-    university_name_english VARCHAR(200) COMMENT '大学名称(英文)',
-    university_tags VARCHAR(100) COMMENT '大学标签(国家)',
-    university_tags_state VARCHAR(100) COMMENT '大学标签(大洲)',
-    ranking_year INT COMMENT '排名年份',
-    current_rank_integer_qs INT COMMENT 'QS当前排名',
-    current_rank_integer_qs_cs INT COMMENT 'QS计算机排名',
-    current_rank_integer_usnews INT COMMENT 'US News当前排名',
-    current_rank_integer_usnews_cs INT COMMENT 'US News计算机排名'
-) COMMENT='大学排名数据汇总表';
-```
-
-### 3. choose_phd - 院校信息表
-```sql
-CREATE TABLE choose_phd (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
-    university_name VARCHAR(200) COMMENT '大学名称',
-    ranking_data TEXT COMMENT '大学排名相关数据',
-    official_website VARCHAR(500) COMMENT '院校官网链接',
-    recruitment_website VARCHAR(500) COMMENT '社招网站链接',
-    priority INT COMMENT '优先级',
-    country_region VARCHAR(100) COMMENT '国家/地区',
-    scholarship TEXT COMMENT '奖学金信息',
-    salary_amount DECIMAL(10,2) COMMENT '薪资金额',
-    salary_currency VARCHAR(20) COMMENT '薪资货币类型',
-    living_expenses_amount DECIMAL(10,2) COMMENT '生活费用',
-    living_expenses_currency VARCHAR(20) COMMENT '生活费用货币类型',
-    research_field TEXT COMMENT '研究方向',
-    application_requirements TEXT COMMENT '申请要求',
-    application_deadline DATE COMMENT '招生截止时间',
-    drug_prohibition BOOLEAN COMMENT '是否禁毒',
-    gun_control BOOLEAN COMMENT '是否控枪',
-    qs_rank INT COMMENT 'QS排名',
-    usnews_rank INT COMMENT 'US News排名',
-    education_duration VARCHAR(50) COMMENT '学制',
-    application_difficulty VARCHAR(50) COMMENT '申请难度',
-    reference_material TEXT COMMENT '参考资料'
-) COMMENT='院校详细信息表';
-```
-
-### 4. university_rankings_qs - QS排名表
-```sql
-CREATE TABLE university_rankings_qs (
-    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
-    university_name_chinese VARCHAR(200) COMMENT '大学名称(中文)',
-    university_name_english VARCHAR(200) COMMENT '大学名称(英文)',
-    university_tags VARCHAR(100) COMMENT '国家',
-    university_tags_state VARCHAR(100) COMMENT '大洲',
-    ranking_year INT COMMENT '排名年份',
-    current_rank_integer INT COMMENT '当前排名'
-) COMMENT='QS世界大学排名表';
-```
-
-### 5. university_rankings_usnews - US News排名表
-```sql
-CREATE TABLE university_rankings_usnews (
-    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
-    university_name_chinese VARCHAR(200) COMMENT '大学名称(中文)',
-    university_name_english VARCHAR(200) COMMENT '大学名称(英文)',
-    university_tags VARCHAR(100) COMMENT '国家',
-    university_tags_state VARCHAR(100) COMMENT '大洲',
-    ranking_year INT COMMENT '排名年份',
-    current_rank_integer INT COMMENT '当前排名'
-) COMMENT='US News世界大学排名表';
-```
-
-## 📡 主要 API 接口
-
-### 用户认证
-
-| 接口 | 方法 | 描述 |
-|------|------|------|
-| `/vue-element-admin/user/login` | POST | 用户登录（MD5密码验证） |
-| `/vue-element-admin/user/info` | GET | 获取用户角色信息 |
-
-### 大学排名查询
-
-| 接口 | 方法 | 描述 |
-|------|------|------|
-| `/query/queryAll` | GET | 分页查询大学汇总排名 |
-| `/query/queryAllEcharts` | GET | 查询ECharts图表数据 |
-
-## 🎯 核心特性
-
-- **多源排名数据**: 整合QS、US News等多个权威排名数据源
-- **专业排名**: 支持计算机科学等专业单独排名查询
-- **多维筛选**: 按国家、大洲、排名范围等条件灵活筛选
-- **可视化接口**: 提供ECharts图表数据接口，支持数据可视化展示
-- **分页查询**: 支持大数据量分页查询，性能优秀
-- **Knife4j文档**: 集成Knife4j接口文档，方便API测试
-- **多数据源**: 支持动态多数据源配置
-
-## 📁 项目结构
-
-```
-JOSP-choosePhdJava/
-├── src/main/java/wo1261931780/choosecollegejava/
-│   ├── controller/          # 控制器层
-│   ├── service/             # 服务层
-│   ├── mapper/              # 数据访问层
-│   ├── entity/              # 实体类
-│   ├── common/              # 通用类
-│   └── ChooseCollegeJavaApplication.java
-├── src/main/resources/
-│   ├── application.yml       # 应用配置
-│   └── static/              # 静态资源
-├── pom.xml
-├── README.md
-└── SPEC.md
-```
-
-## 系统架构图
-
-```mermaid
-flowchart TB
-    subgraph Frontend["前端展示层"]
-        Vue["Vue3 + Element Plus<br/>大学排名展示"]
-    end
-
-    subgraph API["API 网关层"]
-        Knife4j["Knife4j API 文档"]
-    end
-
-    subgraph Controller["控制器层"]
-        QueryC["QueryController<br/>排名查询"]
-        UserC["LoginController<br/>用户认证"]
-    end
-
-    subgraph Service["业务逻辑层"]
-        RankingS["RankingService<br/>排名服务"]
-        UserS["LoginUserService<br/>用户服务"]
-        CacheS["CacheService<br/>缓存服务"]
-    end
-
-    subgraph Data["数据访问层"]
-        MP["MyBatis-Plus<br/>ORM 框架"]
-        PageHelper["PageHelper<br/>分页插件"]
-        Redis["Redis<br/>缓存支持"]
-    end
-
-    subgraph Database["数据存储层"]
-        MySQL[(MySQL 8.0+<br/>大学排名数据)]
-    end
-
-    Frontend -->|"HTTP REST"| Controller
-    Controller --> Service
-    Service --> MP
-    Service --> Redis
-    MP --> MySQL
-    Redis -->|"缓存加速"| MySQL
-
-    style Frontend fill:#e3f2fd,stroke:#1565c0
-    style API fill:#fff3e0,stroke:#f57c00
-    style Controller fill:#f3e5f5,stroke:#7b1fa2
-    style Service fill:#e8f5e9,stroke:#388e3c
-    style Data fill:#fce4ec,stroke:#c2185b
-    style Database fill:#e0f7fa,stroke:#00838f
-```
-
-## 📝 提交规范
-
-```
-feat: 新功能
-fix: 修复问题
-docs: 文档更新
-style: 代码格式调整
-refactor: 重构
-perf: 性能优化
-test: 测试相关
-chore: 构建/工具相关
-```
-
-## 👥 贡献指南
-
-欢迎贡献代码！请遵循以下步骤：
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 提交 Pull Request
-
-## 📄 许可证
-
-本项目采用 AGPL-3.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 📮 联系方式
-
-项目维护者: JOSP Team
-
----
-
-⭐ 如果这个项目对你有帮助，欢迎 Star 支持！
+后续 Phase 2 将补充:`/api/v1/universities`、`/api/v1/rankings`、`/api/v1/trends`、`/api/v1/compare`。

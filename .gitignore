@@ -75,6 +75,7 @@ application-dev.yml
 
 # Local data
 qs 排名/
+data/raw/
 
 # Compiled class files
 *.class
