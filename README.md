@@ -93,6 +93,19 @@ java -jar target/choosephd-server-1.0.0.jar
 
 Flyway 会自动执行 `src/main/resources/db/migration/` 下的脚本完成建表。
 
+### 5. 默认管理员账号
+
+首次启动时，若 `user_account` 表中不存在配置的管理员账号，系统会自动创建：
+
+```yaml
+choosephd:
+  admin:
+    username: admin
+    password: admin
+```
+
+即默认可用 **admin / admin** 登录。生产环境请务必在 `application.yml` 中修改该密码。
+
 ---
 
 ## 数据流程
