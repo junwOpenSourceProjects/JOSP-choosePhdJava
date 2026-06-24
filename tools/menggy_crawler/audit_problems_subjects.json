@@ -1,0 +1,142 @@
+[
+  {
+    "slug": "arwu-university-subject-rankings-marine-ocean-engineering",
+    "year": 2018,
+    "db_count": 46,
+    "web_total": 44,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "arwu-university-subject-rankings-mining-mineral-engineering",
+    "year": 2018,
+    "db_count": 104,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-architecture-built-environment",
+    "year": 2023,
+    "db_count": 18,
+    "web_total": 15,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-art-history",
+    "year": 2024,
+    "db_count": 42,
+    "web_total": 41,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-engineering-mineral-mining",
+    "year": 2017,
+    "db_count": 54,
+    "web_total": 53,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-engineering-petroleum",
+    "year": 2020,
+    "db_count": 81,
+    "web_total": 76,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-hospitality-leisure-management",
+    "year": 2017,
+    "db_count": 56,
+    "web_total": 49,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-hospitality-leisure-management",
+    "year": 2021,
+    "db_count": 102,
+    "web_total": 98,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-library-information-management",
+    "year": 2021,
+    "db_count": 52,
+    "web_total": 51,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-nursing",
+    "year": 2017,
+    "db_count": 107,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-performing-arts",
+    "year": 2016,
+    "db_count": 107,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-performing-arts",
+    "year": 2017,
+    "db_count": 103,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-performing-arts",
+    "year": 2018,
+    "db_count": 103,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-theology-divinity-religious-studies",
+    "year": 2017,
+    "db_count": 107,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "qs-university-subject-rankings-veterinary-science",
+    "year": 2020,
+    "db_count": 52,
+    "web_total": 51,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "the-university-subject-rankings-arts-humanities",
+    "year": 2011,
+    "db_count": 52,
+    "web_total": 51,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "the-university-subject-rankings-business-economics",
+    "year": 2017,
+    "db_count": 104,
+    "web_total": 99,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "the-university-subject-rankings-clinical-health",
+    "year": 2011,
+    "db_count": 52,
+    "web_total": 51,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "the-university-subject-rankings-clinical-health",
+    "year": 2013,
+    "db_count": 52,
+    "web_total": 51,
+    "issue": "count_mismatch"
+  },
+  {
+    "slug": "usnews-university-subject-rankings-engineering",
+    "year": 2026,
+    "db_count": 1500,
+    "web_total": 1501,
+    "issue": "count_mismatch"
+  }
+]

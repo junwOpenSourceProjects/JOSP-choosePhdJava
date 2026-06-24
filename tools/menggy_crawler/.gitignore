@@ -1,0 +1,23 @@
+# Logs
+*.log
+*.log.gz
+
+# Cache / temp
+discovery_cache.json
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Large downloaded data
+sitemap.xml
+*.xml.gz
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
