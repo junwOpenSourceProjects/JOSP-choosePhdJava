@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.choosephd.repository.UniversityMapper">
+
+    <sql id="baseColumns">
+        u.url_id, u.name_zh, u.name_en, u.name_zh_tw, u.country, u.region,
+        u.badge_url, u.website, u.motto, u.founded_date, u.address,
+        u.created_at, u.updated_at, u.deleted
+    </sql>
+
+    <select id="selectSearchPage" resultType="com.choosephd.entity.University">
+        SELECT
+            <include refid="baseColumns"/>,
+            best.best_rank_value
+        FROM university u
+        LEFT JOIN (
+            SELECT re.university_id, MIN(re.rank_value) AS best_rank_value
+            FROM ranking_entry re
+            WHERE re.deleted = 0
+              AND re.subject_id IS NULL
+              AND re.rank_value IS NOT NULL
+              AND re.rank_value &lt; 9999
+              AND re.source_id IN (4, 11, 16, 19, 46, 54)
+            GROUP BY re.university_id
+        ) best ON u.url_id = best.university_id
+        WHERE u.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.url_id = #{keyword}
+                OR u.name_zh LIKE CONCAT('%', #{keyword}, '%')
+                OR u.name_en LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="country != null and country != ''">
+            AND u.country = #{country}
+        </if>
+        <if test="continent != null and continent != ''">
+            AND (
+                u.country = #{continent}
+                <if test="continentCountries != null and !continentCountries.isEmpty()">
+                    OR u.country IN
+                    <foreach collection="continentCountries" item="c" open="(" separator="," close=")">
+                        #{c}
+                    </foreach>
+                </if>
+            )
+        </if>
+        <choose>
+            <when test="sortBy == 'name'">
+                ORDER BY u.name_en ASC
+            </when>
+            <otherwise>
+                ORDER BY
+                    CASE WHEN best.best_rank_value IS NULL THEN 1 ELSE 0 END ASC,
+                    best.best_rank_value ASC,
+                    u.name_en ASC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectCountries" resultType="java.lang.String">
+        SELECT DISTINCT u.country
+        FROM university u
+        WHERE u.deleted = 0
+          AND u.country IS NOT NULL
+          AND u.country != ''
+          AND u.country != 'unknown'
+          AND u.country NOT IN ('亚洲', '欧洲', '北美洲', '非洲', '南美洲', '大洋洲',
+                                '综合类', '师范类', '理工类', '政法类', '艺术类',
+                                '医药类', '财经类', '体育类', '农林类', '民族类',
+                                '语言类', '军事类')
+          AND u.country NOT REGEXP '^(山东|山西|江苏|河南|新疆|河北|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|辽宁|吉林|黑龙江|内蒙古|宁夏|北京|天津|上海|重庆|香港|澳门|台湾)$'
+        <if test="continent != null and continent != ''">
+            AND (
+                u.country = #{continent}
+                <if test="continentCountries != null and !continentCountries.isEmpty()">
+                    OR u.country IN
+                    <foreach collection="continentCountries" item="c" open="(" separator="," close=")">
+                        #{c}
+                    </foreach>
+                </if>
+            )
+        </if>
+        ORDER BY u.country ASC
+    </select>
+
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.choosephd.repository.RankingEntryMapper">
+
+    <delete id="deleteByNaturalKey">
+        DELETE FROM ranking_entry
+        WHERE university_id = #{universityId}
+          AND source_id = #{sourceId}
+          AND (subject_id = #{subjectId} OR (#{subjectId} IS NULL AND subject_id IS NULL))
+          AND year = #{year}
+    </delete>
+
+    <select id="selectVoPageBySource" resultType="com.choosephd.dto.RankingEntryVo">
+        SELECT
+            re.id,
+            re.university_id,
+            u.name_zh AS university_name_zh,
+            u.name_en AS university_name_en,
+            u.country,
+            re.year,
+            re.rank_display,
+            re.rank_value,
+            re.rank_delta,
+            re.direction,
+            re.subject_id,
+            s.name_zh AS subject_name,
+            re.source_id AS sourceId,
+            rs.name_zh AS sourceName
+        FROM ranking_entry re
+        LEFT JOIN university u ON re.university_id = u.url_id
+        LEFT JOIN subject s ON re.subject_id = s.id
+        LEFT JOIN ranking_source rs ON re.source_id = rs.id
+        WHERE re.deleted = 0
+          AND re.source_id = #{sourceId}
+        <if test="year != null">
+            AND re.year = #{year}
+        </if>
+        ORDER BY re.year DESC,
+                 CASE WHEN re.rank_value IS NULL OR re.rank_value >= 9999 THEN 1 ELSE 0 END ASC,
+                 re.rank_value ASC,
+                 re.id ASC
+    </select>
+
+    <select id="selectVoPageByUniversity" resultType="com.choosephd.dto.RankingEntryVo">
+        SELECT
+            re.id,
+            re.university_id,
+            u.name_zh AS university_name_zh,
+            u.name_en AS university_name_en,
+            u.country,
+            re.year,
+            re.rank_display,
+            re.rank_value,
+            re.rank_delta,
+            re.direction,
+            re.subject_id,
+            s.name_zh AS subject_name,
+            re.source_id AS sourceId,
+            rs.name_zh AS sourceName
+        FROM ranking_entry re
+        LEFT JOIN university u ON re.university_id = u.url_id
+        LEFT JOIN subject s ON re.subject_id = s.id
+        LEFT JOIN ranking_source rs ON re.source_id = rs.id
+        WHERE re.deleted = 0
+          AND re.university_id = #{universityId}
+        <if test="sourceId != null">
+            AND re.source_id = #{sourceId}
+        </if>
+        <if test="year != null">
+            AND re.year = #{year}
+        </if>
+        <if test="overallOnly != null and overallOnly">
+            AND re.subject_id IS NULL
+        </if>
+        ORDER BY re.year DESC,
+                 CASE WHEN re.rank_value IS NULL OR re.rank_value >= 9999 THEN 1 ELSE 0 END ASC,
+                 re.rank_value ASC,
+                 re.id ASC
+    </select>
+
+    <select id="selectSourceSummariesByUniversity" resultType="com.choosephd.dto.UniversitySourceSummary">
+        SELECT
+            source_id,
+            source_name_zh,
+            source_name_en,
+            year AS latest_year,
+            rank_display AS latest_rank_display,
+            rank_value AS latest_rank_value
+        FROM (
+            SELECT
+                rs.id AS source_id,
+                rs.name_zh AS source_name_zh,
+                rs.name_en AS source_name_en,
+                re.year,
+                re.rank_display,
+                re.rank_value,
+                ROW_NUMBER() OVER (PARTITION BY rs.id ORDER BY re.year DESC,
+                    CASE WHEN re.rank_value IS NULL OR re.rank_value >= 9999 THEN 1 ELSE 0 END ASC,
+                    re.rank_value ASC) AS rn
+            FROM ranking_entry re
+            JOIN ranking_source rs ON re.source_id = rs.id
+            WHERE re.deleted = 0
+              AND rs.deleted = 0
+              AND re.university_id = #{universityId}
+        ) t
+        WHERE rn = 1
+        ORDER BY latest_year DESC, source_id ASC
+    </select>
+
+    <select id="selectYearsBySource" resultType="java.lang.Integer">
+        SELECT DISTINCT year
+        FROM ranking_entry
+        WHERE deleted = 0
+          AND source_id = #{sourceId}
+        ORDER BY year DESC
+    </select>
+</mapper>
