@@ -2,6 +2,16 @@ package com.choosephd.dto;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
+/**
+ * 分页转换工具类 — {@link PageQuery} ↔ MyBatis-Plus {@code Page<T>} 互转。
+ *
+ * <p>三个重载：
+ * <ul>
+ *   <li>{@code toPage(PageQuery)} — 用 PageQuery 自带 max=200 限制</li>
+ *   <li>{@code toPage(page, size)} — 直接传 page/size，默认 max=200</li>
+ *   <li>{@code toPage(page, size, maxSize)} — 自定义 max（特殊端点用）</li>
+ * </ul>
+ */
 public class PageUtil {
 
     private PageUtil() {
