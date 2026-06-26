@@ -20,7 +20,7 @@
               AND re.subject_id IS NULL
               AND re.rank_value IS NOT NULL
               AND re.rank_value &lt; 9999
-              AND re.source_id IN (4, 11, 16, 19, 46, 54)
+              AND re.source_id IN (4, 11, 16, 19, 46, 54, 268)
             GROUP BY re.university_id
         ) best ON u.url_id = best.university_id
         <if test="tagIds != null and !tagIds.isEmpty()">
