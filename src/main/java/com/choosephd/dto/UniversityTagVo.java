@@ -8,6 +8,7 @@ public class UniversityTagVo {
     private String nameEn;
     private String category;
     private String color;
+    private String description;
     private Integer sortOrder;
 
     public Integer getId() {
@@ -56,6 +57,14 @@ public class UniversityTagVo {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Integer getSortOrder() {

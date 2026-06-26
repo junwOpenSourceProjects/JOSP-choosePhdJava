@@ -142,6 +142,7 @@ public class UniversityTagService {
         tag.setNameEn(request.getNameEn());
         tag.setCategory(request.getCategory());
         tag.setColor(request.getColor());
+        tag.setDescription(request.getDescription());
         tag.setSortOrder(request.getSortOrder() == null ? 0 : request.getSortOrder());
         tag.setActive(request.getActive() == null ? 1 : request.getActive());
         universityTagMapper.insert(tag);
@@ -176,6 +177,9 @@ public class UniversityTagService {
         }
         if (request.getColor() != null) {
             tag.setColor(request.getColor());
+        }
+        if (request.getDescription() != null) {
+            tag.setDescription(request.getDescription());
         }
         if (request.getSortOrder() != null) {
             tag.setSortOrder(request.getSortOrder());

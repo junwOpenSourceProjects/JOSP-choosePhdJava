@@ -14,7 +14,7 @@ import java.util.Set;
 public interface UniversityTagMapper extends BaseMapper<UniversityTag> {
 
     @Select("""
-            SELECT t.id, t.slug, t.name_zh, t.name_en, t.category, t.color, t.sort_order
+            SELECT t.id, t.slug, t.name_zh, t.name_en, t.category, t.color, t.description, t.sort_order
             FROM university_tag t
             JOIN university_tag_relation r ON r.tag_id = t.id
             WHERE r.university_id = #{universityId}
@@ -25,7 +25,7 @@ public interface UniversityTagMapper extends BaseMapper<UniversityTag> {
     List<UniversityTagVo> selectTagsByUniversity(@Param("universityId") String universityId);
 
     @Select("""
-            SELECT t.id, t.slug, t.name_zh, t.name_en, t.category, t.color, t.sort_order
+            SELECT t.id, t.slug, t.name_zh, t.name_en, t.category, t.color, t.description, t.sort_order
             FROM university_tag t
             WHERE t.active = 1
               AND t.deleted = 0
