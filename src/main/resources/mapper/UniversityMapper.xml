@@ -8,8 +8,8 @@
         u.created_at, u.updated_at, u.deleted
     </sql>
 
-    <select id="selectSearchPage" resultType="com.choosephd.entity.University">
-        SELECT
+    <select id="selectSearchPage" resultType="com.choosephd.dto.UniversityVo">
+        SELECT DISTINCT
             <include refid="baseColumns"/>,
             best.best_rank_value
         FROM university u
@@ -23,6 +23,12 @@
               AND re.source_id IN (4, 11, 16, 19, 46, 54)
             GROUP BY re.university_id
         ) best ON u.url_id = best.university_id
+        <if test="tagIds != null and !tagIds.isEmpty()">
+            JOIN university_tag_relation utr ON utr.university_id = u.url_id AND utr.tag_id IN
+            <foreach collection="tagIds" item="tid" open="(" separator="," close=")">
+                #{tid}
+            </foreach>
+        </if>
         WHERE u.deleted = 0
         <if test="keyword != null and keyword != ''">
             AND (

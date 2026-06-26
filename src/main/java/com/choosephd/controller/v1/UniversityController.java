@@ -5,7 +5,7 @@ import com.choosephd.common.PageResult;
 import com.choosephd.dto.PageQuery;
 import com.choosephd.dto.RankingEntryVo;
 import com.choosephd.dto.UniversityDetailResponse;
-import com.choosephd.entity.University;
+import com.choosephd.dto.UniversityVo;
 import com.choosephd.service.UniversityService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +22,14 @@ public class UniversityController {
     }
 
     @GetMapping
-    public ApiResult<PageResult<University>> searchUniversities(
+    public ApiResult<PageResult<UniversityVo>> searchUniversities(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String continent,
             @RequestParam(required = false) String country,
             @RequestParam(required = false, defaultValue = "bestRank") String sortBy,
+            @RequestParam(required = false) List<Integer> tagIds,
             PageQuery query) {
-        return ApiResult.ok(universityService.searchUniversities(keyword, continent, country, sortBy, query));
+        return ApiResult.ok(universityService.searchUniversities(keyword, continent, country, sortBy, tagIds, query));
     }
 
     @GetMapping("/countries")

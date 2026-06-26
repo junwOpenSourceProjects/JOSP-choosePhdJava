@@ -8,6 +8,7 @@ public class UniversityDetailResponse {
 
     private University university;
     private List<UniversitySourceSummary> sources;
+    private List<UniversityTagVo> tags;
 
     public UniversityDetailResponse() {
     }
@@ -31,5 +32,13 @@ public class UniversityDetailResponse {
 
     public void setSources(List<UniversitySourceSummary> sources) {
         this.sources = sources;
+    }
+
+    public List<UniversityTagVo> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<UniversityTagVo> tags) {
+        this.tags = tags;
     }
 }

@@ -8,6 +8,8 @@ import com.choosephd.dto.PageUtil;
 import com.choosephd.dto.RankingEntryVo;
 import com.choosephd.dto.UniversityDetailResponse;
 import com.choosephd.dto.UniversitySourceSummary;
+import com.choosephd.dto.UniversityTagVo;
+import com.choosephd.dto.UniversityVo;
 import com.choosephd.entity.University;
 import com.choosephd.repository.RankingEntryMapper;
 import com.choosephd.repository.UniversityMapper;
@@ -80,22 +82,46 @@ public class UniversityService {
 
     private final UniversityMapper universityMapper;
     private final RankingEntryMapper rankingEntryMapper;
+    private final UniversityTagService universityTagService;
 
-    public UniversityService(UniversityMapper universityMapper, RankingEntryMapper rankingEntryMapper) {
+    public UniversityService(UniversityMapper universityMapper, RankingEntryMapper rankingEntryMapper,
+                             UniversityTagService universityTagService) {
         this.universityMapper = universityMapper;
         this.rankingEntryMapper = rankingEntryMapper;
+        this.universityTagService = universityTagService;
     }
 
-    public PageResult<University> searchUniversities(String keyword, String continent, String country, String sortBy, PageQuery query) {
+    public PageResult<UniversityVo> searchUniversities(String keyword, String continent, String country,
+                                                        String sortBy, List<Integer> tagIds, PageQuery query) {
         Set<String> continentCountries = continentCountriesOf(continent);
-        IPage<University> page = universityMapper.selectSearchPage(
+        IPage<UniversityVo> page = universityMapper.selectSearchPage(
                 PageUtil.toPage(query),
                 keyword,
                 continent,
                 continentCountries,
                 country,
-                sortBy);
+                sortBy,
+                tagIds);
+        attachTags(page.getRecords());
         return PageResult.of(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
+    }
+
+    private void attachTags(List<UniversityVo> universities) {
+        if (universities == null || universities.isEmpty()) {
+            return;
+        }
+        List<String> ids = universities.stream()
+                .map(University::getUrlId)
+                .distinct()
+                .toList();
+        for (String id : ids) {
+            List<UniversityTagVo> tags = universityTagService.listTagsByUniversity(id);
+            for (UniversityVo vo : universities) {
+                if (id.equals(vo.getUrlId())) {
+                    vo.setTags(tags);
+                }
+            }
+        }
     }
 
     public List<String> listCountries(String continent) {
@@ -116,7 +142,9 @@ public class UniversityService {
             throw new BusinessException("大学不存在");
         }
         List<UniversitySourceSummary> sources = rankingEntryMapper.selectSourceSummariesByUniversity(urlId);
-        return new UniversityDetailResponse(university, sources);
+        UniversityDetailResponse response = new UniversityDetailResponse(university, sources);
+        response.setTags(universityTagService.listTagsByUniversity(urlId));
+        return response;
     }
 
     public PageResult<RankingEntryVo> listUniversityRankings(String urlId, Integer sourceId, Integer year,

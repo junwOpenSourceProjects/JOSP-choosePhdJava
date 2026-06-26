@@ -42,6 +42,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/v1/universities",
                         "/api/v1/universities/*",
                         "/api/v1/universities/*/rankings",
+                        "/api/v1/university-tags",
+                        "/api/v1/university-tags/**",
                         "/api/v1/trends/**",
                         "/api/v1/stats/**",
                         "/api/v1/admin/import/status"
