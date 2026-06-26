@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.choosephd.common.BusinessException;
 import com.choosephd.dto.UniversityTagRequest;
 import com.choosephd.dto.UniversityTagVo;
+import com.choosephd.dto.UniversityTagWithUniversity;
 import com.choosephd.entity.UniversityTag;
 import com.choosephd.entity.UniversityTagRelation;
 import com.choosephd.repository.UniversityTagMapper;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +39,31 @@ public class UniversityTagService {
             return Collections.emptyList();
         }
         return universityTagMapper.selectTagsByUniversity(universityId);
+    }
+
+    /**
+     * 批量按多所大学查标签 — 一次 SQL 解决 N+1。
+     * 返回 Map<universityId, List<UniversityTagVo>>，没标签的大学不在 Map 里（调用方 getOrDefault 空列表）。
+     */
+    public Map<String, List<UniversityTagVo>> listTagsByUniversities(java.util.Collection<String> universityIds) {
+        if (universityIds == null || universityIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<UniversityTagWithUniversity> rows = universityTagMapper.selectTagsByUniversityIds(universityIds);
+        Map<String, List<UniversityTagVo>> result = new HashMap<>();
+        for (UniversityTagWithUniversity row : rows) {
+            UniversityTagVo vo = new UniversityTagVo();
+            vo.setId(row.getId());
+            vo.setSlug(row.getSlug());
+            vo.setNameZh(row.getNameZh());
+            vo.setNameEn(row.getNameEn());
+            vo.setCategory(row.getCategory());
+            vo.setColor(row.getColor());
+            vo.setDescription(row.getDescription());
+            vo.setSortOrder(row.getSortOrder());
+            result.computeIfAbsent(row.getUniversityId(), k -> new java.util.ArrayList<>()).add(vo);
+        }
+        return result;
     }
 
     public Set<String> listUniversityIdsByTag(Integer tagId) {

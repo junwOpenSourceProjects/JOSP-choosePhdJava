@@ -114,13 +114,10 @@ public class UniversityService {
                 .map(University::getUrlId)
                 .distinct()
                 .toList();
-        for (String id : ids) {
-            List<UniversityTagVo> tags = universityTagService.listTagsByUniversity(id);
-            for (UniversityVo vo : universities) {
-                if (id.equals(vo.getUrlId())) {
-                    vo.setTags(tags);
-                }
-            }
+        // 一次 SQL 拿所有大学的标签，Map 按 urlId 分组
+        Map<String, List<UniversityTagVo>> tagsByUniversity = universityTagService.listTagsByUniversities(ids);
+        for (UniversityVo vo : universities) {
+            vo.setTags(tagsByUniversity.getOrDefault(vo.getUrlId(), Collections.emptyList()));
         }
     }
 
