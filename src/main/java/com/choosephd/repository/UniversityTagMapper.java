@@ -11,6 +11,18 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 院校标签字典 mapper — admin 端 CRUD + 公开端 listActiveTags。
+ *
+ * <p>继承 {@code BaseMapper<UniversityTag>}，免费拿到 insert/update/delete/selectById 等基础方法。
+ *
+ * <p>自定义方法：
+ * <ul>
+ *   <li>{@code listAllTags()} — admin 端拉所有标签（含 active=0）</li>
+ *   <li>{@code listActiveTags()} — 公开端只拉 active=1</li>
+ *   <li>{@code listUniversitiesByTag(tagId)} — admin 端查某标签下所有院校</li>
+ * </ul>
+ */
 @Mapper
 public interface UniversityTagMapper extends BaseMapper<UniversityTag> {
 
