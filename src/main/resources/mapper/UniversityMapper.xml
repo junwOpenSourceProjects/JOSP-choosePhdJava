@@ -39,6 +39,10 @@
         <if test="country != null and country != ''">
             AND u.country = #{country}
         </if>
+        <!-- continent 兼容 dirty data: 历史数据有把 continent 名 (如 '亚洲') 误填到 country 列的情况.
+             这里保留 OR u.country = #{continent}, 即使前端传的是 continent 名, 也能匹配脏数据行.
+             同时 OR u.country IN (continentCountries) 匹配正经 country.
+             脏数据规模 < 50 行, 暂时不修, SQL 加注释避免后人误删. -->
         <if test="continent != null and continent != ''">
             AND (
                 u.country = #{continent}
@@ -70,11 +74,16 @@
           AND u.country IS NOT NULL
           AND u.country != ''
           AND u.country != 'unknown'
+          <!-- 过滤掉 continent 名 + 中国省份名 + 院校类型名三类脏数据, 让 SELECT DISTINCT country
+               返干净的"国家级"列表. 脏数据规模 < 50 行 (临时保留 OR 兼容, 等下一次批量清洗时
+               跟前端 country 选择器改造成 continent 分组后再删). -->
           AND u.country NOT IN ('亚洲', '欧洲', '北美洲', '非洲', '南美洲', '大洋洲',
                                 '综合类', '师范类', '理工类', '政法类', '艺术类',
                                 '医药类', '财经类', '体育类', '农林类', '民族类',
                                 '语言类', '军事类')
           AND u.country NOT REGEXP '^(山东|山西|江苏|河南|新疆|河北|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|辽宁|吉林|黑龙江|内蒙古|宁夏|北京|天津|上海|重庆|香港|澳门|台湾)$'
+        <!-- continent 兼容 dirty data: 同 selectSearchPage 注释. 当 continent = '亚洲' 时,
+             既匹配 country='亚洲' (脏数据) 又匹配 country IN ('中国', '日本', ...) (正经国家). -->
         <if test="continent != null and continent != ''">
             AND (
                 u.country = #{continent}
