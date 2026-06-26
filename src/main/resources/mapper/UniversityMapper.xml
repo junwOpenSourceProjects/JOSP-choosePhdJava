@@ -24,9 +24,8 @@
             GROUP BY re.university_id
         ) best ON u.url_id = best.university_id
         <if test="tagIds != null and !tagIds.isEmpty()">
-            JOIN university_tag_relation utr ON utr.university_id = u.url_id AND utr.tag_id IN
-            <foreach collection="tagIds" item="tid" open="(" separator="," close=")">
-                #{tid}
+            <foreach collection="tagIds" item="tid" index="idx">
+                JOIN university_tag_relation utr${idx} ON utr${idx}.university_id = u.url_id AND utr${idx}.tag_id = #{tid}
             </foreach>
         </if>
         WHERE u.deleted = 0
