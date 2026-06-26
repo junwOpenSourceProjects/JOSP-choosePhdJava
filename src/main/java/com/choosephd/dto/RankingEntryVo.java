@@ -12,6 +12,7 @@ public class RankingEntryVo {
     private Integer year;
     private String rankDisplay;
     private Integer rankValue;
+    private java.math.BigDecimal score;
     private Integer rankDelta;
     private Integer direction;
     private Integer subjectId;
@@ -95,6 +96,14 @@ public class RankingEntryVo {
 
     public void setRankValue(Integer rankValue) {
         this.rankValue = rankValue;
+    }
+
+    public java.math.BigDecimal getScore() {
+        return score;
+    }
+
+    public void setScore(java.math.BigDecimal score) {
+        this.score = score;
     }
 
     public Integer getRankDelta() {
