@@ -7,6 +7,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 院校标签公开读 controller — 单端点 GET / 返回所有 active 标签。
+ *
+ * <p>无鉴权要求（标签公开访问）。Admin 写操作在 {@link com.choosephd.controller.v1.UniversityTagAdminController}。
+ *
+ * <p>Service：{@link com.choosephd.service.UniversityTagService}。
+ */
 @RestController
 @RequestMapping("/api/v1/university-tags")
 public class UniversityTagController {

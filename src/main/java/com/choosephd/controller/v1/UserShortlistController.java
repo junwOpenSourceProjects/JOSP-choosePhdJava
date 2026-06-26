@@ -9,6 +9,22 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 用户选校清单 controller — 登录用户专属 CRUD。
+ *
+ * <p>端点：
+ * <ul>
+ *   <li>GET / — 当前用户选校清单</li>
+ *   <li>POST / — 加一项或改优先级 (upsert)</li>
+ *   <li>DELETE /{itemId} — 删一项</li>
+ *   <li>PUT /reorder — 批量改优先级</li>
+ * </ul>
+ *
+ * <p>鉴权：必须登录（{@link com.choosephd.security.AuthInterceptor} 拦截）。
+ * userId 从 {@code request.getAttribute("userId")} 取，避免前端传不可信 userId。
+ *
+ * <p>Service：{@link com.choosephd.service.UserShortlistService}。
+ */
 @RestController
 @RequestMapping("/api/v1/shortlist")
 public class UserShortlistController {

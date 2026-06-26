@@ -11,6 +11,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 院校 controller — 公开读 3 端点 + 院校标签附加。
+ *
+ * <p>端点：
+ * <ul>
+ *   <li>GET / — 院校列表分页（关键字/国家/地区/标签筛选 + 排序）</li>
+ *   <li>GET /countries — 不重复的国家列表（筛选用）</li>
+ *   <li>GET /{urlId} — 单院校详情（基本信息 + 标签 + 历年榜单汇总）</li>
+ * </ul>
+ *
+ * <p>无鉴权要求（数据公开）。
+ *
+ * <p>Service：{@link com.choosephd.service.UniversityService} +
+ * {@link com.choosephd.service.UniversityTagService}（标签批量查询）。
+ */
 @RestController
 @RequestMapping("/api/v1/universities")
 public class UniversityController {

@@ -11,6 +11,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 院校标签 admin controller — 写操作 (新增/改/删) + 全部标签列表（含 disabled）。
+ *
+ * <p>权限：仅 ROLE_ADMIN（{@link com.choosephd.security.AdminInterceptor} 拦截）。
+ *
+ * <p>端点：
+ * <ul>
+ *   <li>GET / — 全部标签（含 active=0）</li>
+ *   <li>POST / — 新增标签</li>
+ *   <li>PUT /{id} — 改标签名/active</li>
+ *   <li>DELETE /{id} — 删标签（软删）</li>
+ *   <li>PUT /{tagId}/universities — 批量替换某标签关联的院校</li>
+ * </ul>
+ *
+ * <p>Service：{@link com.choosephd.service.UniversityTagService}。
+ */
 @RestController
 @RequestMapping("/api/v1/admin/university-tags")
 public class UniversityTagAdminController {
