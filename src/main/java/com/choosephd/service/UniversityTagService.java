@@ -196,7 +196,6 @@ public class UniversityTagService {
         LambdaQueryWrapper<UniversityTagRelation> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UniversityTagRelation::getTagId, id);
         relationMapper.delete(wrapper);
-        tag.setDeleted(1);
-        universityTagMapper.updateById(tag);
+        universityTagMapper.deleteById(id);
     }
 }
