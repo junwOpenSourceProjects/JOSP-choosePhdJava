@@ -18,6 +18,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 用户选校清单 service — 加/删/查/排序四入口。
+ *
+ * <p>每个登录用户维护一份选校清单（每条目含 universityId + priority + note + addedAt），
+ * 用于"对比"页和"我的选校"页的预选数据。
+ *
+ * <p>事务边界：upsertShortlistItem（用户加或改优先级）走 @Transactional，
+ * 删除/查询无事务。
+ *
+ * <p>Controller 入口：{@link com.choosephd.controller.v1.UserShortlistController}。
+ */
 @Service
 public class UserShortlistService {
 

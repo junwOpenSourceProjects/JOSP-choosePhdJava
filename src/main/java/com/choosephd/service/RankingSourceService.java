@@ -18,6 +18,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 排名榜单 source + entry 数据访问 service。
+ *
+ * <p>覆盖：
+ * <ul>
+ *   <li>{@code listActiveSources()} — admin 后台拉所有 active source</li>
+ *   <li>{@code listRankingsBySource(sourceId, page)} — 单榜单下分页查 entry（按 rankValue 升序）</li>
+ *   <li>{@code listEntriesByUniversity(universityId)} — 单院校历年所有榜单 entry</li>
+ * </ul>
+ *
+ * <p>所有写操作集中在 admin controller（{@link com.choosephd.controller.v1.RankingSourceAdminController}），
+ * 本 service 只做查询；权限校验在 controller 入口。
+ */
 @Service
 public class RankingSourceService {
 

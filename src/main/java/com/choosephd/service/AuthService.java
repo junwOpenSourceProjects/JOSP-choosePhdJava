@@ -12,6 +12,20 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * 用户认证服务 — 注册/登录/me 三个核心入口。
+ *
+ * <p>负责：
+ * <ul>
+ *   <li>用户名/密码注册（密码 BCrypt 加密入库）</li>
+ *   <li>用户名/密码登录（验证 BCrypt hash + 签发 JWT）</li>
+ *   <li>me — 用 userId 查 user 公开信息（不含密码 hash）</li>
+ * </ul>
+ *
+ * <p>鉴权链路下游：{@link com.choosephd.security.AuthInterceptor} 验 JWT 写
+ * {@code request.setAttribute("userId", ...)}，本 service 不直接读 request attribute，
+ * 由 controller 透传 userId 进来。
+ */
 @Service
 public class AuthService {
 

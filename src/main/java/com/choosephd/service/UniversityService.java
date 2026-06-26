@@ -22,6 +22,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 院校数据核心 service — 列表/详情/标签/榜单汇总四大入口。
+ *
+ * <p>覆盖：
+ * <ul>
+ *   <li>{@code searchPage} — 院校列表分页（关键字/国家/地区/标签筛选 + 排序）</li>
+ *   <li>{@code listCountries} — 不重复的国家列表（用于筛选下拉）</li>
+ *   <li>{@code getDetail} — 单院校详情（基本信息 + 标签 + 历年榜单汇总）</li>
+ *   <li>{@code attachTags} — 批量查询院校标签（用 {@link UniversityTagService#listTagsByUniversities}）</li>
+ * </ul>
+ *
+ * <p>批量查询：从 N+1（每校一次 selectList）优化为单次 IN 查询，详情页 20 校 → 1 SQL。
+ *
+ * <p>CONTINENT_COUNTRIES 静态常量：continent (亚洲/欧洲等) → Set&lt;country&gt; 映射，
+ * SQL OR u.country IN (...) 用。同时 SQL 还有 OR u.country = #{continent} 兼容脏数据
+ * （参考 UniversityMapper.xml 注释）。
+ */
 @Service
 public class UniversityService {
 

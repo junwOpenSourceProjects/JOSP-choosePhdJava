@@ -12,6 +12,15 @@ import com.choosephd.repository.SubjectMapper;
 import com.choosephd.repository.UniversityMapper;
 import org.springframework.stereotype.Service;
 
+/**
+ * 首页 Dashboard 聚合统计 service。
+ *
+ * <p>返回 {@link com.choosephd.dto.StatsOverviewResponse}：院校总数 / 榜单总数 /
+ * 排名条目总数 / 学科总数 / 最近更新时间。所有数据从 MyBatis-Plus count 查询直接返回，
+ * 不做复杂聚合 (单字段 count 走索引，毫秒级)。
+ *
+ * <p>Controller 入口：{@link com.choosephd.controller.v1.StatsController#getOverview}。
+ */
 @Service
 public class StatsService {
 

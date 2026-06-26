@@ -19,6 +19,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 院校标签 service — admin 写 + 公开读 + 院校-标签关联管理。
+ *
+ * <p>三个实体：university_tag（标签字典）、university_tag_relation（多对多关联）、
+ * {@link com.choosephd.dto.UniversityTagVo}（admin 列表展示）。
+ *
+ * <p>核心方法：
+ * <ul>
+ *   <li>{@code listAllTags} — admin 端拉所有 tag（含 active=0 禁用）</li>
+ *   <li>{@code listActiveTags} — 公开端只拉 active=1</li>
+ *   <li>{@code listTagsByUniversities} — 批量查 N 校对应的标签（取代 N+1）</li>
+ *   <li>{@code setUniversityTags} — admin 一次性替换某校所有 tag 关联</li>
+ * </ul>
+ *
+ * <p>事务边界：{@code setUniversityTags} 走 @Transactional（先删后插保证不重复）。
+ *
+ * <p>Controller 入口：{@link com.choosephd.controller.v1.UniversityTagAdminController}
+ * 和 {@link com.choosephd.controller.v1.UniversityController}（公开读）。
+ */
 @Service
 public class UniversityTagService {
 
