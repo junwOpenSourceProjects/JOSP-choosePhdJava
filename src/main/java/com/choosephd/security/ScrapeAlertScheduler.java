@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * <p>触发频率：每 10 分钟（{@code fixedRate = 600000}）。
  * <p>告警阈值：默认 50 次/24h（{@code scrape.alert.threshold-per-24h}）。
- * <p>告警渠道：当前仅打 {@code WARN} 日志，留口子接 webhook / 邮件 / 钉钉机器人。
+ * <p>告警渠道：可配置 {@code scrape.alert.channels=log,webhook}（{@link AlertNotifier} 实现 Bean）。
  *
  * <p>反爬虫告警不应误伤内网（127.0.0.1/192.168.x），因此 dev 环境阈值可调高或
  * 完全关闭（{@code scrape.alert.enabled = false}）。
@@ -29,17 +29,20 @@ public class ScrapeAlertScheduler {
     private static final Logger log = LoggerFactory.getLogger(ScrapeAlertScheduler.class);
 
     private final ScrapeAuditMapper scrapeAuditMapper;
+    private final List<AlertNotifier> notifiers;
     private final boolean enabled;
     private final int thresholdPer24h;
     private final int windowHours;
     private final int sampleLimit;
 
     public ScrapeAlertScheduler(ScrapeAuditMapper scrapeAuditMapper,
+                                List<AlertNotifier> notifiers,
                                 @Value("${scrape.alert.enabled:true}") boolean enabled,
                                 @Value("${scrape.alert.threshold-per-24h:50}") int thresholdPer24h,
                                 @Value("${scrape.alert.window-hours:24}") int windowHours,
                                 @Value("${scrape.alert.sample-limit:500}") int sampleLimit) {
         this.scrapeAuditMapper = scrapeAuditMapper;
+        this.notifiers = notifiers == null ? List.of() : notifiers;
         this.enabled = enabled;
         this.thresholdPer24h = thresholdPer24h;
         this.windowHours = windowHours;
@@ -76,9 +79,7 @@ public class ScrapeAlertScheduler {
         for (Map.Entry<String, Long> e : counts.entrySet()) {
             if (e.getValue() >= thresholdPer24h) {
                 riskyCount++;
-                // 真实部署应接 webhook / 邮件 / 钉钉机器人；当前仅日志
-                log.warn("ALERT scrape: ip={} count={} window={}h threshold={} (action: consider block)",
-                        e.getKey(), e.getValue(), windowHours, thresholdPer24h);
+                notifyRisk(e.getKey(), e.getValue());
             }
         }
         if (riskyCount > 0) {
@@ -90,7 +91,27 @@ public class ScrapeAlertScheduler {
         }
     }
 
+    private void notifyRisk(String ip, long count) {
+        Map<String, Object> extra = new LinkedHashMap<>();
+        extra.put("ip", ip);
+        extra.put("count", count);
+        extra.put("window", windowHours + "h");
+        extra.put("threshold", thresholdPer24h);
+        extra.put("action", "consider block");
+        String title = "🚨 ALERT scrape risky IP";
+        String message = String.format("IP %s hit %d blocks in last %dh (threshold=%d)",
+                ip, count, windowHours, thresholdPer24h);
+        for (AlertNotifier n : notifiers) {
+            try {
+                n.send(title, message, extra);
+            } catch (Exception e) {
+                log.warn("AlertNotifier {} failed: {}", n.channelName(), e.getMessage());
+            }
+        }
+    }
+
     // 暴露为包内可见，方便单测
     boolean isEnabled() { return enabled; }
     int getThreshold() { return thresholdPer24h; }
+    int getNotifierCount() { return notifiers.size(); }
 }

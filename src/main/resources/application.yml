@@ -50,6 +50,21 @@ choosephd:
     username: admin
     password: admin
 
+# 反爬虫告警 — ScrapeAlertScheduler 配置
+# channels: 逗号分隔启用的告警通道（log 永远可用，webhook / 自定义通道可加）
+# threshold-per-24h: 24h 内单 IP 拦截次数阈值（dev 默认 50，生产可调高）
+# window-hours: 扫描窗口（小时）
+# sample-limit: 每次扫描的最大样本数（listRecent 上限）
+# webhook-url: 启用 webhook 时必填（钉钉 / 飞书 / Slack / 自建系统均可）
+scrape:
+  alert:
+    enabled: true
+    channels: log
+    threshold-per-24h: 50
+    window-hours: 24
+    sample-limit: 500
+    webhook-url: ""
+
 springdoc:
   api-docs:
     path: /api-docs
