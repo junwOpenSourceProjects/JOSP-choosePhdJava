@@ -225,6 +225,31 @@ python translate_subjects.py
 
 ---
 
+## 安全与反爬虫
+
+### 三层防护（按 filter order）
+
+1. **L1 CORS** (默认 Spring) — 跨域校验
+2. **L2 AntiScrapeFilter** (order 240) — UA 黑名单拦截（python-requests / curl / scrapy / HeadlessChrome / wget / 空 UA）
+3. **L3 RateLimitFilter** (order 250) — Bucket4j 限流（默认 30 req/min/IP，含 Retry-After header）
+4. **L4 GeoFilter** (order 260) — 国家解析（X-Country / CF-IPCountry / 本机 fallback）
+
+### scrape_audit 表 + 告警 scheduler
+
+每次 403/429 拒绝会写入 `scrape_audit` 表（IP / UA / path / reason）。`ScrapeAlertScheduler` 每 10 分钟扫一次，单 IP 24h 拦截 ≥ 50 次触发 WARN 日志。
+
+### Admin 审计端点（无需鉴权，仅限内网）
+
+- `GET /api/v1/admin/scrape-audit/recent?limit=50`
+- `GET /api/v1/admin/scrape-audit/ip-count?ip=X&hours=24`
+- `GET /api/v1/admin/scrape-audit/risky-ips?hours=24&threshold=50`
+
+### GEO 解析
+
+详见 [GEO.md](GEO.md) — 12 国枚举 + nginx 部署示例 + 集成 P1-P5 优先级。
+
+---
+
 ## License
 
 MIT
