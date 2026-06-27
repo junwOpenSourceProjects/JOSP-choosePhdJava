@@ -47,7 +47,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/v1/trends/**",
                         "/api/v1/stats/**",
                         "/api/v1/geo/**",
-                        "/api/v1/admin/import/status"
+                        "/api/v1/admin/import/status",
+                        "/api/v1/admin/scrape-audit/**"
                 );
     }
 }
