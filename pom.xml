@@ -25,6 +25,7 @@
         <jjwt.version>0.12.6</jjwt.version>
         <commons-csv.version>1.11.0</commons-csv.version>
         <hutool.version>5.8.36</hutool.version>
+        <bucket4j.version>8.10.1</bucket4j.version>
     </properties>
 
     <dependencies>
@@ -121,6 +122,11 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
         </dependency>
     </dependencies>
 
