@@ -1,5 +1,6 @@
 package com.choosephd.config;
 
+import com.choosephd.security.AdminInterceptor;
 import com.choosephd.security.AuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -10,9 +11,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
+    private final AdminInterceptor adminInterceptor;
 
-    public WebConfig(AuthInterceptor authInterceptor) {
+    public WebConfig(AuthInterceptor authInterceptor, AdminInterceptor adminInterceptor) {
         this.authInterceptor = authInterceptor;
+        this.adminInterceptor = adminInterceptor;
     }
 
     @Override
@@ -26,6 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 1) AuthInterceptor 优先 — 校验 JWT 并把 userId/role 写入 request attribute
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/api/v1/**")
                 .excludePathPatterns(
@@ -46,9 +50,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/v1/university-tags/**",
                         "/api/v1/trends/**",
                         "/api/v1/stats/**",
-                        "/api/v1/geo/**",
-                        "/api/v1/admin/import/status",
-                        "/api/v1/admin/scrape-audit/**"
+                        "/api/v1/geo/**"
+                        // 注：admin/** 不再 exclude — AdminInterceptor 会兜底
                 );
+
+        // 2) AdminInterceptor 后续 — 校验 ROLE_ADMIN（依赖 AuthInterceptor 已写入 role attr）
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/api/v1/admin/**");
     }
 }
