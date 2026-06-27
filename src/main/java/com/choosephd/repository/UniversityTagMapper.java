@@ -39,21 +39,11 @@ public interface UniversityTagMapper extends BaseMapper<UniversityTag> {
 
     /**
      * 批量查询多所大学的标签 — 解决 N+1 查询
-     * 一次 SQL 返回 (urlId, tagVo) 对，前端在 service 层按 urlId 分组
+     * 一次 SQL 返回 (urlId, tagVo) 对，前端在 service 层按 urlId 分组。
+     *
+     * <p>实现位于 {@code mapper/UniversityTagMapper.xml}（MyBatis 注解不解析
+     * {@code <foreach>} 等 XML 元素，必须用 XML mapper 才能跑动态 SQL）。
      */
-    @Select("""
-            SELECT r.university_id AS university_id,
-                   t.id, t.slug, t.name_zh, t.name_en, t.category, t.color, t.description, t.sort_order
-            FROM university_tag_relation r
-            JOIN university_tag t ON t.id = r.tag_id
-            WHERE r.university_id IN
-                <foreach collection='universityIds' item='uid' open='(' separator=',' close=')'>
-                    #{uid}
-                </foreach>
-              AND t.active = 1
-              AND t.deleted = 0
-            ORDER BY r.university_id, t.sort_order ASC, t.id ASC
-            """)
     List<UniversityTagWithUniversity> selectTagsByUniversityIds(@Param("universityIds") java.util.Collection<String> universityIds);
 
     @Select("""

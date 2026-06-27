@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.choosephd.repository.UniversityTagMapper">
+
+    <!--
+        批量查询多所大学的标签 — 一次 SQL 返回所有 (urlId, tagVo) 对，
+        替代 N+1 查询。前端在 service 层按 urlId 分组成 Map。
+
+        真凶：原 @Select 注解 + <foreach> 组合非法 — MyBatis 注解字符串不解析 XML 元素，
+        把 <foreach> 字面发给 MySQL 报 syntax error / 'uid' parameter not found.
+        修法搬到 XML 文件。
+    -->
+    <select id="selectTagsByUniversityIds"
+            resultType="com.choosephd.dto.UniversityTagWithUniversity">
+        SELECT r.university_id AS university_id,
+               t.id, t.slug, t.name_zh, t.name_en, t.category, t.color, t.description, t.sort_order
+        FROM university_tag_relation r
+        JOIN university_tag t ON t.id = r.tag_id
+        WHERE r.university_id IN
+            <foreach collection='universityIds' item='uid' open='(' separator=',' close=')'>
+                #{uid}
+            </foreach>
+          AND t.active = 1
+          AND t.deleted = 0
+        ORDER BY r.university_id, t.sort_order ASC, t.id ASC
+    </select>
+
+</mapper>
