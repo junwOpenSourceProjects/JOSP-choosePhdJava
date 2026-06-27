@@ -3,8 +3,11 @@ package com.choosephd.security;
 /**
  * Filter / Interceptor 顺序常量集中定义，避免 magic number 散落各处。
  *
- * <p>执行顺序：{@link #ANTI_SCRAPE} (200) → Spring Security 默认链 (300)
- * → {@link com.choosephd.security.AuthInterceptor} (WebConfig 注册 500)。
+ * <p>执行顺序：
+ * <pre>
+ *   ANTI_SCRAPE (200) → RATE_LIMIT (250) → SPRING_SECURITY (300)
+ *                   → AUTH_INTERCEPTOR (500)
+ * </pre>
  */
 public final class Ordered {
 
@@ -16,6 +19,9 @@ public final class Ordered {
 
     /** AuthInterceptor 在 WebConfig 中通过 addPathPatterns 注册，order 500。 */
     public static final int AUTH_INTERCEPTOR = 500;
+
+    /** L3 频率限制 filter — 紧跟 AntiScrapeFilter，已通过 UA 黑名单的合法请求才进入限流。 */
+    public static final int RATE_LIMIT = 250;
 
     private Ordered() {}
 }
