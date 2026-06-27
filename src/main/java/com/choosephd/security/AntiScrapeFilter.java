@@ -1,6 +1,8 @@
 package com.choosephd.security;
 
 import com.choosephd.common.ApiResult;
+import com.choosephd.entity.ScrapeAudit;
+import com.choosephd.repository.ScrapeAuditMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,7 +17,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 /**
@@ -32,9 +36,10 @@ import java.util.regex.Pattern;
  * 仅过滤可执行脚本与自动化框架的明显标记，避免误伤真实用户。
  *
  * <p>命中后按项目统一 {@link ApiResult} 格式返 JSON，{@code Content-Type: application/json;charset=UTF-8}，
- * 与 {@link AuthInterceptor} 保持一致。
+ * 与 {@link AuthInterceptor} 保持一致；同时写入 {@code scrape_audit} 表供 admin 审计与告警。
  *
  * @see com.choosephd.security.SecurityConfig
+ * @see com.choosephd.security.RateLimitFilter
  */
 @Component
 @Order(Ordered.ANTI_SCRAPE)
@@ -61,7 +66,16 @@ public class AntiScrapeFilter extends OncePerRequestFilter {
             Pattern.compile("Java/", Pattern.CASE_INSENSITIVE)
     );
 
+    private final ScrapeAuditMapper scrapeAuditMapper;
+
+    /** 简单 ID 生成器（基于毫秒 + 计数器，全局递增）。 */
+    private final AtomicLong idSequence = new AtomicLong(System.currentTimeMillis() * 1000);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public AntiScrapeFilter(ScrapeAuditMapper scrapeAuditMapper) {
+        this.scrapeAuditMapper = scrapeAuditMapper;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -72,6 +86,7 @@ public class AntiScrapeFilter extends OncePerRequestFilter {
         if (reason != null) {
             log.warn("Anti-scrape reject: ip={} ua=\"{}\" path={} reason={}",
                     request.getRemoteAddr(), ua, request.getRequestURI(), reason);
+            writeAudit(request, 403, reason);
             writeForbidden(response, reason);
             return;
         }
@@ -92,6 +107,25 @@ public class AntiScrapeFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    private void writeAudit(HttpServletRequest request, int statusCode, String reason) {
+        try {
+            ScrapeAudit audit = new ScrapeAudit();
+            audit.setId(idSequence.incrementAndGet());
+            audit.setIp(request.getRemoteAddr());
+            String ua = request.getHeader("User-Agent");
+            audit.setUserAgent(ua != null && ua.length() > 500 ? ua.substring(0, 500) : ua);
+            audit.setMethod(request.getMethod());
+            String path = request.getRequestURI();
+            audit.setPath(path != null && path.length() > 500 ? path.substring(0, 500) : path);
+            audit.setStatusCode(statusCode);
+            audit.setRejectReason(reason.length() > 100 ? reason.substring(0, 100) : reason);
+            audit.setCreatedAt(LocalDateTime.now());
+            scrapeAuditMapper.insert(audit);
+        } catch (Exception e) {
+            log.error("scrape_audit insert failed", e);
+        }
     }
 
     private void writeForbidden(HttpServletResponse response, String reason) throws IOException {
