@@ -125,7 +125,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             audit.setCreatedAt(LocalDateTime.now());
             scrapeAuditMapper.insert(audit);
         } catch (Exception e) {
-            log.error("scrape_audit insert failed", e);
+            log.error("scrape_audit insert failed: status={} reason={}", statusCode, reason, e);
         }
     }
 
