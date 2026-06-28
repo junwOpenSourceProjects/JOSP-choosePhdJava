@@ -12,12 +12,14 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 反爬虫告警 scheduler — 定期扫描 scrape_audit 表，单 IP 24h 拦截超阈值触发告警。
  *
  * <p>触发频率：每 10 分钟（{@code fixedRate = 600000}）。
  * <p>告警阈值：默认 50 次/24h（{@code scrape.alert.threshold-per-24h}）。
+ * <p>告警冷却：默认 24h 同 IP 不重复发（{@code scrape.alert.cooldown-hours}），避免 10 分钟 spam log 与外部告警通道滥用。
  * <p>告警渠道：可配置 {@code scrape.alert.channels=log,webhook}（{@link AlertNotifier} 实现 Bean）。
  *
  * <p>反爬虫告警不应误伤内网（127.0.0.1/192.168.x），因此 dev 环境阈值可调高或
@@ -34,19 +36,25 @@ public class ScrapeAlertScheduler {
     private final int thresholdPer24h;
     private final int windowHours;
     private final int sampleLimit;
+    private final int alertCooldownHours;
+
+    /** IP → 上次告警时间 (in-memory), 跨重启重置, 但避 10 分钟重复 spam. */
+    private final Map<String, LocalDateTime> lastAlertByIp = new ConcurrentHashMap<>();
 
     public ScrapeAlertScheduler(ScrapeAuditMapper scrapeAuditMapper,
                                 List<AlertNotifier> notifiers,
                                 @Value("${scrape.alert.enabled:true}") boolean enabled,
                                 @Value("${scrape.alert.threshold-per-24h:50}") int thresholdPer24h,
                                 @Value("${scrape.alert.window-hours:24}") int windowHours,
-                                @Value("${scrape.alert.sample-limit:500}") int sampleLimit) {
+                                @Value("${scrape.alert.sample-limit:500}") int sampleLimit,
+                                @Value("${scrape.alert.cooldown-hours:24}") int alertCooldownHours) {
         this.scrapeAuditMapper = scrapeAuditMapper;
         this.notifiers = notifiers == null ? List.of() : notifiers;
         this.enabled = enabled;
         this.thresholdPer24h = thresholdPer24h;
         this.windowHours = windowHours;
         this.sampleLimit = sampleLimit;
+        this.alertCooldownHours = alertCooldownHours;
     }
 
     /**
@@ -76,18 +84,29 @@ public class ScrapeAlertScheduler {
             }
         }
         int riskyCount = 0;
+        int suppressedCount = 0;
+        LocalDateTime now = LocalDateTime.now();
         for (Map.Entry<String, Long> e : counts.entrySet()) {
             if (e.getValue() >= thresholdPer24h) {
                 riskyCount++;
-                notifyRisk(e.getKey(), e.getValue());
+                String ip = e.getKey();
+                LocalDateTime lastAlert = lastAlertByIp.get(ip);
+                if (lastAlert != null && lastAlert.isAfter(now.minusHours(alertCooldownHours))) {
+                    // 冷却期内, 跳过重复告警, 不调用 notifier
+                    suppressedCount++;
+                    log.debug("ScrapeAlertScheduler: IP {} in cooldown until {}, skip alert",
+                            ip, lastAlert.plusHours(alertCooldownHours));
+                    continue;
+                }
+                notifyRisk(ip, e.getValue());
+                lastAlertByIp.put(ip, now);
             }
         }
         if (riskyCount > 0) {
-            log.warn("ScrapeAlertScheduler: {} risky IPs in last {}h (threshold={})",
-                    riskyCount, windowHours, thresholdPer24h);
+            log.warn("ScrapeAlertScheduler: {} risky IPs in last {}h (threshold={}), {} suppressed by cooldown",
+                    riskyCount, windowHours, thresholdPer24h, suppressedCount);
         } else {
-            log.debug("ScrapeAlertScheduler: clean, {} unique IPs in last {}h",
-                    counts.size(), windowHours);
+            log.debug("ScrapeAlertScheduler: clean, {} unique IPs in last {}h", counts.size(), windowHours);
         }
     }
 
@@ -114,4 +133,6 @@ public class ScrapeAlertScheduler {
     boolean isEnabled() { return enabled; }
     int getThreshold() { return thresholdPer24h; }
     int getNotifierCount() { return notifiers.size(); }
+    /** 单测 + 端到端 verify 用, 看 in-memory 冷却状态. */
+    int getTrackedIpCount() { return lastAlertByIp.size(); }
 }

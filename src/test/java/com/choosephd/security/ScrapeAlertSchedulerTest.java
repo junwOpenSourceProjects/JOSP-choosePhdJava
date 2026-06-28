@@ -46,14 +46,15 @@ class ScrapeAlertSchedulerTest {
                 true,   // enabled
                 50,     // thresholdPer24h
                 24,     // windowHours
-                500);   // sampleLimit
+                500,    // sampleLimit
+                24);    // alertCooldownHours
     }
 
     @Test
     void scanRiskyIps_disabled_skipsBeforeCallingMapper() {
         // enabled 检查在 scanRiskyIps (public), 不在 doScan (package-private)
         ScrapeAlertScheduler disabled = new ScrapeAlertScheduler(mapper, List.of(logNotifier),
-                false, 50, 24, 500);
+                false, 50, 24, 500, 24);
 
         disabled.scanRiskyIps();
 
@@ -166,5 +167,72 @@ class ScrapeAlertSchedulerTest {
         scheduler.doScan();
 
         verifyNoInteractions(logNotifier);
+    }
+
+    // ============ 冷却机制新测试 (Round 6) ============
+
+    @Test
+    void doScan_aboveThreshold_firstTime_callsNotifiers_andTracksIp() {
+        // 51 次同一 IP, 第一次扫描 → 触发告警 + 入 lastAlertByIp
+        LocalDateTime now = LocalDateTime.now();
+        List<ScrapeAudit> records = new ArrayList<>();
+        for (int i = 0; i < 51; i++) {
+            ScrapeAudit a = new ScrapeAudit();
+            a.setIp("198.51.100.42");
+            a.setCreatedAt(now.minusMinutes(i));
+            records.add(a);
+        }
+        when(mapper.listRecent(anyInt())).thenReturn(records);
+
+        scheduler.doScan();
+
+        // notifier 被调用
+        verify(logNotifier, times(1)).send(anyString(), anyString(), any());
+        // in-memory 跟踪 1 个 IP
+        assertEquals(1, scheduler.getTrackedIpCount());
+    }
+
+    @Test
+    void doScan_sameIpTwiceWithinCooldown_secondCallSuppressed() {
+        // 第一次扫描触发 + 入冷却, 第二次同一 IP 应跳过 notifier
+        LocalDateTime now = LocalDateTime.now();
+        List<ScrapeAudit> records = new ArrayList<>();
+        for (int i = 0; i < 51; i++) {
+            ScrapeAudit a = new ScrapeAudit();
+            a.setIp("198.51.100.99");
+            a.setCreatedAt(now.minusMinutes(i));
+            records.add(a);
+        }
+        when(mapper.listRecent(anyInt())).thenReturn(records);
+
+        scheduler.doScan();  // 第一次: 触发
+        scheduler.doScan();  // 第二次: 冷却中, 跳过
+
+        // 只调用 1 次 (第二次被冷却跳过)
+        verify(logNotifier, times(1)).send(anyString(), anyString(), any());
+        verify(webhookNotifier, times(1)).send(anyString(), anyString(), any());
+    }
+
+    @Test
+    void doScan_differentIpsBothAboveThreshold_bothAlertOnce() {
+        // 2 个 IP 都超阈值, 互不影响, 各发 1 次
+        LocalDateTime now = LocalDateTime.now();
+        List<ScrapeAudit> records = new ArrayList<>();
+        for (int ip = 1; ip <= 2; ip++) {
+            for (int i = 0; i < 51; i++) {
+                ScrapeAudit a = new ScrapeAudit();
+                a.setIp("198.51.100." + ip);
+                a.setCreatedAt(now.minusMinutes(i));
+                records.add(a);
+            }
+        }
+        when(mapper.listRecent(anyInt())).thenReturn(records);
+
+        scheduler.doScan();
+
+        // 2 个不同 IP 各发 1 次, 总共 2 次
+        verify(logNotifier, times(2)).send(anyString(), anyString(), any());
+        verify(webhookNotifier, times(2)).send(anyString(), anyString(), any());
+        assertEquals(2, scheduler.getTrackedIpCount());
     }
 }
