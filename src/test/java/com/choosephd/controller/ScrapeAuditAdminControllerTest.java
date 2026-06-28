@@ -10,10 +10,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -172,7 +176,102 @@ class ScrapeAuditAdminControllerTest {
                 .andExpect(jsonPath("$.data.top.length()").value(0));
     }
 
-    private static ScrapeAudit newScrapeAudit(String ip, LocalDateTime createdAt) {
+    // ============ /export CSV 端点测试 (Round 8) ============
+
+    @Test
+    void export_default24h_returnsCsvWithBomAndHeader() throws Exception {
+        // UTF-8 BOM 头 + 表头 + 1 条数据
+        LocalDateTime now = LocalDateTime.now();
+        ScrapeAudit a = newScrapeAudit("1.2.3.4", now);
+        a.setId(123L);
+        a.setMethod("GET");
+        a.setPath("/api/v1/universities");
+        a.setStatusCode(403);
+        a.setRejectReason("Blocked UA pattern: curl/8.7.1");
+        a.setUserAgent("curl/8.7.1");
+        when(scrapeAuditMapper.listSince(any(LocalDateTime.class), eq(10000))).thenReturn(List.of(a));
+
+        var result = mockMvc.perform(get("/api/v1/admin/scrape-audit/export"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+                .andExpect(header().string("Content-Disposition",
+                        org.hamcrest.Matchers.matchesPattern(
+                                "attachment; filename=\"scrape-audit_24h_\\d{8}_\\d{6}\\.csv\";"
+                                        + " filename\\*=UTF-8''scrape-audit_24h_\\d{8}_\\d{6}\\.csv")))
+                .andReturn();
+
+        String body = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        org.junit.jupiter.api.Assertions.assertTrue(body.startsWith("\uFEFF"),
+                "缺 BOM 头: body=" + body.substring(0, 10));
+        org.junit.jupiter.api.Assertions.assertTrue(
+                body.contains("id,created_at,ip,method,path,status_code,reject_reason,user_agent\n"),
+                "缺表头: " + body);
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains(",1.2.3.4,GET,/api/v1/universities,403,"),
+                "数据行错: " + body);
+    }
+
+    @Test
+    void export_hoursZero_callsListRecent_forAllHistory() throws Exception {
+        when(scrapeAuditMapper.listRecent(10000)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/admin/scrape-audit/export").param("hours", "0"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition",
+                        org.hamcrest.Matchers.containsString("scrape-audit_all_")));
+
+        verify(scrapeAuditMapper).listRecent(10000);
+        verify(scrapeAuditMapper, never()).listSince(any(LocalDateTime.class), anyInt());
+    }
+
+    @Test
+    void export_csvFieldEscaping_handlesCommasQuotesNewlines() throws Exception {
+        // reason 含 逗号 + 双引号 + \n 换行 — RFC 4180 强制包双引号 + 内部双引号 escape 成 ""
+        ScrapeAudit a = newScrapeAudit("9.9.9.9", LocalDateTime.now());
+        a.setId(1L);
+        a.setStatusCode(403);
+        a.setRejectReason("Has,comma \"quote\"\nnewline");
+        a.setUserAgent("Mozilla/5.0");
+        when(scrapeAuditMapper.listSince(any(LocalDateTime.class), eq(10000))).thenReturn(List.of(a));
+
+        var result = mockMvc.perform(get("/api/v1/admin/scrape-audit/export").param("hours", "24"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String body = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        // 含逗号字段必被双引号包裹, 内部双引号 escape 为 ""
+        org.junit.jupiter.api.Assertions.assertTrue(
+                body.contains("\"Has,comma \"\"quote\"\"\nnewline\""),
+                "RFC 4180 转义错: body=" + body);
+    }
+
+    @Test
+    void export_hoursClampedToMax168() throws Exception {
+        when(scrapeAuditMapper.listSince(any(LocalDateTime.class), eq(10000))).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/admin/scrape-audit/export").param("hours", "99999"))
+                .andExpect(status().isOk());
+
+        verify(scrapeAuditMapper, times(1)).listSince(any(LocalDateTime.class), eq(10000));
+    }
+
+    @Test
+    void export_emptyResults_returnsOnlyHeader() throws Exception {
+        when(scrapeAuditMapper.listSince(any(LocalDateTime.class), eq(10000))).thenReturn(List.of());
+
+        var result = mockMvc.perform(get("/api/v1/admin/scrape-audit/export"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String body = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        // 空结果只返 BOM + 表头
+        org.junit.jupiter.api.Assertions.assertEquals(
+                "\uFEFF" + "id,created_at,ip,method,path,status_code,reject_reason,user_agent\n",
+                body,
+                "空结果应只有 BOM + 表头");
+    }
+
+
+        private static ScrapeAudit newScrapeAudit(String ip, LocalDateTime createdAt) {
         ScrapeAudit a = new ScrapeAudit();
         a.setIp(ip);
         a.setCreatedAt(createdAt);
