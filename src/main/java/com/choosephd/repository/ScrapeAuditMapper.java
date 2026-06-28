@@ -39,4 +39,15 @@ public interface ScrapeAuditMapper extends BaseMapper<ScrapeAudit> {
      */
     @Select("SELECT * FROM scrape_audit ORDER BY created_at DESC LIMIT #{limit}")
     java.util.List<ScrapeAudit> listRecent(@Param("limit") int limit);
+
+    /**
+     * 查询自指定时间以来的拦截记录，按时间倒序。
+     * 用于 {@code GET /api/v1/admin/scrape-audit/export?hours=N} CSV 导出。
+     *
+     * @param since     起始时间（含）
+     * @param limit     返回条数上限（默认 10000）
+     * @return          拦截记录列表
+     */
+    @Select("SELECT * FROM scrape_audit WHERE created_at >= #{since} ORDER BY created_at DESC LIMIT #{limit}")
+    java.util.List<ScrapeAudit> listSince(@Param("since") LocalDateTime since, @Param("limit") int limit);
 }
