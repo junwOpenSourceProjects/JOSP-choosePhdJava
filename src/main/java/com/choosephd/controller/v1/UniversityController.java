@@ -27,8 +27,7 @@ public class UniversityController {
     }
 
     /**
-     * 判断当前请求是否携带有效 JWT（因为 /universities/* 在 AuthInterceptor 白名单中，
-     * request attribute 不会被设置，这里手动检查 Authorization header）。
+     * 判断当前请求是否携带有效 JWT。
      */
     private boolean isAuthenticated(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -42,6 +41,22 @@ public class UniversityController {
         }
     }
 
+    /**
+     * 从 JWT 中读取 membership 字段。
+     */
+    private String getMembership(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return "free";
+        try {
+            String token = authHeader.substring(7);
+            if (!jwtService.validateToken(token)) return "free";
+            String m = jwtService.parseToken(token).get("membership", String.class);
+            return m != null ? m : "free";
+        } catch (Exception e) {
+            return "free";
+        }
+    }
+
     @GetMapping
     public ApiResult<PageResult<UniversityVo>> searchUniversities(
             @RequestParam(required = false) String keyword,
@@ -49,10 +64,12 @@ public class UniversityController {
             @RequestParam(required = false) String country,
             @RequestParam(required = false, defaultValue = "bestRank") String sortBy,
             @RequestParam(required = false) List<Integer> tagIds,
-            PageQuery query) {
-        // 强制上限 30 条，防批量爬取
-        if (query.getSize() > 30) {
-            query.setSize(30L);
+            PageQuery query,
+            HttpServletRequest request) {
+        // 免费用户上限 30，Pro 用户上限 100
+        long maxSize = "pro".equals(getMembership(request)) ? 100L : 30L;
+        if (query.getSize() > maxSize) {
+            query.setSize(maxSize);
         }
         return ApiResult.ok(universityService.searchUniversities(keyword, continent, country, sortBy, tagIds, query));
     }
@@ -66,7 +83,9 @@ public class UniversityController {
     public ApiResult<UniversityDetailResponse> getUniversity(@PathVariable String urlId,
                                                               HttpServletRequest request) {
         UniversityDetailResponse detail = universityService.getUniversityDetail(urlId);
-        if (!isAuthenticated(request)) {
+        // Pro 用户直接看完整数据；免费/未登录用户 mask
+        boolean isPro = "pro".equals(getMembership(request));
+        if (!isPro && !isAuthenticated(request)) {
             maskDetailForGuest(detail);
         }
         return ApiResult.ok(detail);
@@ -80,12 +99,14 @@ public class UniversityController {
             @RequestParam(required = false) Boolean overallOnly,
             PageQuery query,
             HttpServletRequest request) {
-        // 强制上限 50 条，防批量爬取
-        if (query.getSize() > 50) {
-            query.setSize(50L);
+        // Pro 用户上限 200，免费用户上限 50
+        long maxSize = "pro".equals(getMembership(request)) ? 200L : 50L;
+        if (query.getSize() > maxSize) {
+            query.setSize(maxSize);
         }
+        boolean isPro = "pro".equals(getMembership(request));
         PageResult<RankingEntryVo> result = universityService.listUniversityRankings(urlId, sourceId, year, overallOnly, query);
-        if (!isAuthenticated(request)) {
+        if (!isPro && !isAuthenticated(request)) {
             maskRankingsForGuest(result.getList());
         }
         return ApiResult.ok(result);

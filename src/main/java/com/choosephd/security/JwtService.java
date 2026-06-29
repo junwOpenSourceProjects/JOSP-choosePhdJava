@@ -28,13 +28,17 @@ public class JwtService {
     }
 
     public String generateToken(Long userId, String role) {
-        return generateToken(userId, role, null);
+        return generateToken(userId, role, null, "free");
+    }
+
+    public String generateToken(Long userId, String role, String membership) {
+        return generateToken(userId, role, null, membership);
     }
 
     /**
-     * 签发 JWT，可选携带账号创建时间用于新号观察期判断。
+     * 签发 JWT，携带账号创建时间和会员等级。
      */
-    public String generateToken(Long userId, String role, java.time.LocalDateTime createdAt) {
+    public String generateToken(Long userId, String role, java.time.LocalDateTime createdAt, String membership) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + properties.getJwt().getExpiration());
         var builder = Jwts.builder()
@@ -45,6 +49,7 @@ public class JwtService {
         if (createdAt != null) {
             builder.claim("createdAt", createdAt.toString());
         }
+        builder.claim("membership", membership);
         return builder.signWith(key).compact();
     }
 

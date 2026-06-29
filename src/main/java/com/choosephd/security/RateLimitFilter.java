@@ -51,10 +51,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** 新注册账号每日总请求上限。 */
     private static final long NEW_USER_DAILY_TOTAL_LIMIT = 400;
 
-    /** 单 IP 每日列表请求总上限（跨所有账号合计）。 */
+    /** Pro 用户每日列表请求上限（大幅放宽）。 */
+    private static final long PRO_DAILY_LIST_LIMIT = 5000;
+
+    /** Pro 用户每日总请求上限。 */
+    private static final long PRO_DAILY_TOTAL_LIMIT = 20000;
+
+    /** 单 IP 每日列表请求总上限（跨所有账号合计，免费用户）。 */
     private static final long IP_DAILY_LIST_LIMIT = 1000;
 
-    /** 单 IP 每日总请求上限（跨所有账号合计）。 */
+    /** 单 IP 每日总请求上限（跨所有账号合计，Pro 用户不纳计）。 */
     private static final long IP_DAILY_TOTAL_LIMIT = 5000;
 
     private final ConcurrentHashMap<String, BucketEntry> buckets = new ConcurrentHashMap<>();
@@ -97,39 +103,52 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ---- 第 2 关：IP 每日总量（跨所有账号合计） ----
-        DailyCounter ipDay = ipDailyCounters.computeIfAbsent(ip, k -> new DailyCounter());
-        long ipUsed;
-        if (isListPath(path)) {
-            ipUsed = ipDay.incList();
-            if (ipUsed > IP_DAILY_LIST_LIMIT) {
-                log.warn("Rate limit reject (IP daily list): ip={} used={}", ip, ipUsed);
-                writeAudit(ip, request, 429, "ip_daily_list_limit");
+        // ---- 第 2 关：IP 每日总量（仅免费用户纳计；Pro 用户跳过） ----
+        UserJwtInfo jwtInfo = extractUserInfo(request);
+        boolean isPro = jwtInfo != null && "pro".equals(jwtInfo.membership);
+
+        if (!isPro) {
+            DailyCounter ipDay = ipDailyCounters.computeIfAbsent(ip, k -> new DailyCounter());
+            long ipUsed;
+            if (isListPath(path)) {
+                ipUsed = ipDay.incList();
+                if (ipUsed > IP_DAILY_LIST_LIMIT) {
+                    log.warn("Rate limit reject (IP daily list): ip={} used={}", ip, ipUsed);
+                    writeAudit(ip, request, 429, "ip_daily_list_limit");
+                    writeTooManyRequests(response, 3600);
+                    return;
+                }
+            }
+            ipUsed = ipDay.incTotal();
+            if (ipUsed > IP_DAILY_TOTAL_LIMIT) {
+                log.warn("Rate limit reject (IP daily total): ip={} used={}", ip, ipUsed);
+                writeAudit(ip, request, 429, "ip_daily_total_limit");
                 writeTooManyRequests(response, 3600);
                 return;
             }
         }
-        ipUsed = ipDay.incTotal();
-        if (ipUsed > IP_DAILY_TOTAL_LIMIT) {
-            log.warn("Rate limit reject (IP daily total): ip={} used={}", ip, ipUsed);
-            writeAudit(ip, request, 429, "ip_daily_total_limit");
-            writeTooManyRequests(response, 3600);
-            return;
-        }
 
-        // ---- 第 3 关：登录用户每日配额（区分新老用户） ----
-        UserJwtInfo jwtInfo = extractUserInfo(request);
+        // ---- 第 3 关：登录用户每日配额 ----
         if (jwtInfo != null) {
-            long listCap = jwtInfo.isNewAccount ? NEW_USER_DAILY_LIST_LIMIT : USER_DAILY_LIST_LIMIT;
-            long totalCap = jwtInfo.isNewAccount ? NEW_USER_DAILY_TOTAL_LIMIT : USER_DAILY_TOTAL_LIMIT;
+            long listCap, totalCap;
+            if (isPro) {
+                listCap = PRO_DAILY_LIST_LIMIT;
+                totalCap = PRO_DAILY_TOTAL_LIMIT;
+            } else if (jwtInfo.isNewAccount) {
+                listCap = NEW_USER_DAILY_LIST_LIMIT;
+                totalCap = NEW_USER_DAILY_TOTAL_LIMIT;
+            } else {
+                listCap = USER_DAILY_LIST_LIMIT;
+                totalCap = USER_DAILY_TOTAL_LIMIT;
+            }
 
             DailyCounter counter = userDailyCounters.computeIfAbsent(jwtInfo.userId, k -> new DailyCounter());
             long used;
             if (isListPath(path)) {
                 used = counter.incList();
                 if (used > listCap) {
-                    log.warn("Rate limit reject (user daily list): userId={} isNew={} used={} cap={}",
-                            jwtInfo.userId, jwtInfo.isNewAccount, used, listCap);
+                    log.warn("Rate limit reject (user daily list): userId={} membership={} used={} cap={}",
+                            jwtInfo.userId, jwtInfo.membership, used, listCap);
                     writeAudit(ip, request, 429, "user_daily_list_limit");
                     writeTooManyRequests(response, 3600);
                     return;
@@ -137,8 +156,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
             }
             used = counter.incTotal();
             if (used > totalCap) {
-                log.warn("Rate limit reject (user daily total): userId={} isNew={} used={} cap={}",
-                        jwtInfo.userId, jwtInfo.isNewAccount, used, totalCap);
+                log.warn("Rate limit reject (user daily total): userId={} membership={} used={} cap={}",
+                        jwtInfo.userId, jwtInfo.membership, used, totalCap);
                 writeAudit(ip, request, 429, "user_daily_total_limit");
                 writeTooManyRequests(response, 3600);
                 return;
@@ -171,13 +190,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 isNew = createdAt.isAfter(LocalDateTime.now().minusHours(24));
             }
 
-            return new UserJwtInfo(userId, isNew);
+            String membership = claims.get("membership", String.class);
+            if (membership == null) membership = "free";
+
+            return new UserJwtInfo(userId, isNew, membership);
         } catch (Exception e) {
             return null;
         }
     }
 
-    private record UserJwtInfo(Long userId, boolean isNewAccount) {}
+    private record UserJwtInfo(Long userId, boolean isNewAccount, String membership) {}
 
     private Bucket createBucket(long perMinute) {
         return Bucket.builder()

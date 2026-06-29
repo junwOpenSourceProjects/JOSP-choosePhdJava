@@ -15,6 +15,7 @@ public class UserAccount {
     private String username;
     private String passwordHash;
     private String role;
+    private String membership;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -51,6 +52,14 @@ public class UserAccount {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getMembership() {
+        return membership;
+    }
+
+    public void setMembership(String membership) {
+        this.membership = membership;
     }
 
     public LocalDateTime getCreatedAt() {
