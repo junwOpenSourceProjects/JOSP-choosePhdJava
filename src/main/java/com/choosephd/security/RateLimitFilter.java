@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,57 +22,42 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * L3 频率限制 filter — IP 维度 token bucket，超限返 429。
- *
- * <p>执行顺序在 {@link com.choosephd.security.Ordered#ANTI_SCRAPE} 之后，
- * 已通过 UA 黑名单的合法请求才会进入限流。
- *
- * <p>限流规则（按路径前缀区分）：
- * <ul>
- *   <li>{@code /api/v1/universities}（列表） — 30 req/min/IP</li>
- *   <li>其他 API — 60 req/min/IP</li>
- * </ul>
- *
- * <p>超出限流后：
- * <ol>
- *   <li>返 429 + JSON 响应，告知 Retry-After</li>
- *   <li>写入 {@code scrape_audit} 表（IP/路径/原因 "rate_limit"）</li>
- * </ol>
- *
- * <p>桶内存 ConcurrentHashMap 保存，每 5 分钟清理 idle 桶（> 10 分钟未访问即回收）。
- *
- * @see com.choosephd.security.AntiScrapeFilter
- * @see com.choosephd.entity.ScrapeAudit
- */
 @Component
 @Order(Ordered.RATE_LIMIT)
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
 
-    /** 列表 API 限流 30 req/min。 */
+    /** 列表 API 限流 30 req/min（未登录 IP 维度）。 */
     private static final long LIST_LIMIT_PER_MINUTE = 30;
 
     /** 默认 API 限流 60 req/min。 */
     private static final long DEFAULT_LIMIT_PER_MINUTE = 60;
 
-    /** IP + bucket key 缓存。 */
-    private final ConcurrentHashMap<String, BucketEntry> buckets = new ConcurrentHashMap<>();
+    /** 登录用户每日列表请求上限（防脚本用 JWT 批量抓取）。 */
+    private static final long USER_DAILY_LIST_LIMIT = 500;
 
-    /** 简单 ID 生成器（基于毫秒 + 计数器，全局递增）。 */
+    /** 登录用户每日总请求上限。 */
+    private static final long USER_DAILY_TOTAL_LIMIT = 2000;
+
+    private final ConcurrentHashMap<String, BucketEntry> buckets = new ConcurrentHashMap<>();
     private final AtomicLong idSequence = new AtomicLong(System.currentTimeMillis() * 1000);
 
-    private final ScrapeAuditMapper scrapeAuditMapper;
+    /** 登录用户每日请求计数：key = userId, value = DailyCounter */
+    private final ConcurrentHashMap<Long, DailyCounter> userDailyCounters = new ConcurrentHashMap<>();
 
+    private final ScrapeAuditMapper scrapeAuditMapper;
+    private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public RateLimitFilter(ScrapeAuditMapper scrapeAuditMapper) {
+    public RateLimitFilter(ScrapeAuditMapper scrapeAuditMapper, JwtService jwtService) {
         this.scrapeAuditMapper = scrapeAuditMapper;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -80,21 +66,61 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String ip = request.getRemoteAddr();
         String path = request.getRequestURI();
+
+        // ---- 第 1 关：IP 维度 token bucket ----
         long limit = isListPath(path) ? LIST_LIMIT_PER_MINUTE : DEFAULT_LIMIT_PER_MINUTE;
         String bucketKey = ip + "|" + (isListPath(path) ? "list" : "default");
 
         Bucket bucket = buckets.computeIfAbsent(bucketKey, k -> new BucketEntry(createBucket(limit))).bucket;
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
-        if (probe.isConsumed()) {
-            filterChain.doFilter(request, response);
+        if (!probe.isConsumed()) {
+            long retryAfterSeconds = probe.getNanosToWaitForRefill() / 1_000_000_000L + 1;
+            log.warn("Rate limit reject (IP): ip={} path={} retry_after={}s", ip, path, retryAfterSeconds);
+            writeAudit(ip, request, 429, "rate_limit");
+            writeTooManyRequests(response, retryAfterSeconds);
             return;
         }
 
-        long retryAfterSeconds = probe.getNanosToWaitForRefill() / 1_000_000_000L + 1;
-        log.warn("Rate limit reject: ip={} path={} retry_after={}s", ip, path, retryAfterSeconds);
-        writeAudit(ip, request, 429, "rate_limit");
-        writeTooManyRequests(response, retryAfterSeconds);
+        // ---- 第 2 关：登录用户每日配额 ----
+        Long userId = extractUserId(request);
+        if (userId != null) {
+            DailyCounter counter = userDailyCounters.computeIfAbsent(userId, k -> new DailyCounter());
+            long used;
+            if (isListPath(path)) {
+                used = counter.incList();
+                if (used > USER_DAILY_LIST_LIMIT) {
+                    log.warn("Rate limit reject (user daily list): userId={} used={} path={}", userId, used, path);
+                    writeAudit(ip, request, 429, "user_daily_list_limit");
+                    writeTooManyRequests(response, 3600);
+                    return;
+                }
+            }
+            used = counter.incTotal();
+            if (used > USER_DAILY_TOTAL_LIMIT) {
+                log.warn("Rate limit reject (user daily total): userId={} used={} path={}", userId, used, path);
+                writeAudit(ip, request, 429, "user_daily_total_limit");
+                writeTooManyRequests(response, 3600);
+                return;
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private Long extractUserId(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        try {
+            String token = authHeader.substring(7);
+            if (!jwtService.validateToken(token)) return null;
+            Claims claims = jwtService.parseToken(token);
+            return Long.valueOf(claims.getSubject());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private Bucket createBucket(long perMinute) {
@@ -138,10 +164,41 @@ public class RateLimitFilter extends OncePerRequestFilter {
         response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 
-    /** 桶条目，附带最后访问时间用于 idle 清理。 */
     private record BucketEntry(Bucket bucket, long lastAccessMs) {
         BucketEntry(Bucket bucket) {
             this(bucket, System.currentTimeMillis());
+        }
+    }
+
+    /**
+     * 每日请求计数器。跨天自动重置。
+     */
+    private static class DailyCounter {
+        volatile LocalDate date = LocalDate.now();
+        final AtomicLong listCount = new AtomicLong(0);
+        final AtomicLong totalCount = new AtomicLong(0);
+
+        long incList() {
+            resetIfNewDay();
+            return listCount.incrementAndGet();
+        }
+
+        long incTotal() {
+            resetIfNewDay();
+            return totalCount.incrementAndGet();
+        }
+
+        private void resetIfNewDay() {
+            LocalDate today = LocalDate.now();
+            if (!today.equals(date)) {
+                synchronized (this) {
+                    if (!today.equals(date)) {
+                        date = today;
+                        listCount.set(0);
+                        totalCount.set(0);
+                    }
+                }
+            }
         }
     }
 }
