@@ -113,19 +113,33 @@ public class UniversityController {
         return ApiResult.ok(result);
     }
 
+    /**
+     * 未登录/免费用户 mask 详情页排名汇总。
+     * Top 10 榜单保留数据（保障 GEO 索引），10 名之外 mask。
+     */
     private void maskDetailForGuest(UniversityDetailResponse detail) {
         if (detail.getSources() != null) {
             for (UniversitySourceSummary s : detail.getSources()) {
-                s.setLatestRankDisplay("🔒 月度解锁");
-                s.setLatestRankValue(-1);
+                if (s.getLatestRankValue() == null || s.getLatestRankValue() <= 0
+                        || s.getLatestRankValue() > 10) {
+                    s.setLatestRankDisplay("🔒 月度解锁");
+                    s.setLatestRankValue(-1);
+                }
             }
         }
     }
 
+    /**
+     * 未登录/免费用户 mask 排行榜列表。
+     * 前 10 名保留完整数据 + 按年精度；10 名之后 5 年精度降级 + mask。
+     */
     private void maskRankingsForGuest(List<RankingEntryVo> list) {
         if (list == null) return;
+        int pos = 0;
         for (RankingEntryVo entry : list) {
-            // 5年精度降级：非5的倍数年份 rank 置为 -1
+            pos++;
+            if (pos <= 10) continue; // Top 10 完整可见
+            // 10 名之后：5 年精度降级
             if (entry.getYear() != null && entry.getYear() % 5 != 0) {
                 entry.setRankValue(-1);
                 entry.setRankDisplay("🔒 月度解锁");

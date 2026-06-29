@@ -93,6 +93,7 @@ public class AuthService {
     }
 
     private UserInfo toUserInfo(UserAccount user) {
-        return new UserInfo(user.getId(), user.getUsername(), user.getRole());
+        String m = user.getMembership();
+        return new UserInfo(user.getId(), user.getUsername(), user.getRole(), m != null ? m : "free");
     }
 }

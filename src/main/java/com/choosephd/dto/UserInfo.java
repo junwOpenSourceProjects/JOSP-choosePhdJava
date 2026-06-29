@@ -5,14 +5,16 @@ public class UserInfo {
     private Long id;
     private String username;
     private String role;
+    private String membership;
 
     public UserInfo() {
     }
 
-    public UserInfo(Long id, String username, String role) {
+    public UserInfo(Long id, String username, String role, String membership) {
         this.id = id;
         this.username = username;
         this.role = role;
+        this.membership = membership;
     }
 
     public Long getId() {
@@ -37,5 +39,13 @@ public class UserInfo {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getMembership() {
+        return membership;
+    }
+
+    public void setMembership(String membership) {
+        this.membership = membership;
     }
 }

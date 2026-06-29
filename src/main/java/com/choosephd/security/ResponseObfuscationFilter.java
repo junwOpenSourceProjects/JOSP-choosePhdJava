@@ -41,6 +41,14 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
             "/api/v1/trends"
     );
 
+    /** AI 爬虫 UA 白名单 — 放行不混淆，保障 GEO 索引收录。 */
+    private static final Set<String> AI_CRAWLER_UAS = Set.of(
+            "GPTBot", "ChatGPT-User", "anthropic-ai", "Claude-Web",
+            "PerplexityBot", "Google-Extended", "Googlebot",
+            "Bingbot", "Baiduspider", "YandexBot", "DuckDuckBot",
+            "Applebot", "Slurp", "Twitterbot", "facebookexternalhit"
+    );
+
     private final JwtService jwtService;
 
     public ResponseObfuscationFilter(JwtService jwtService) {
@@ -53,6 +61,12 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
 
         // 已登录 → 放行原样
         if (isAuthenticated(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // AI 爬虫 → 放行原样（GEO 需要 LLM/搜索引擎看到 Top 10 数据）
+        if (isAiCrawler(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -97,6 +111,16 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** 检测 AI 爬虫/搜索引擎 UA — 放行不混淆，保障 GEO 收录。 */
+    private boolean isAiCrawler(HttpServletRequest request) {
+        String ua = request.getHeader("User-Agent");
+        if (ua == null) return false;
+        for (String bot : AI_CRAWLER_UAS) {
+            if (ua.contains(bot)) return true;
+        }
+        return false;
     }
 
     private byte[] xorBytes(byte[] input) {
