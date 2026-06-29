@@ -26,5 +26,8 @@ public final class Ordered {
     /** AuthInterceptor 在 WebConfig 中通过 addPathPatterns 注册，order 500。 */
     public static final int AUTH_INTERCEPTOR = 500;
 
+    /** 响应体混淆 filter — 最外层包裹 response，拦截未登录用户的 JSON 响应做 XOR+Base64 编码。 */
+    public static final int RESPONSE_OBFUSCATION = 100;
+
     private Ordered() {}
 }
