@@ -41,11 +41,26 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
             "/api/v1/trends"
     );
 
-    /** AI 爬虫 UA 白名单 — 放行不混淆，保障 GEO 索引收录。 */
+    /** AI 爬虫/搜索引擎 UA 白名单 — 放行不混淆，保障 GEO 索引收录。 */
     private static final Set<String> AI_CRAWLER_UAS = Set.of(
-            "GPTBot", "ChatGPT-User", "anthropic-ai", "Claude-Web",
-            "PerplexityBot", "Google-Extended", "Googlebot",
-            "Bingbot", "Baiduspider", "YandexBot", "DuckDuckBot",
+            // OpenAI
+            "GPTBot", "ChatGPT-User",
+            // Anthropic
+            "anthropic-ai", "Claude-Web",
+            // Google (Gemini / Search)
+            "Google-Extended", "Googlebot",
+            // Microsoft
+            "Bingbot",
+            // 百度
+            "Baiduspider",
+            // DeepSeek
+            "DeepSeekBot",
+            // 字节跳动 (豆包)
+            "Bytespider", "ByteSpider",
+            // 阿里 (通义千问)
+            "TongyiBot", "Tongyi", "YisouSpider",
+            // 其他
+            "PerplexityBot", "YandexBot", "DuckDuckBot",
             "Applebot", "Slurp", "Twitterbot", "facebookexternalhit"
     );
 
