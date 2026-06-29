@@ -45,11 +45,26 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** 登录用户每日总请求上限。 */
     private static final long USER_DAILY_TOTAL_LIMIT = 2000;
 
+    /** 新注册账号（24h内）每日列表请求上限 — 仅为正常用户的 1/5。 */
+    private static final long NEW_USER_DAILY_LIST_LIMIT = 100;
+
+    /** 新注册账号每日总请求上限。 */
+    private static final long NEW_USER_DAILY_TOTAL_LIMIT = 400;
+
+    /** 单 IP 每日列表请求总上限（跨所有账号合计）。 */
+    private static final long IP_DAILY_LIST_LIMIT = 1000;
+
+    /** 单 IP 每日总请求上限（跨所有账号合计）。 */
+    private static final long IP_DAILY_TOTAL_LIMIT = 5000;
+
     private final ConcurrentHashMap<String, BucketEntry> buckets = new ConcurrentHashMap<>();
     private final AtomicLong idSequence = new AtomicLong(System.currentTimeMillis() * 1000);
 
-    /** 登录用户每日请求计数：key = userId, value = DailyCounter */
+    /** 登录用户每日请求计数：key = userId */
     private final ConcurrentHashMap<Long, DailyCounter> userDailyCounters = new ConcurrentHashMap<>();
+
+    /** IP 每日请求计数（跨账号合计）：key = ip */
+    private final ConcurrentHashMap<String, DailyCounter> ipDailyCounters = new ConcurrentHashMap<>();
 
     private final ScrapeAuditMapper scrapeAuditMapper;
     private final JwtService jwtService;
@@ -67,7 +82,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String ip = request.getRemoteAddr();
         String path = request.getRequestURI();
 
-        // ---- 第 1 关：IP 维度 token bucket ----
+        // ---- 第 1 关：IP 维度 token bucket（每分钟） ----
         long limit = isListPath(path) ? LIST_LIMIT_PER_MINUTE : DEFAULT_LIMIT_PER_MINUTE;
         String bucketKey = ip + "|" + (isListPath(path) ? "list" : "default");
 
@@ -76,29 +91,54 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         if (!probe.isConsumed()) {
             long retryAfterSeconds = probe.getNanosToWaitForRefill() / 1_000_000_000L + 1;
-            log.warn("Rate limit reject (IP): ip={} path={} retry_after={}s", ip, path, retryAfterSeconds);
+            log.warn("Rate limit reject (IP/min): ip={} path={} retry_after={}s", ip, path, retryAfterSeconds);
             writeAudit(ip, request, 429, "rate_limit");
             writeTooManyRequests(response, retryAfterSeconds);
             return;
         }
 
-        // ---- 第 2 关：登录用户每日配额 ----
-        Long userId = extractUserId(request);
-        if (userId != null) {
-            DailyCounter counter = userDailyCounters.computeIfAbsent(userId, k -> new DailyCounter());
+        // ---- 第 2 关：IP 每日总量（跨所有账号合计） ----
+        DailyCounter ipDay = ipDailyCounters.computeIfAbsent(ip, k -> new DailyCounter());
+        long ipUsed;
+        if (isListPath(path)) {
+            ipUsed = ipDay.incList();
+            if (ipUsed > IP_DAILY_LIST_LIMIT) {
+                log.warn("Rate limit reject (IP daily list): ip={} used={}", ip, ipUsed);
+                writeAudit(ip, request, 429, "ip_daily_list_limit");
+                writeTooManyRequests(response, 3600);
+                return;
+            }
+        }
+        ipUsed = ipDay.incTotal();
+        if (ipUsed > IP_DAILY_TOTAL_LIMIT) {
+            log.warn("Rate limit reject (IP daily total): ip={} used={}", ip, ipUsed);
+            writeAudit(ip, request, 429, "ip_daily_total_limit");
+            writeTooManyRequests(response, 3600);
+            return;
+        }
+
+        // ---- 第 3 关：登录用户每日配额（区分新老用户） ----
+        UserJwtInfo jwtInfo = extractUserInfo(request);
+        if (jwtInfo != null) {
+            long listCap = jwtInfo.isNewAccount ? NEW_USER_DAILY_LIST_LIMIT : USER_DAILY_LIST_LIMIT;
+            long totalCap = jwtInfo.isNewAccount ? NEW_USER_DAILY_TOTAL_LIMIT : USER_DAILY_TOTAL_LIMIT;
+
+            DailyCounter counter = userDailyCounters.computeIfAbsent(jwtInfo.userId, k -> new DailyCounter());
             long used;
             if (isListPath(path)) {
                 used = counter.incList();
-                if (used > USER_DAILY_LIST_LIMIT) {
-                    log.warn("Rate limit reject (user daily list): userId={} used={} path={}", userId, used, path);
+                if (used > listCap) {
+                    log.warn("Rate limit reject (user daily list): userId={} isNew={} used={} cap={}",
+                            jwtInfo.userId, jwtInfo.isNewAccount, used, listCap);
                     writeAudit(ip, request, 429, "user_daily_list_limit");
                     writeTooManyRequests(response, 3600);
                     return;
                 }
             }
             used = counter.incTotal();
-            if (used > USER_DAILY_TOTAL_LIMIT) {
-                log.warn("Rate limit reject (user daily total): userId={} used={} path={}", userId, used, path);
+            if (used > totalCap) {
+                log.warn("Rate limit reject (user daily total): userId={} isNew={} used={} cap={}",
+                        jwtInfo.userId, jwtInfo.isNewAccount, used, totalCap);
                 writeAudit(ip, request, 429, "user_daily_total_limit");
                 writeTooManyRequests(response, 3600);
                 return;
@@ -108,7 +148,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private Long extractUserId(HttpServletRequest request) {
+    /**
+     * 从 JWT 提取 userId 和新号标记（createdAt < 24h 前）。
+     * 返回 null 表示无有效 JWT。
+     */
+    private UserJwtInfo extractUserInfo(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -117,11 +161,23 @@ public class RateLimitFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             if (!jwtService.validateToken(token)) return null;
             Claims claims = jwtService.parseToken(token);
-            return Long.valueOf(claims.getSubject());
+            Long userId = Long.valueOf(claims.getSubject());
+
+            // 检查账号创建时间：< 24h → 新号观察期
+            boolean isNew = false;
+            String createdAtStr = claims.get("createdAt", String.class);
+            if (createdAtStr != null) {
+                LocalDateTime createdAt = LocalDateTime.parse(createdAtStr);
+                isNew = createdAt.isAfter(LocalDateTime.now().minusHours(24));
+            }
+
+            return new UserJwtInfo(userId, isNew);
         } catch (Exception e) {
             return null;
         }
     }
+
+    private record UserJwtInfo(Long userId, boolean isNewAccount) {}
 
     private Bucket createBucket(long perMinute) {
         return Bucket.builder()

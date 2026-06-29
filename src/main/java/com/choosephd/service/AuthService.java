@@ -60,7 +60,7 @@ public class AuthService {
         user.setUpdatedAt(LocalDateTime.now());
         userAccountMapper.insert(user);
 
-        String token = jwtService.generateToken(user.getId(), user.getRole());
+        String token = jwtService.generateToken(user.getId(), user.getRole(), user.getCreatedAt());
         return new AuthResponse(token, toUserInfo(user));
     }
 
@@ -78,7 +78,7 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BusinessException("用户名或密码错误");
         }
-        String token = jwtService.generateToken(user.getId(), user.getRole());
+        String token = jwtService.generateToken(user.getId(), user.getRole(), user.getCreatedAt());
         return new AuthResponse(token, toUserInfo(user));
     }
 

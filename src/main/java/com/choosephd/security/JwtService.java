@@ -28,15 +28,24 @@ public class JwtService {
     }
 
     public String generateToken(Long userId, String role) {
+        return generateToken(userId, role, null);
+    }
+
+    /**
+     * 签发 JWT，可选携带账号创建时间用于新号观察期判断。
+     */
+    public String generateToken(Long userId, String role, java.time.LocalDateTime createdAt) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + properties.getJwt().getExpiration());
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("role", role)
                 .issuedAt(now)
-                .expiration(expiry)
-                .signWith(key)
-                .compact();
+                .expiration(expiry);
+        if (createdAt != null) {
+            builder.claim("createdAt", createdAt.toString());
+        }
+        return builder.signWith(key).compact();
     }
 
     public Claims parseToken(String token) {
