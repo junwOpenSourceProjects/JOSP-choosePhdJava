@@ -49,23 +49,15 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
             "Applebot", "Slurp", "Twitterbot", "facebookexternalhit"
     );
 
-    private final JwtService jwtService;
-
-    public ResponseObfuscationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
+    public ResponseObfuscationFilter() {
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                      FilterChain filterChain) throws ServletException, IOException {
 
-        // 已登录 → 放行原样
-        if (isAuthenticated(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // AI 爬虫 → 放行原样（GEO 需要 LLM/搜索引擎看到 Top 10 数据）
+        // AI 爬虫 / 搜索引擎 → 放行原样（GEO 收录需要 LLM 看到 Top 10 数据）
+        // 除此以外所有人（免费/付费/登录/未登录）一律走混淆
         if (isAiCrawler(request)) {
             filterChain.doFilter(request, response);
             return;
@@ -98,18 +90,6 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
         } else {
             // 空响应直接放行
             wrapper.copyBodyToResponse();
-        }
-    }
-
-    private boolean isAuthenticated(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return false;
-        }
-        try {
-            return jwtService.validateToken(authHeader.substring(7));
-        } catch (Exception e) {
-            return false;
         }
     }
 
