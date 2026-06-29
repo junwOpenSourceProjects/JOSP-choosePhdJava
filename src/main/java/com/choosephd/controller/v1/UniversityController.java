@@ -5,27 +5,14 @@ import com.choosephd.common.PageResult;
 import com.choosephd.dto.PageQuery;
 import com.choosephd.dto.RankingEntryVo;
 import com.choosephd.dto.UniversityDetailResponse;
+import com.choosephd.dto.UniversitySourceSummary;
 import com.choosephd.dto.UniversityVo;
 import com.choosephd.service.UniversityService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 院校 controller — 公开读 3 端点 + 院校标签附加。
- *
- * <p>端点：
- * <ul>
- *   <li>GET / — 院校列表分页（关键字/国家/地区/标签筛选 + 排序）</li>
- *   <li>GET /countries — 不重复的国家列表（筛选用）</li>
- *   <li>GET /{urlId} — 单院校详情（基本信息 + 标签 + 历年榜单汇总）</li>
- * </ul>
- *
- * <p>无鉴权要求（数据公开）。
- *
- * <p>Service：{@link com.choosephd.service.UniversityService} +
- * {@link com.choosephd.service.UniversityTagService}（标签批量查询）。
- */
 @RestController
 @RequestMapping("/api/v1/universities")
 public class UniversityController {
@@ -44,6 +31,10 @@ public class UniversityController {
             @RequestParam(required = false, defaultValue = "bestRank") String sortBy,
             @RequestParam(required = false) List<Integer> tagIds,
             PageQuery query) {
+        // 强制上限 30 条，防批量爬取
+        if (query.getSize() > 30) {
+            query.setSize(30L);
+        }
         return ApiResult.ok(universityService.searchUniversities(keyword, continent, country, sortBy, tagIds, query));
     }
 
@@ -53,8 +44,14 @@ public class UniversityController {
     }
 
     @GetMapping("/{urlId}")
-    public ApiResult<UniversityDetailResponse> getUniversity(@PathVariable String urlId) {
-        return ApiResult.ok(universityService.getUniversityDetail(urlId));
+    public ApiResult<UniversityDetailResponse> getUniversity(@PathVariable String urlId,
+                                                              HttpServletRequest request) {
+        UniversityDetailResponse detail = universityService.getUniversityDetail(urlId);
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            maskDetailForGuest(detail);
+        }
+        return ApiResult.ok(detail);
     }
 
     @GetMapping("/{urlId}/rankings")
@@ -63,7 +60,39 @@ public class UniversityController {
             @RequestParam(required = false) Integer sourceId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Boolean overallOnly,
-            PageQuery query) {
-        return ApiResult.ok(universityService.listUniversityRankings(urlId, sourceId, year, overallOnly, query));
+            PageQuery query,
+            HttpServletRequest request) {
+        // 强制上限 50 条，防批量爬取
+        if (query.getSize() > 50) {
+            query.setSize(50L);
+        }
+        Long userId = (Long) request.getAttribute("userId");
+        PageResult<RankingEntryVo> result = universityService.listUniversityRankings(urlId, sourceId, year, overallOnly, query);
+        if (userId == null) {
+            maskRankingsForGuest(result.getList());
+        }
+        return ApiResult.ok(result);
+    }
+
+    private void maskDetailForGuest(UniversityDetailResponse detail) {
+        if (detail.getSources() != null) {
+            for (UniversitySourceSummary s : detail.getSources()) {
+                s.setLatestRankDisplay("🔒 月度解锁");
+                s.setLatestRankValue(-1);
+            }
+        }
+    }
+
+    private void maskRankingsForGuest(List<RankingEntryVo> list) {
+        if (list == null) return;
+        for (RankingEntryVo entry : list) {
+            // 5年精度降级：非5的倍数年份 rank 置为 -1
+            if (entry.getYear() != null && entry.getYear() % 5 != 0) {
+                entry.setRankValue(-1);
+                entry.setRankDisplay("🔒 月度解锁");
+                entry.setScore(null);
+                entry.setRankDelta(null);
+            }
+        }
     }
 }
