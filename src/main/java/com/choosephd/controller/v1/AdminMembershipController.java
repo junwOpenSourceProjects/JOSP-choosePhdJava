@@ -25,8 +25,8 @@ public class AdminMembershipController {
     public ApiResult<Map<String, String>> setMembership(@PathVariable String username,
                                                          @RequestBody Map<String, String> body) {
         String tier = body.get("membership");
-        if (tier == null || (!tier.equals("free") && !tier.equals("pro"))) {
-            return ApiResult.error(400, "membership must be 'free' or 'pro'");
+        if (tier == null || (!tier.equals("free") && !tier.equals("standard") && !tier.equals("premium"))) {
+            return ApiResult.error(400, "membership must be 'free', 'standard' or 'premium'");
         }
         UserAccount user = userAccountMapper.selectByUsername(username);
         if (user == null) {

@@ -39,13 +39,15 @@ public class UsageController {
             }
         }
 
+        boolean isPaid = !"free".equals(membership);
         return ApiResult.ok(Map.of(
                 "membership", membership,
-                "dailyListLimit", "pro".equals(membership) ? 5000 : 500,
-                "dailyTotalLimit", "pro".equals(membership) ? 20000 : 2000,
-                "pageSizeLimit", "pro".equals(membership) ? 100 : 30,
-                "compareLimit", "pro".equals(membership) ? 10 : 3,
-                "exportEnabled", "pro".equals(membership)
+                "dailyListLimit", isPaid ? 5000 : 500,
+                "dailyTotalLimit", isPaid ? 20000 : 2000,
+                "pageSizeLimit", isPaid ? 100 : 30,
+                "compareLimit", isPaid ? 10 : 3,
+                "exportEnabled", "premium".equals(membership),
+                "exportMonthlyLimit", "premium".equals(membership) ? 20 : 0
         ));
     }
 }

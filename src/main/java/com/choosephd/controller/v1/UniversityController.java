@@ -66,8 +66,9 @@ public class UniversityController {
             @RequestParam(required = false) List<Integer> tagIds,
             PageQuery query,
             HttpServletRequest request) {
-        // 免费用户上限 30，Pro 用户上限 100
-        long maxSize = "pro".equals(getMembership(request)) ? 100L : 30L;
+        // 免费用户上限 30，付费用户上限 100
+        boolean isPaid = !"free".equals(getMembership(request));
+        long maxSize = isPaid ? 100L : 30L;
         if (query.getSize() > maxSize) {
             query.setSize(maxSize);
         }
@@ -83,9 +84,9 @@ public class UniversityController {
     public ApiResult<UniversityDetailResponse> getUniversity(@PathVariable String urlId,
                                                               HttpServletRequest request) {
         UniversityDetailResponse detail = universityService.getUniversityDetail(urlId);
-        // Pro 用户直接看完整数据；免费/未登录用户 mask
-        boolean isPro = "pro".equals(getMembership(request));
-        if (!isPro && !isAuthenticated(request)) {
+        // 付费用户直接看完整数据；免费/未登录用户 mask
+        boolean isPaid = !"free".equals(getMembership(request));
+        if (!isPaid && !isAuthenticated(request)) {
             maskDetailForGuest(detail);
         }
         return ApiResult.ok(detail);
@@ -99,14 +100,14 @@ public class UniversityController {
             @RequestParam(required = false) Boolean overallOnly,
             PageQuery query,
             HttpServletRequest request) {
-        // Pro 用户上限 200，免费用户上限 50
-        long maxSize = "pro".equals(getMembership(request)) ? 200L : 50L;
+        // 付费用户上限 200，免费用户上限 50
+        boolean isPaid2 = !"free".equals(getMembership(request));
+        long maxSize = isPaid2 ? 200L : 50L;
         if (query.getSize() > maxSize) {
             query.setSize(maxSize);
         }
-        boolean isPro = "pro".equals(getMembership(request));
         PageResult<RankingEntryVo> result = universityService.listUniversityRankings(urlId, sourceId, year, overallOnly, query);
-        if (!isPro && !isAuthenticated(request)) {
+        if (!isPaid2 && !isAuthenticated(request)) {
             maskRankingsForGuest(result.getList());
         }
         return ApiResult.ok(result);

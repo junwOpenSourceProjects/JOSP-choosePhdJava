@@ -51,11 +51,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** 新注册账号每日总请求上限。 */
     private static final long NEW_USER_DAILY_TOTAL_LIMIT = 400;
 
-    /** Pro 用户每日列表请求上限（大幅放宽）。 */
-    private static final long PRO_DAILY_LIST_LIMIT = 5000;
+    /** Standard 用户每日列表请求上限。 */
+    private static final long STANDARD_DAILY_LIST_LIMIT = 5000;
 
-    /** Pro 用户每日总请求上限。 */
-    private static final long PRO_DAILY_TOTAL_LIMIT = 20000;
+    /** Standard 用户每日总请求上限。 */
+    private static final long STANDARD_DAILY_TOTAL_LIMIT = 20000;
+
+    /** Premium 用户每日列表请求上限。 */
+    private static final long PREMIUM_DAILY_LIST_LIMIT = 5000;
+
+    /** Premium 用户每日总请求上限。 */
+    private static final long PREMIUM_DAILY_TOTAL_LIMIT = 20000;
 
     /** 单 IP 每日列表请求总上限（跨所有账号合计，免费用户）。 */
     private static final long IP_DAILY_LIST_LIMIT = 1000;
@@ -105,9 +111,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         // ---- 第 2 关：IP 每日总量（仅免费用户纳计；Pro 用户跳过） ----
         UserJwtInfo jwtInfo = extractUserInfo(request);
-        boolean isPro = jwtInfo != null && "pro".equals(jwtInfo.membership);
+        boolean isPaid = jwtInfo != null && !"free".equals(jwtInfo.membership);
 
-        if (!isPro) {
+        if (!isPaid) {
             DailyCounter ipDay = ipDailyCounters.computeIfAbsent(ip, k -> new DailyCounter());
             long ipUsed;
             if (isListPath(path)) {
@@ -131,9 +137,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // ---- 第 3 关：登录用户每日配额 ----
         if (jwtInfo != null) {
             long listCap, totalCap;
-            if (isPro) {
-                listCap = PRO_DAILY_LIST_LIMIT;
-                totalCap = PRO_DAILY_TOTAL_LIMIT;
+            if (isPaid) {
+                listCap = STANDARD_DAILY_LIST_LIMIT;
+                totalCap = STANDARD_DAILY_TOTAL_LIMIT;
             } else if (jwtInfo.isNewAccount) {
                 listCap = NEW_USER_DAILY_LIST_LIMIT;
                 totalCap = NEW_USER_DAILY_TOTAL_LIMIT;
