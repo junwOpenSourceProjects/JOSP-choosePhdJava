@@ -7,6 +7,7 @@ import com.choosephd.dto.RankingEntryVo;
 import com.choosephd.dto.UniversityDetailResponse;
 import com.choosephd.dto.UniversitySourceSummary;
 import com.choosephd.dto.UniversityVo;
+import com.choosephd.security.JwtService;
 import com.choosephd.service.UniversityService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,27 @@ import java.util.List;
 public class UniversityController {
 
     private final UniversityService universityService;
+    private final JwtService jwtService;
 
-    public UniversityController(UniversityService universityService) {
+    public UniversityController(UniversityService universityService, JwtService jwtService) {
         this.universityService = universityService;
+        this.jwtService = jwtService;
+    }
+
+    /**
+     * 判断当前请求是否携带有效 JWT（因为 /universities/* 在 AuthInterceptor 白名单中，
+     * request attribute 不会被设置，这里手动检查 Authorization header）。
+     */
+    private boolean isAuthenticated(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return false;
+        }
+        try {
+            return jwtService.validateToken(authHeader.substring(7));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @GetMapping
@@ -47,8 +66,7 @@ public class UniversityController {
     public ApiResult<UniversityDetailResponse> getUniversity(@PathVariable String urlId,
                                                               HttpServletRequest request) {
         UniversityDetailResponse detail = universityService.getUniversityDetail(urlId);
-        Long userId = (Long) request.getAttribute("userId");
-        if (userId == null) {
+        if (!isAuthenticated(request)) {
             maskDetailForGuest(detail);
         }
         return ApiResult.ok(detail);
@@ -66,9 +84,8 @@ public class UniversityController {
         if (query.getSize() > 50) {
             query.setSize(50L);
         }
-        Long userId = (Long) request.getAttribute("userId");
         PageResult<RankingEntryVo> result = universityService.listUniversityRankings(urlId, sourceId, year, overallOnly, query);
-        if (userId == null) {
+        if (!isAuthenticated(request)) {
             maskRankingsForGuest(result.getList());
         }
         return ApiResult.ok(result);
