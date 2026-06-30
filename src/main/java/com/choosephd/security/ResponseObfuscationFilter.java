@@ -112,8 +112,9 @@ public class ResponseObfuscationFilter extends OncePerRequestFilter {
     private boolean isAiCrawler(HttpServletRequest request) {
         String ua = request.getHeader("User-Agent");
         if (ua == null) return false;
+        String uaLower = ua.toLowerCase();
         for (String bot : AI_CRAWLER_UAS) {
-            if (ua.contains(bot)) return true;
+            if (uaLower.contains(bot.toLowerCase())) return true;
         }
         return false;
     }
