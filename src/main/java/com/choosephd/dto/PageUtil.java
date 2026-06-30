@@ -24,6 +24,9 @@ public class PageUtil {
     public static <T> Page<T> toPage(Long page, Long size) {
         long p = page == null || page < 1 ? 1 : page;
         long s = size == null || size < 1 ? 20 : size;
+        if (s > 200L) {
+            s = 200L;
+        }
         return new Page<>(p, s);
     }
 
