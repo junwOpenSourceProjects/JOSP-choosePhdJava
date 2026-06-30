@@ -86,7 +86,7 @@ public class UniversityController {
         UniversityDetailResponse detail = universityService.getUniversityDetail(urlId);
         // 付费用户直接看完整数据；免费/未登录用户 mask
         boolean isPaid = !"free".equals(getMembership(request));
-        if (!isPaid && !isAuthenticated(request)) {
+        if (!isPaid) {
             maskDetailForGuest(detail);
         }
         return ApiResult.ok(detail);
@@ -107,7 +107,7 @@ public class UniversityController {
             query.setSize(maxSize);
         }
         PageResult<RankingEntryVo> result = universityService.listUniversityRankings(urlId, sourceId, year, overallOnly, query);
-        if (!isPaid2 && !isAuthenticated(request)) {
+        if (!isPaid2) {
             maskRankingsForGuest(result.getList());
         }
         return ApiResult.ok(result);
