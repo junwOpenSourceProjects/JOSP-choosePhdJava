@@ -111,7 +111,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         // ---- 第 2 关：IP 每日总量（仅免费用户纳计；Pro 用户跳过） ----
         UserJwtInfo jwtInfo = extractUserInfo(request);
-        boolean isPaid = jwtInfo != null && !"free".equals(jwtInfo.membership);
+        boolean isStandard = jwtInfo != null && "standard".equals(jwtInfo.membership);
+        boolean isPremium = jwtInfo != null && "premium".equals(jwtInfo.membership);
+        boolean isPaid = isStandard || isPremium;
 
         if (!isPaid) {
             DailyCounter ipDay = ipDailyCounters.computeIfAbsent(ip, k -> new DailyCounter());
@@ -137,7 +139,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // ---- 第 3 关：登录用户每日配额 ----
         if (jwtInfo != null) {
             long listCap, totalCap;
-            if (isPaid) {
+            if (isPremium) {
+                listCap = PREMIUM_DAILY_LIST_LIMIT;
+                totalCap = PREMIUM_DAILY_TOTAL_LIMIT;
+            } else if (isStandard) {
                 listCap = STANDARD_DAILY_LIST_LIMIT;
                 totalCap = STANDARD_DAILY_TOTAL_LIMIT;
             } else if (jwtInfo.isNewAccount) {
@@ -217,7 +222,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private static boolean isListPath(String path) {
-        return path.startsWith("/api/v1/universities") && !path.contains("/export");
+        if (path.contains("/export")) {
+            return false;
+        }
+        return path.startsWith("/api/v1/universities")
+                || path.startsWith("/api/v1/sources")
+                || path.startsWith("/api/v1/rankings")
+                || path.startsWith("/api/v1/compare")
+                || path.startsWith("/api/v1/trends");
     }
 
     private void writeAudit(String ip, HttpServletRequest req, int statusCode, String reason) {
